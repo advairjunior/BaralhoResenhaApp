@@ -65,7 +65,7 @@ public sealed class EuNuncaMaioriaTestes
         var revelacao = mesa.Responder(Sala.RespostaJa, Sala.RespostaJa, Sala.RespostaNunca, Sala.RespostaNunca, Sala.RespostaNunca);
 
         Assert.False(revelacao.MinoriaLeva);
-        Assert.Equal([mesa.Todos[0].Id, mesa.Todos[1].Id], revelacao.Perderam.Order());
+        Assert.Equal(new[] { mesa.Todos[0].Id, mesa.Todos[1].Id }.Order(), revelacao.Perderam.Order());
     }
 
     [Fact]
