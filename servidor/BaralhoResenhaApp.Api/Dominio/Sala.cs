@@ -233,7 +233,7 @@ public sealed partial class Sala
     internal const int TamanhoMaximoDoNome = 20;
 
     /// <summary>Parte das cartas de Quem é mais provável jogadas com votação no celular.</summary>
-    internal double ChanceDeVotacao { get; set; } = 0.5;
+    internal double ChanceDeVotacao { get; set; } = 0.6;
 
     private readonly object _trinco = new();
     private readonly Baralho _baralho;

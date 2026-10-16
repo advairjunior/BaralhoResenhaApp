@@ -184,4 +184,21 @@ public sealed class BaralhoTestes
             Assert.Contains(baralho.Cartas, c => c.Nivel == nivel);
         Assert.All(baralho.Cartas, c => Assert.False(string.IsNullOrWhiteSpace(c.Texto)));
     }
+
+    [Fact]
+    public void ComTudoLigadoVotacaoTribunalEDesafiosSaemBastante()
+    {
+        var baralho = CatalogoDeCartas.Carregar();
+        var configuracao = new ConfiguracaoDoJogo(NivelDaCarta.Resenha, Enum.GetValues<ModoDeJogo>(), true);
+        var sorteio = new Random(11);
+
+        var cartas = Enumerable.Range(0, 3000)
+            .Select(_ => baralho.Sortear(configuracao, new HashSet<string>(), 5, false, sorteio, casais: 2)!)
+            .ToList();
+
+        var deVoto = cartas.Count(c => c.Modo is ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal) / 3000.0;
+        var desafios = cartas.Count(c => c.Duelo) / 3000.0;
+        Assert.True(deVoto >= 0.35, $"votação e tribunal: {deVoto:P0}");
+        Assert.True(desafios >= 0.07, $"duelos: {desafios:P0}");
+    }
 }

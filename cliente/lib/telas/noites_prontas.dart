@@ -122,18 +122,6 @@ const noitesProntas = [
     ),
   ),
   NoitePronta(
-    chave: 'tudo',
-    emoji: '🎲',
-    titulo: 'Tudo liberado',
-    descricao: 'Todos os jogos misturados, esquentando sozinho até o Picante.',
-    configuracao: ConfiguracaoDoJogo(
-      nivel: NivelDaCarta.picante,
-      modos: {...ModoDeJogo.values},
-      zonaSegura: true,
-      esquentar: true,
-    ),
-  ),
-  NoitePronta(
     chave: 'raiz',
     emoji: '🔥',
     titulo: 'Raiz',

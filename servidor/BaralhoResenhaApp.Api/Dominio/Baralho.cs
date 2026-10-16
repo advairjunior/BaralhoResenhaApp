@@ -18,17 +18,17 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
     internal const double PesoDoNivelAoEsquentar = 0.85;
 
     /// <summary>
-    /// Peso de cada jogo na mistura. Os rápidos aparecem mais; Casais em Jogo
-    /// é tempero: com tudo ligado, sai mais ou menos uma carta a cada dez.
+    /// Peso de cada jogo na mistura. Votação, desafios e Tribunal são o coração da noite; Casais em Jogo
+    /// é tempero: com tudo ligado, sai mais ou menos uma carta a cada vinte.
     /// A regra-relâmpago tem chance própria (<see cref="ChanceDeRelampago"/>).
     /// </summary>
     internal static readonly IReadOnlyDictionary<ModoDeJogo, int> Pesos = new Dictionary<ModoDeJogo, int>
     {
         [ModoDeJogo.EuNunca] = 4,
-        [ModoDeJogo.MaisProvavel] = 3,
+        [ModoDeJogo.MaisProvavel] = 5,
         [ModoDeJogo.BebaSe] = 3,
         [ModoDeJogo.CasaisEmJogo] = 1,
-        [ModoDeJogo.Tribunal] = 3,
+        [ModoDeJogo.Tribunal] = 4,
         [ModoDeJogo.Elogios] = 1,
         // Demora mais que uma carta comum: tempero, não prato principal.
         [ModoDeJogo.Correio] = 1,

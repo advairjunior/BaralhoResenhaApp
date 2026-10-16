@@ -41,6 +41,24 @@ void main() {
     await fecharApp(tester);
   });
 
+  testWidgets('ligar todos os jogos não mexe no nível nem esquenta sozinho', (tester) async {
+    final servidor = ServidorFalso()
+      ..respostas['GET /api/salas/ABCD'] = visaoJson(nivel: 'Resenha')
+      ..respostas['PUT /api/salas/ABCD/configuracao'] = visaoJson(nivel: 'Resenha');
+    await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+    expect(find.text('Tudo liberado'), findsNothing);
+
+    await rolarAte(tester, find.byKey(const Key('ligar-todos')));
+    await tester.tap(find.byKey(const Key('ligar-todos')));
+    await tester.pumpAndSettle();
+
+    final corpo = servidor.recebidas.last.corpo!;
+    expect(corpo['nivel'], 'Resenha');
+    expect(corpo['esquentar'], isNot(true));
+    expect((corpo['modos'] as List), containsAll(['MaisProvavel', 'Tribunal', 'Correio', 'ImagemEAcao']));
+    await fecharApp(tester);
+  });
+
   testWidgets('convidado vê as configurações sem poder mexer', (tester) async {
     final servidor = ServidorFalso()..respostas['GET /api/salas/ABCD'] = visaoJson(euId: 'bia', souAnfitriao: false);
     await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
