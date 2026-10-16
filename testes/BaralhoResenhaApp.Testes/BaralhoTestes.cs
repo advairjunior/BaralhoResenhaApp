@@ -197,12 +197,29 @@ public sealed class BaralhoTestes
             .Select(_ => baralho.Sortear(configuracao, new HashSet<string>(), 5, false, sorteio, casais: 2)!)
             .ToList();
 
-        var deVoto = cartas.Count(c => c.Modo is ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.Jurados) / 3000.0;
-        var desafios = cartas.Count(c => c.Duelo || c.Modo == ModoDeJogo.Musica) / 3000.0;
+        // A Roda de Música é surpresa de vez em quando: não mexe na mistura das outras.
+        var outras = cartas.Where(c => c.Modo != ModoDeJogo.Musica).ToList();
+        double Parte(Func<Carta, bool> filtro) => outras.Count(filtro) / (double)outras.Count;
+        var deVoto = Parte(c => c.Modo is ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.Jurados);
+        var desafios = Parte(c => c.Duelo);
+        var mimica = Parte(c => c.Modo == ModoDeJogo.ImagemEAcao);
         Assert.True(deVoto >= 0.35, $"votação, tribunal e jurados: {deVoto:P0}");
-        Assert.True(desafios >= 0.07, $"duelos e rodas de música: {desafios:P0}");
-        var mimica = cartas.Count(c => c.Modo == ModoDeJogo.ImagemEAcao) / 3000.0;
-        Assert.True(mimica >= 0.11, $"imagem e ação: {mimica:P0}");
+        // Esperado: uns 7,5% (Quem é mais provável pesa 5 e 40% dele é duelo).
+        Assert.True(desafios >= 0.065, $"duelos: {desafios:P0}");
+        Assert.True(mimica >= 0.12, $"imagem e ação: {mimica:P0}");
+    }
+
+    [Fact]
+    public void RodaDeMusicaSaiDeVezEmQuando()
+    {
+        var baralho = CatalogoDeCartas.Carregar();
+        var configuracao = new ConfiguracaoDoJogo(NivelDaCarta.Resenha, Enum.GetValues<ModoDeJogo>(), true);
+        var sorteio = new Random(12);
+
+        var musicas = Enumerable.Range(0, 3000)
+            .Count(_ => baralho.Sortear(configuracao, new HashSet<string>(), 5, false, sorteio)!.Modo == ModoDeJogo.Musica);
+
+        Assert.InRange(musicas / 3000.0, 0.03, 0.07);
     }
 
     [Theory]

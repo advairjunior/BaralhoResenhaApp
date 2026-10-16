@@ -54,7 +54,7 @@ public sealed class RodaDeMusicaTestes
         mesa.Sala.MarcarPronto(mesa.Quem(fila[0]).Token, mesa.Rodada);
         Assert.Equal(fila[1], mesa.DaVez);
 
-        mesa.Sala.MarcarTravou(mesa.Ana.Token, mesa.Rodada, fila[1]);
+        mesa.Sala.MarcarTravou(mesa.Quem(fila[0]).Token, mesa.Rodada, fila[1]);
         Assert.Equal(1, mesa.Quem(fila[1]).Pontos);
         Assert.Equal([fila[1]], mesa.Sala.Visao(mesa.Ana.Token).Rodada!.Travaram);
 
@@ -68,16 +68,22 @@ public sealed class RodaDeMusicaTestes
     }
 
     [Fact]
-    public void SoQuemCriouASalaMarcaQueTravouESoQuemEstaNaVez()
+    public void QualquerUmDaTurmaMarcaQueTravouMenosQuemEstaCantando()
     {
         var mesa = Montar();
         var fila = mesa.Sala.Rodada!.Fila;
-        var outro = mesa.Todos.First(j => j != mesa.Ana);
+        var cantando = mesa.Quem(fila[0]);
+        var outro = mesa.Quem(fila[1]);
 
-        Assert.Throws<AcaoNaoPermitidaException>(() => mesa.Sala.MarcarTravou(outro.Token, mesa.Rodada, fila[0]));
         var erro = Assert.Throws<AcaoNaoPermitidaException>(
-            () => mesa.Sala.MarcarTravou(mesa.Ana.Token, mesa.Rodada, fila[1]));
-        Assert.Equal($"Agora é a vez de {mesa.Quem(fila[0]).Nome} cantar.", erro.Message);
+            () => mesa.Sala.MarcarTravou(cantando.Token, mesa.Rodada, cantando.Id));
+        Assert.Equal("Quem está cantando não marca o próprio travou.", erro.Message);
+        erro = Assert.Throws<AcaoNaoPermitidaException>(
+            () => mesa.Sala.MarcarTravou(mesa.Quem(fila[2]).Token, mesa.Rodada, fila[1]));
+        Assert.Equal($"Agora é a vez de {cantando.Nome} cantar.", erro.Message);
+
+        mesa.Sala.MarcarTravou(outro.Token, mesa.Rodada, fila[0]);
+        Assert.Equal(fila[1], mesa.DaVez);
     }
 
     [Fact]

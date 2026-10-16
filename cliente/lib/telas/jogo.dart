@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
@@ -868,7 +869,7 @@ class _RevelacaoDoTribunal extends StatelessWidget {
 }
 
 /// Roda de Música: cada um canta na sua vez, na ordem sorteada, com a foto na tela.
-class _RodaDeMusica extends StatelessWidget {
+class _RodaDeMusica extends StatefulWidget {
   const _RodaDeMusica({required this.visao, required this.rodada, required this.acoes});
 
   final VisaoDaSala visao;
@@ -876,7 +877,36 @@ class _RodaDeMusica extends StatelessWidget {
   final AcoesDaSala acoes;
 
   @override
+  State<_RodaDeMusica> createState() => _RodaDeMusicaState();
+}
+
+class _RodaDeMusicaState extends State<_RodaDeMusica> {
+  @override
+  void initState() {
+    super.initState();
+    _avisarSeForMinhaVez(null);
+  }
+
+  @override
+  void didUpdateWidget(_RodaDeMusica antigo) {
+    super.didUpdateWidget(antigo);
+    _avisarSeForMinhaVez(_daVez(antigo.rodada));
+  }
+
+  static String? _daVez(Rodada rodada) =>
+      rodada.pendentes.where((p) => p.motivo == MotivoPendente.cantar).firstOrNull?.jogadorId;
+
+  /// Chegou a minha vez: o celular vibra, para ninguém precisar chamar.
+  void _avisarSeForMinhaVez(String? antes) {
+    final agora = _daVez(widget.rodada);
+    if (agora == widget.visao.euId && agora != antes) HapticFeedback.vibrate();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final visao = widget.visao;
+    final rodada = widget.rodada;
+    final acoes = widget.acoes;
     final fila = [for (final id in rodada.fila) ?visao.jogador(id)];
     final daVezId = rodada.pendentes.where((p) => p.motivo == MotivoPendente.cantar).firstOrNull?.jogadorId;
     final daVez = daVezId == null ? null : visao.jogador(daVezId);
@@ -904,19 +934,23 @@ class _RodaDeMusica extends StatelessWidget {
             ),
           ),
           const SizedBox(height: EspacoBaralho.medio),
-          Text('🎤 Vez de ${daVez.nome} cantar!',
+          Text(daVez.id == visao.euId ? '🎤 É a sua vez de cantar!' : '🎤 Vez de ${daVez.nome} cantar!',
               textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
-          Text('${indice + 1} de ${fila.length}',
-              textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.ambar)),
+          // Quem vem depois já se prepara: ninguém precisa ficar chamando.
+          Text(
+            '${indice + 1} de ${fila.length} · '
+            '${indice + 1 < fila.length ? 'depois: ${fila[indice + 1].nome}' : 'fecha a roda!'}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: CoresBaralho.ambar),
+          ),
           const SizedBox(height: EspacoBaralho.medio),
           if (daVez.id == visao.euId)
-            FilledButton(onPressed: acoes.marcarPronto, child: const Text('🎤 Cantei'))
-          else if (!visao.souAnfitriao)
-            Text('Vez de ${daVez.nome} cantar…',
-                textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoSecundario)),
-          if (visao.souAnfitriao) ...[
-            if (daVez.id != visao.euId)
+            FilledButton(onPressed: acoes.marcarPronto, child: const Text('🎤 Cantei · próximo!'))
+          else ...[
+            // Reserva: quem está cantando sem o celular na mão.
+            if (visao.souAnfitriao)
               OutlinedButton(onPressed: () => acoes.confirmarHistoria(daVez.id), child: Text('${daVez.nome} cantou ✓')),
+            // Qualquer um da turma marca o travou, menos quem está cantando.
             TextButton(onPressed: () => acoes.marcarTravou(daVez.id), child: const Text('😵 Travou')),
           ],
         ],

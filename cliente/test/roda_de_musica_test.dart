@@ -34,14 +34,32 @@ void main() {
         ..respostas['POST /api/salas/ABCD/pronto'] = _roda(euId: 'bia', daVez: 'caio');
       await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
 
-      expect(find.text('🎤 Vez de Bia cantar!'), findsOneWidget);
-      expect(find.text('1 de 3'), findsOneWidget);
-      await rolarAte(tester, find.text('🎤 Cantei'));
-      await tester.tap(find.text('🎤 Cantei'));
+      expect(find.text('🎤 É a sua vez de cantar!'), findsOneWidget);
+      expect(find.text('1 de 3 · depois: Caio'), findsOneWidget);
+      expect(find.text('😵 Travou'), findsNothing);
+      await rolarAte(tester, find.text('🎤 Cantei · próximo!'));
+      await tester.tap(find.text('🎤 Cantei · próximo!'));
       await tester.pumpAndSettle();
 
       expect(servidor.recebidas.last.rota, 'POST /api/salas/ABCD/pronto');
       expect(find.text('🎤 Vez de Caio cantar!'), findsOneWidget);
+      expect(find.text('2 de 3 · depois: Ana'), findsOneWidget);
+      await fecharApp(tester);
+    });
+
+    testWidgets('quem não está cantando também pode marcar que travou', (tester) async {
+      final servidor = ServidorFalso()
+        ..respostas['GET /api/salas/ABCD'] = _roda(euId: 'caio', daVez: 'bia')
+        ..respostas['POST /api/salas/ABCD/travou'] = _roda(euId: 'caio', daVez: 'caio', travaram: ['bia']);
+      await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+      expect(find.text('🎤 Vez de Bia cantar!'), findsOneWidget);
+      await rolarAte(tester, find.text('😵 Travou'));
+      await tester.tap(find.text('😵 Travou'));
+      await tester.pumpAndSettle();
+
+      expect(servidor.recebidas.last.corpo, {'rodada': 1, 'jogadorId': 'bia'});
+      expect(find.text('🎤 É a sua vez de cantar!'), findsOneWidget);
       await fecharApp(tester);
     });
 

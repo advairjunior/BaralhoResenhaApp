@@ -8,6 +8,12 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
     internal const int ChanceDeRelampago = 7;
 
     /// <summary>
+    /// Roda de Música: surpresa de vez em quando (uma em cada tantas cartas), fora
+    /// da mistura, para não tirar espaço das outras brincadeiras.
+    /// </summary>
+    internal const int ChanceDeMusica = 20;
+
+    /// <summary>
     /// Parte das cartas que sai do nível escolhido; o restante vem dos níveis
     /// abaixo, para a noite não ficar só no extremo. Pouco: quem escolheu
     /// Resenha quer Resenha, e carta leve demais esfria a mesa.
@@ -30,7 +36,6 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
         [ModoDeJogo.CasaisEmJogo] = 1,
         [ModoDeJogo.Tribunal] = 4,
         [ModoDeJogo.Jurados] = 2,
-        [ModoDeJogo.Musica] = 2,
         [ModoDeJogo.Elogios] = 1,
         // Demora mais que uma carta comum: tempero, não prato principal.
         [ModoDeJogo.Correio] = 1,
@@ -71,6 +76,11 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
             .Where(modo => modo != ModoDeJogo.RegraRelampago || !regraEmAndamento)
             .Where(modo => modo != ModoDeJogo.CasaisEmJogo || casais > 0)
             .ToList();
+
+        if (modos.Remove(ModoDeJogo.Musica) &&
+            (modos.Count == 0 || sorteio.Next(ChanceDeMusica) == 0) &&
+            SortearDoModo(ModoDeJogo.Musica, configuracao, usadas, tiradas, sorteio) is { } musica)
+            return musica;
 
         if (modos.Remove(ModoDeJogo.RegraRelampago) &&
             (modos.Count == 0 || sorteio.Next(ChanceDeRelampago) == 0) &&

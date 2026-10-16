@@ -89,12 +89,17 @@ public sealed partial class Sala
         }
     }
 
-    /// <summary>Roda de Música: travou na sua vez. Leva o ponto e a roda segue no próximo.</summary>
+    /// <summary>
+    /// Roda de Música: travou na sua vez. Qualquer um da turma marca (quem criou a
+    /// sala não fica sobrecarregado), menos quem está cantando. Leva o ponto e a
+    /// roda segue no próximo.
+    /// </summary>
     public void MarcarTravou(string token, int numeroDaRodada, Guid jogadorId)
     {
         lock (_trinco)
         {
-            ExigirAnfitriao(token, "Quem marca que travou é quem criou a sala.");
+            if (Reconhecer(token).Id == jogadorId)
+                throw new AcaoNaoPermitidaException("Quem está cantando não marca o próprio travou.");
             if (!RodadaEmAndamento(numeroDaRodada) || Rodada!.Carta.Modo != ModoDeJogo.Musica) return;
             var rodada = Rodada;
             if (ExigirDaVez(rodada, jogadorId) is not { } daVez) return;
