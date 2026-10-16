@@ -732,7 +732,6 @@
   { "id": "el-016", "modo": "Elogios", "nivel": "Leve", "texto": "A turma inventa o slogan de {jogador}, como se fosse propaganda de TV." },
   { "id": "el-017", "modo": "Elogios", "nivel": "Leve", "texto": "Se {jogador} fosse um personagem de desenho animado, qual seria? Cada um responde e explica o motivo bonito." },
   { "id": "el-018", "modo": "Elogios", "nivel": "Leve", "texto": "{jogador} recebe o troféu da noite: cada um diz de qual categoria e por quê." },
-  { "id": "el-019", "modo": "Elogios", "nivel": "Resenha", "texto": "Cada um conta a melhor resenha que já viveu com {jogador}." },
   { "id": "el-020", "modo": "Elogios", "nivel": "Resenha", "texto": "{jogador} ganha um discurso de homenagem de {jogador2}, como se fosse aposentadoria. Vale chorar!" },
   { "id": "el-021", "modo": "Elogios", "nivel": "Resenha", "texto": "{jogador2} escolhe a trilha sonora da vida de {jogador}, e a turma canta um pedacinho junto." },
   { "id": "el-022", "modo": "Elogios", "nivel": "Resenha", "texto": "Cada um diz o que copiaria de {jogador} se pudesse." },
