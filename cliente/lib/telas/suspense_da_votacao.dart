@@ -34,7 +34,8 @@ class SuspenseDaVotacao extends StatefulWidget {
     final chave = '${visao.codigo}-${rodada.numero}';
     if (rodada.modo == ModoDeJogo.tribunal) {
       final reu = visao.jogador(rodada.alvo ?? '');
-      final condenado = reu != null && revelacao.escolhidos.contains(reu.id);
+      final condenado = reu != null && revelacao.perderam.contains(reu.id);
+      final elogiado = reu != null && revelacao.escolhidos.contains(reu.id);
       return SuspenseDaVotacao(
         key: key,
         chave: chave,
@@ -43,8 +44,9 @@ class SuspenseDaVotacao extends StatefulWidget {
         resultado: switch ((revelacao.elogio, condenado)) {
           (false, true) => 'CULPADO(A)! ${destinoDoPego(visao, reu!)}',
           (false, false) => 'ABSOLVIDO(A)! 😇',
-          (true, true) => '💛 SIM! E ${distribuiGoles(visao, 2).substring(3)}',
-          (true, false) => 'Ficou na dúvida… 😅',
+          (true, true) => 'A TURMA DISSE NÃO! ${destinoDoPego(visao, reu!)}',
+          (true, false) when elogiado => '💛 SIM! E ${distribuiGoles(visao, 2).substring(3)}',
+          (true, false) => 'Ninguém votou 😅',
         },
       );
     }

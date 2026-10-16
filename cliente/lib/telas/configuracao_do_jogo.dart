@@ -166,6 +166,15 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
         ),
         const SizedBox(height: EspacoBaralho.pequeno),
         _ResumoDaMistura(modos: configuracao.modos),
+        if (podeEditar && configuracao.modos.length < ModoDeJogo.values.length)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              key: const Key('ligar-todos'),
+              onPressed: () => aoMudar(configuracao.copiar(modos: ModoDeJogo.values.toSet())),
+              child: const Text('🎲 Ligar todos os jogos'),
+            ),
+          ),
         for (final modo in ModoDeJogo.values)
           SwitchListTile(
             key: Key('modo-${modo.name}'),

@@ -35,6 +35,12 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
         [ModoDeJogo.ImagemEAcao] = 2,
     };
 
+    /// <summary>
+    /// Parte das cartas de Quem é mais provável que é duelo (inclui pedra, papel e
+    /// tesoura). São poucas cartas no meio de muitas: sem isso, quase não saem.
+    /// </summary>
+    internal const double ChanceDeDuelo = 0.35;
+
     /// <summary>Ritmo: o mesmo jogo não vem mais que isso seguido.</summary>
     internal const int MaximoSeguidas = 2;
 
@@ -109,6 +115,13 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
             .Where(carta => !(configuracao.ZonaSegura && carta.Sensivel))
             .ToList();
         if (permitidas.Count == 0) return null;
+
+        if (modo == ModoDeJogo.MaisProvavel)
+        {
+            var querDuelo = sorteio.NextDouble() < ChanceDeDuelo;
+            var doJeito = permitidas.Where(carta => carta.Duelo == querDuelo).ToList();
+            if (doJeito.Count > 0) permitidas = doJeito;
+        }
 
         var disponiveis = permitidas.Where(carta => !usadas.Contains(carta.Id)).ToList();
         if (disponiveis.Count == 0)

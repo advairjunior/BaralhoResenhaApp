@@ -29,15 +29,15 @@ extension VisualDoModo on ModoDeJogo {
       };
 
   String get explicacao => switch (this) {
-        ModoDeJogo.euNunca => 'Cada um responde em segredo. Quem já fez, bebe.',
+        ModoDeJogo.euNunca => 'Cada um responde em segredo. Quem já fez leva ponto; se a maioria fez, vira.',
         ModoDeJogo.maisProvavel => 'Às vezes a turma vota no celular (com suspense e foto), '
-            'às vezes aponta no 3. Quem é escolhido bebe.',
+            'às vezes aponta no 3. Inclui os ⚔️ duelos e o ✊✋✌️ pedra, papel e tesoura.',
         ModoDeJogo.bebaSe => 'Cartas rápidas para a mesa inteira.',
         ModoDeJogo.regraRelampago => 'Uma regra maluca que vale por algumas cartas.',
         ModoDeJogo.casaisEmJogo => 'Um do casal responde, o outro adivinha. Aparece de vez em quando, '
             'como tempero. Marquem os pares na sala de espera.',
-        ModoDeJogo.tribunal => 'A turma julga alguém da mesa, sim ou não, em segredo. Condenado bebe; '
-            'no elogio, distribui goles.',
+        ModoDeJogo.tribunal => 'A turma julga alguém da mesa, sim ou não, em segredo. Na zoeira, o sim '
+            'condena; no elogio, o não condena e o sim faz o réu distribuir goles.',
         ModoDeJogo.elogios => 'Dinâmicas de elogio para alguém da mesa. Ninguém bebe: todo mundo sai se achando.',
         ModoDeJogo.correio => 'Alguém fica de fora e a turma escreve um bilhete curto e anônimo sobre a pessoa. '
             'No fim, todo mundo lê. Precisa de 4 pessoas.',

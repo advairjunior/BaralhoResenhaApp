@@ -101,6 +101,37 @@ public sealed class TribunalEElogioTestes
     }
 
     [Fact]
+    public void NoElogioDoTribunalMaioriaNaoCondenaOReu()
+    {
+        var mesa = Montar(ElogioNoTribunal, ModoDeJogo.Tribunal);
+        var reu = mesa.Reu;
+        var rodada = mesa.Sala.Rodada!.Numero;
+        foreach (var jurado in mesa.Jurados) mesa.Sala.Responder(jurado.Token, rodada, Sala.RespostaNao);
+
+        var revelacao = mesa.Sala.Rodada.Revelacao!;
+        Assert.True(revelacao.Elogio);
+        Assert.Equal([reu.Id], revelacao.Perderam);
+        Assert.Empty(revelacao.Escolhidos);
+        Assert.Equal(1, reu.Pontos);
+    }
+
+    [Fact]
+    public void NoElogioDoTribunalEmpateFicaComOElogio()
+    {
+        var mesa = Montar(ElogioNoTribunal, ModoDeJogo.Tribunal);
+        var reu = mesa.Reu;
+        var jurados = mesa.Jurados.ToList();
+        var rodada = mesa.Sala.Rodada!.Numero;
+        mesa.Sala.Responder(jurados[0].Token, rodada, Sala.RespostaSim);
+        mesa.Sala.Responder(jurados[1].Token, rodada, Sala.RespostaNao);
+        mesa.Sala.Revelar(mesa.Todos[0].Token, rodada);
+
+        var revelacao = mesa.Sala.Rodada.Revelacao!;
+        Assert.Empty(revelacao.Perderam);
+        Assert.Equal([reu.Id], revelacao.Escolhidos);
+    }
+
+    [Fact]
     public void ElogioNoQuemEhMaisProvavelEhSempreVotadoENinguemBebe()
     {
         var sala = new Sala("ABCD", new Baralho([

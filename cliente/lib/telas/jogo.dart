@@ -100,10 +100,11 @@ class Jogo extends StatelessWidget {
                 _BarraDaCarta(visao: visao, rodada: rodada, acoes: acoes),
                 DicaDePrimeiraVez(key: ValueKey('dica-${rodada.numero}'), visao: visao, rodada: rodada),
                 const SizedBox(height: EspacoBaralho.base),
-                // A mímica tem o cronômetro no painel dela.
+                // A mímica e o aponta no 3 têm a contagem no painel deles.
                 if (rodada.cronometroSegundos != null &&
                     rodada.revelacao == null &&
-                    rodada.modo != ModoDeJogo.imagemEAcao)
+                    rodada.modo != ModoDeJogo.imagemEAcao &&
+                    !(rodada.modo == ModoDeJogo.maisProvavel && !rodada.votacao))
                   Cronometro(
                     key: ValueKey('cronometro-${rodada.numero}'),
                     visao: visao,
@@ -295,7 +296,7 @@ class _AreaDeAcao extends StatelessWidget {
       ModoDeJogo.maisProvavel when !rodada.pedeResposta => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const ContagemParaApontar(),
+            ContagemParaApontar(visao: visao, rodada: rodada, aoContar: acoes.iniciarCronometro),
             const SizedBox(height: EspacoBaralho.grande),
             QuemFoiApontado(visao: visao, rodada: rodada, aoMarcar: acoes.marcarApontado),
             const SizedBox(height: EspacoBaralho.grande),
@@ -814,12 +815,15 @@ class _RevelacaoDoTribunal extends StatelessWidget {
     if (reu == null) return const Text('O réu saiu da sala. 🏃', textAlign: TextAlign.center);
     final sim = revelacao.jaFizeram.length;
     final nao = revelacao.nuncaFizeram.length;
-    final condenado = revelacao.escolhidos.contains(reu.id);
-    final (titulo, detalhe) = switch ((revelacao.elogio, condenado)) {
+    // Na zoeira, o "sim" condena; no elogio, o "não" condena e o "sim" elogia.
+    final condenado = revelacao.perderam.contains(reu.id);
+    final elogiado = revelacao.elogio && revelacao.escolhidos.contains(reu.id);
+    final (titulo, detalhe) = switch ((revelacao.elogio, condenado || elogiado)) {
       (false, true) => ('Culpado(a)! 🔨', '${reu.nome} ${destinoDoEscolhido(visao, reu, elogio: false)}'),
       (false, false) => ('Absolvido(a)! 😇', 'A turma livrou a cara de ${reu.nome}.'),
-      (true, true) => ('A turma concorda! 💛', '${reu.nome} ${destinoDoEscolhido(visao, reu, elogio: true, goles: 2)}'),
-      (true, false) => ('A turma ficou em dúvida… 😅', 'Fica para a próxima, ${reu.nome}.'),
+      (true, true) when elogiado =>
+        ('A turma concorda! 💛', '${reu.nome} ${destinoDoEscolhido(visao, reu, elogio: true, goles: 2)}'),
+      (true, _) => ('A turma disse NÃO! 🔨', '${reu.nome} ${destinoDoPego(visao, reu)}'),
     };
     return Column(children: [
       AvatarDoJogador(

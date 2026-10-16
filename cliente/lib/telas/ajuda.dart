@@ -50,8 +50,8 @@ ComoJoga comoJoga(Rodada rodada) {
         'Quem levar mais votos leva 1 ponto (empate: todos os mais votados).',
       ]),
     Rodada(modo: ModoDeJogo.maisProvavel) => ('apontar', 'Aponta no 3', [
-        'Quem criou a sala toca em "Contar até 3".',
-        'No "APONTEM!", todo mundo aponta ao mesmo tempo para quem tem mais a cara da carta.',
+        'Quem criou a sala toca em "Contar até 3" e a contagem aparece em todos os celulares ao mesmo tempo.',
+        'No "APONTEM!", todo mundo aponta junto para quem tem mais a cara da carta.',
         'Quem criou a sala marca no app quem foi mais apontado: essa pessoa leva 1 ponto.',
       ]),
     Rodada(modo: ModoDeJogo.bebaSe) => ('bebaSe', ModoDeJogo.bebaSe.titulo, [
@@ -73,7 +73,7 @@ ComoJoga comoJoga(Rodada rodada) {
         'A pessoa da carta é o réu: ela só espera.',
         'O resto da turma vota em segredo: 👍 sim ou 👎 não.',
         'Maioria sim (ou empate) condena: o réu leva 1 ponto. Ninguém fica sabendo quem votou o quê.',
-        'Na carta de elogio, quem é "condenado" não bebe: distribui goles.',
+        'Na carta de elogio é ao contrário: maioria sim, o réu distribui goles; maioria não, o réu leva 1 ponto.',
       ]),
     Rodada(modo: ModoDeJogo.elogios) => ('elogios', ModoDeJogo.elogios.titulo, [
         'Façam o que a carta pede para a pessoa da vez.',

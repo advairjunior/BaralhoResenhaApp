@@ -43,6 +43,19 @@ public sealed class CronometroTestes
     }
 
     [Fact]
+    public void ApontaNo3TemContagemDe3SegundosParaTodos()
+    {
+        var (sala, ana, bia, _) = Mesa(
+            new Carta("mp-1", ModoDeJogo.MaisProvavel, NivelDaCarta.Leve, "Quem ronca mais?"), ModoDeJogo.MaisProvavel);
+        sala.ChanceDeVotacao = 0;
+        sala.Proxima(ana.Token, sala.Rodada!.Numero);
+
+        Assert.Equal(3, sala.Visao(bia.Token).Rodada!.CronometroSegundos);
+        sala.IniciarCronometro(ana.Token, sala.Rodada.Numero);
+        Assert.Equal(3000, sala.Visao(bia.Token).Rodada!.CronometroRestanteMs);
+    }
+
+    [Fact]
     public void MimicaTemSessentaSegundosECartaSemTempoNaoTemCronometro()
     {
         var (mimica, ana, _, _) = Mesa(

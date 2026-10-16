@@ -105,18 +105,57 @@ void main() {
     });
   });
 
-  group('Quem é mais provável', () {
-    testWidgets('sem votação, a tela conta até 3 para a turma apontar', (tester) async {
+  group('Tribunal de elogio', () {
+    testWidgets('maioria não condena o réu', (tester) async {
       final servidor = ServidorFalso()
-        ..respostas['GET /api/salas/ABCD'] = visaoJson(
+        ..respostas['GET /api/salas/XYZW'] = _tribunal(
+          elogio: true,
+          revelacao: {
+            'jaFizeram': [],
+            'nuncaFizeram': ['bia', 'caio'],
+            'votos': [],
+            'perderam': ['ana'],
+            'contaAHistoria': null,
+            'elogio': true,
+            'escolhidos': [],
+          },
+        );
+      await abrirApp(tester, servidor, rota: '/sala/XYZW', guardado: {'sala_XYZW': 'tk'}, esperarAcalmar: false);
+      await passarSuspense(tester);
+
+      await rolarAte(tester, find.text('A turma disse NÃO! 🔨'));
+      await fecharApp(tester);
+    });
+  });
+
+  group('Quem é mais provável', () {
+    Map<String, dynamic> apontar({String euId = 'ana', int? restanteMs}) => visaoJson(
+          euId: euId,
+          souAnfitriao: euId == 'ana',
           fase: 'Carta',
           jogadores: _mesa,
           rodada: {
             ...rodadaJson(modo: 'MaisProvavel', texto: 'Quem é mais provável de roncar?'),
             'pedeResposta': false,
             'votacao': false,
+            'cronometroSegundos': 3,
+            'cronometroRestanteMs': restanteMs,
           },
-        )
+        );
+
+    testWidgets('só quem criou a sala puxa a contagem; os outros esperam', (tester) async {
+      final servidor = ServidorFalso()..respostas['GET /api/salas/ABCD'] = apontar(euId: 'bia');
+      await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+      await rolarAte(tester, find.text('Ana puxa a contagem. Todo mundo aponta junto no APONTEM!'));
+      expect(find.byKey(const Key('contar-ate-tres')), findsNothing);
+      await fecharApp(tester);
+    });
+
+    testWidgets('sem votação, a contagem até 3 é a mesma em todos os celulares', (tester) async {
+      final servidor = ServidorFalso()
+        ..respostas['GET /api/salas/ABCD'] = apontar()
+        ..respostas['POST /api/salas/ABCD/cronometro'] = apontar(restanteMs: 3000)
         ..respostas['POST /api/salas/ABCD/apontado'] = visaoJson(fase: 'Carta', jogadores: _mesa, rodada: {
             ...rodadaJson(modo: 'MaisProvavel', texto: 'Quem é mais provável de roncar?', beberam: ['bia']),
             'pedeResposta': false,
@@ -127,11 +166,13 @@ void main() {
       expect(find.text('👉 TODO MUNDO APONTA NO 3'), findsOneWidget);
       await rolarAte(tester, find.byKey(const Key('contar-ate-tres')));
       await tester.tap(find.byKey(const Key('contar-ate-tres')));
+      // Depois do valendo, o servidor conta; aqui ele já responde que acabou.
+      servidor.respostas['GET /api/salas/ABCD'] = apontar(restanteMs: 0);
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(servidor.recebidas.last.rota, 'POST /api/salas/ABCD/cronometro');
       expect(find.text('3'), findsOneWidget);
-      await tester.pump(const Duration(milliseconds: 800));
-      await tester.pump(const Duration(milliseconds: 800));
-      await tester.pump(const Duration(milliseconds: 800));
+      await tester.pump(const Duration(seconds: 3));
       await tester.pumpAndSettle();
       expect(find.text('APONTEM! 👉'), findsOneWidget);
       expect(find.text('Toque em quem a turma apontou:'), findsOneWidget);

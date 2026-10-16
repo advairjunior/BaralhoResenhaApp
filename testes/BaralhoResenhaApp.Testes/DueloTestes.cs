@@ -92,6 +92,23 @@ public sealed class DueloTestes
     }
 
     [Fact]
+    public void UmEmCadaTresQuemEhMaisProvavelEhDuelo()
+    {
+        var cartas = Enumerable.Range(1, 9)
+            .Select(i => new Carta($"mp-{i}", ModoDeJogo.MaisProvavel, NivelDaCarta.Leve, $"Quem {i}?"))
+            .Append(Duelo)
+            .ToList();
+        var baralho = new Baralho(cartas);
+        var sorteio = new Random(5);
+        var configuracao = new ConfiguracaoDoJogo(NivelDaCarta.Leve, [ModoDeJogo.MaisProvavel], true);
+
+        var duelos = Enumerable.Range(0, 1000)
+            .Count(_ => baralho.Sortear(configuracao, new HashSet<string>(), 4, false, sorteio)!.Duelo);
+
+        Assert.InRange(duelos / 1000.0, 0.25, 0.45);
+    }
+
+    [Fact]
     public void QuemMaisVenceDueloLevaPremio()
     {
         var ana = new Jogador { Id = Guid.NewGuid(), Token = "a", Nome = "Ana" };

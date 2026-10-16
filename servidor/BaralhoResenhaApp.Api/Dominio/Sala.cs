@@ -89,9 +89,13 @@ public sealed class Rodada
     public DateTimeOffset? CronometroAte { get; set; }
 
     /// <summary>Mímica tem 60 s; outras cartas, o tempo que o texto pede ("em 5 segundos").</summary>
-    public int? SegundosDoCronometro => Carta.Modo == ModoDeJogo.ImagemEAcao
-        ? 60
-        : Regex.Match(Texto, @"(\d+) segundos") is { Success: true } achado ? int.Parse(achado.Groups[1].Value) : null;
+    public int? SegundosDoCronometro => Carta.Modo switch
+    {
+        ModoDeJogo.ImagemEAcao => 60,
+        // Aponta no 3: a contagem é uma só, em todos os celulares.
+        ModoDeJogo.MaisProvavel when !Votacao => 3,
+        _ => Regex.Match(Texto, @"(\d+) segundos") is { Success: true } achado ? int.Parse(achado.Groups[1].Value) : null
+    };
 
     /// <summary>O que esta carta fez com cada um; as cartas na manga mexem aqui.</summary>
     public Dictionary<Guid, ContaDaCarta> Contas { get; } = [];
@@ -600,21 +604,24 @@ public sealed partial class Sala
         }
         else if (rodada.Carta.Modo == ModoDeJogo.Tribunal)
         {
-            // Empate condena: a turma não salva ninguém em cima do muro.
+            // O "sim" vence no empate: na zoeira, condena (a turma não salva ninguém
+            // em cima do muro); no elogio, elogia. Na carta de elogio, a resposta
+            // ruim é o "não": maioria não condena o réu.
             var sim = respostas.Where(r => r.Value == RespostaSim).Select(r => r.Key).ToList();
             var nao = respostas.Where(r => r.Value == RespostaNao).Select(r => r.Key).ToList();
             var reu = _jogadores.FirstOrDefault(j => j.Id == rodada.Alvo);
-            var condenado = reu is not null && sim.Count > 0 && sim.Count >= nao.Count;
+            var simVence = reu is not null && sim.Count > 0 && sim.Count >= nao.Count;
             var elogio = rodada.Carta.Elogio;
-            revelacao = new Revelacao(sim, nao, [], condenado && !elogio ? [reu!.Id] : [], null, Elogio: elogio)
+            var condenado = elogio ? reu is not null && nao.Count > sim.Count : simVence;
+            revelacao = new Revelacao(sim, nao, [], condenado ? [reu!.Id] : [], null, Elogio: elogio)
             {
-                Escolhidos = condenado ? [reu!.Id] : []
+                Escolhidos = simVence ? [reu!.Id] : []
             };
-            if (reu is not null && condenado && elogio) DarCarta(reu);
+            if (reu is not null && simVence && elogio) DarCarta(reu);
             if (reu is not null)
             {
                 if (elogio) reu.Estatisticas.Elogios += sim.Count;
-                else reu.Estatisticas.VotosRecebidos += sim.Count;
+                if (condenado) reu.Estatisticas.VotosRecebidos += elogio ? nao.Count : sim.Count;
             }
         }
         else if (rodada.Carta.Modo == ModoDeJogo.EuNunca)

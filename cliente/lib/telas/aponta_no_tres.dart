@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 
 import '../dominio/modelos.dart';
@@ -7,31 +8,55 @@ import '../tema/tema_baralho.dart';
 import 'bebida.dart';
 import 'visual.dart';
 
-/// Quem é mais provável sem votação no celular: quem lê a carta toca e a
-/// tela conta "3… 2… 1… APONTEM!" em voz alta para a turma.
+/// Quem é mais provável sem votação no celular: quem criou a sala toca em
+/// "Contar até 3" e todos os celulares contam juntos "3… 2… 1… APONTEM!",
+/// para a turma apontar ao mesmo tempo.
 class ContagemParaApontar extends StatefulWidget {
-  const ContagemParaApontar({super.key, this.passo = const Duration(milliseconds: 800)});
+  const ContagemParaApontar({super.key, required this.visao, required this.rodada, required this.aoContar});
 
-  /// Tempo de cada número da contagem.
-  final Duration passo;
+  final VisaoDaSala visao;
+  final Rodada rodada;
+  final VoidCallback aoContar;
 
   @override
   State<ContagemParaApontar> createState() => _ContagemParaApontarState();
 }
 
 class _ContagemParaApontarState extends State<ContagemParaApontar> {
-  // 3, 2, 1, depois 0 = "APONTEM!"; nulo = esperando o toque.
-  int? _numero;
+  DateTime? _fim;
   Timer? _relogio;
 
-  void _contar() {
+  @override
+  void initState() {
+    super.initState();
+    _sincronizar();
+  }
+
+  @override
+  void didUpdateWidget(ContagemParaApontar antigo) {
+    super.didUpdateWidget(antigo);
+    if (antigo.rodada.cronometroRestanteMs != widget.rodada.cronometroRestanteMs) _sincronizar();
+  }
+
+  /// O servidor diz quanto falta; aqui vira um horário de fim neste celular.
+  void _sincronizar() {
     _relogio?.cancel();
-    setState(() => _numero = 3);
-    _relogio = Timer.periodic(widget.passo, (relogio) {
+    final restante = widget.rodada.cronometroRestanteMs;
+    _fim = restante == null ? null : clock.now().add(Duration(milliseconds: restante));
+    if (restante == null || restante <= 0) return;
+    _relogio = Timer.periodic(const Duration(milliseconds: 100), (relogio) {
       if (!mounted) return relogio.cancel();
-      setState(() => _numero = _numero! - 1);
+      setState(() {});
       if (_numero == 0) relogio.cancel();
     });
+  }
+
+  /// 3, 2, 1 e depois 0 = "APONTEM!"; nulo antes de contar.
+  int? get _numero {
+    final fim = _fim;
+    if (fim == null) return null;
+    final ms = fim.difference(clock.now()).inMilliseconds;
+    return ms <= 0 ? 0 : (ms / 1000).ceil();
   }
 
   @override
@@ -43,18 +68,26 @@ class _ContagemParaApontarState extends State<ContagemParaApontar> {
   @override
   Widget build(BuildContext context) {
     final numero = _numero;
+    final souAnfitriao = widget.visao.souAnfitriao;
     if (numero == null) {
+      if (!souAnfitriao) {
+        return Text(
+          '${widget.visao.anfitriao?.nome ?? 'Quem criou a sala'} puxa a contagem. Todo mundo aponta junto no APONTEM!',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: CoresBaralho.textoSecundario),
+        );
+      }
       return SizedBox(
         height: 72,
         child: FilledButton(
           key: const Key('contar-ate-tres'),
-          onPressed: _contar,
+          onPressed: widget.aoContar,
           child: const Text('👉 Contar até 3', style: TextStyle(fontSize: 18)),
         ),
       );
     }
     return GestureDetector(
-      onTap: _contar,
+      onTap: souAnfitriao ? widget.aoContar : null,
       child: SizedBox(
         height: 96,
         child: Center(
