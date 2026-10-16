@@ -202,6 +202,10 @@ app.MapPost("/api/salas/{codigo}/bebi", (
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
     Agir(codigo, http, salas, notificador, (sala, token) => sala.AlternarBebi(token, requisicao.Rodada)));
 
+// Guia para mandar à turma por link: página e imagens embutidas na DLL.
+app.MapGet("/como-jogar", () => PaginaComoJogar("index.html"));
+app.MapGet("/como-jogar/{arquivo}", (string arquivo) => PaginaComoJogar(arquivo));
+
 app.MapFallbackToFile("index.html");
 
 app.Run();
@@ -232,6 +236,22 @@ static async Task<byte[]> LerImagem(HttpRequest http, CancellationToken cancelam
             throw new AcaoNaoPermitidaException("A foto ficou grande demais. Tente de novo.");
     }
     return memoria.ToArray();
+}
+
+// Só o que foi embutido em Paginas/como-jogar: nada de caminho com barra ou "..".
+static IResult PaginaComoJogar(string arquivo)
+{
+    if (arquivo.Contains('/') || arquivo.Contains('\\') || arquivo.Contains("..")) return Results.NotFound();
+    var conteudo = typeof(Program).Assembly.GetManifestResourceStream($"como-jogar/{arquivo}");
+    if (conteudo is null) return Results.NotFound();
+    var tipo = Path.GetExtension(arquivo) switch
+    {
+        ".html" => "text/html; charset=utf-8",
+        ".jpg" => "image/jpeg",
+        ".png" => "image/png",
+        _ => "application/octet-stream"
+    };
+    return Results.Stream(conteudo, tipo);
 }
 
 static string Token(HttpRequest http)

@@ -33,6 +33,9 @@ class ApiBaralho {
     return 'http://localhost:5090';
   }
 
+  /// O guia para mandar à turma: mora no mesmo servidor da API.
+  String get enderecoDoComoJogar => '$_enderecoBase/como-jogar';
+
   String enderecoTempoReal(String codigo) => '$_enderecoBase/api/tempo-real/${_codigo(codigo)}';
 
   Future<Entrada> criarSala(String nome, {required bool semAlcool}) async {

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Como jogar · Baralho da Resenha</title>
+<meta name="description" content="O guia do Baralho da Resenha: como funciona, os jogos, os pontos e as cartas na manga.">
+<meta property="og:title" content="Como jogar o Baralho da Resenha">
+<meta property="og:description" content="O jogo da turma. Cada um no seu celular. Veja como funciona antes da próxima noite.">
+<meta property="og:image" content="/como-jogar/inicio.jpg">
+<link rel="icon" href="/favicon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+  /* Mesa de bar à noite, como o app. Um guia de rolar no polegar: cada seção é uma parte da noite. */
+  :root {
+    --fundo: #15100d; --superficie: #211a16; --superficie-2: #2b221d; --linha: #3d3029;
+    --texto: #fbf4ee; --apagado: #b9a698; --ambar: #ffb627; --ambar-fundo: #3a2a0c; --coral: #ff6b5b;
+    --azul: #2f74e0; --verde: #1b8a5a; --roxo: #7446e8; --laranja: #e07a00; --vermelho: #d9452a;
+    --papel: #fff8ee; --tinta: #241812;
+    --fonte: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0; background: var(--fundo); color: var(--texto); font-family: var(--fonte); font-size: 16px; line-height: 1.55;
+    padding-block: max(20px, env(safe-area-inset-top, 0px)) max(48px, env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .pagina { max-width: 1000px; margin: 0 auto; display: grid; gap: 56px; }
+  h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.2; }
+  h1 { font-size: clamp(30px, 7vw, 46px); font-weight: 700; }
+  h1 span, h2 span { color: var(--ambar); }
+  h2 { font-size: clamp(22px, 4.6vw, 30px); font-weight: 700; }
+  h3 { font-size: 18px; font-weight: 600; }
+  p { margin: 0; }
+  .apagado { color: var(--apagado); }
+  .texto { max-width: 62ch; }
+  section { display: grid; gap: 20px; }
+  a { color: var(--ambar); }
+
+  .topo { display: grid; gap: 16px; padding-top: 12px; }
+  .topo .marca { font-size: 15px; color: var(--apagado); letter-spacing: 0.04em; }
+  .botao { display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+    background: var(--ambar); color: var(--tinta); font-weight: 600; padding: 14px 22px; border-radius: 14px; width: fit-content; }
+  .botao.leve { background: transparent; color: var(--texto); border: 1px solid var(--linha); }
+  .botoes { display: flex; flex-wrap: wrap; gap: 10px; }
+  .indice { display: flex; flex-wrap: wrap; gap: 8px; }
+  .indice a { text-decoration: none; color: var(--texto); background: var(--superficie); border: 1px solid var(--linha);
+    padding: 6px 12px; border-radius: 99px; font-size: 14px; }
+
+  /* Telas do app: um celular de verdade, em fila que rola para o lado no celular. */
+  .telas { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 240px); gap: 16px;
+    overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
+  .tela { margin: 0; display: grid; gap: 8px; align-content: start; scroll-snap-align: start; min-width: 0; }
+  .tela button { all: unset; cursor: zoom-in; display: block; border-radius: 22px; }
+  .tela button:focus-visible { outline: 2px solid var(--ambar); outline-offset: 3px; }
+  .tela img { width: 100%; max-width: 100%; aspect-ratio: 390 / 844; object-fit: cover; display: block;
+    border-radius: 22px; border: 1px solid var(--linha); background: var(--superficie); }
+  .tela figcaption { font-size: 14px; color: var(--apagado); line-height: 1.4; }
+  .tela figcaption b { color: var(--texto); font-weight: 600; display: block; }
+
+  .passos { display: grid; gap: 12px; counter-reset: passo; padding: 0; margin: 0; list-style: none; max-width: 62ch; }
+  .passos li { display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: start; counter-increment: passo; }
+  .passos li::before { content: counter(passo); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--ambar-fundo); color: var(--ambar); font-weight: 600; font-size: 14px; }
+
+  /* Simulação: uma rodada em três telas, passo a passo. */
+  .simulacao { display: grid; grid-template-columns: minmax(200px, 280px) 1fr; gap: 24px; align-items: center;
+    background: var(--superficie); border: 1px solid var(--linha); border-radius: 24px; padding: 20px; }
+  .simulacao img { width: 100%; aspect-ratio: 390 / 844; object-fit: cover; border-radius: 18px; border: 1px solid var(--linha); display: block; }
+  .simulacao .etapa { display: grid; gap: 12px; align-content: center; min-width: 0; }
+  .simulacao .contador { color: var(--ambar); font-weight: 600; font-size: 14px; letter-spacing: 0.06em; }
+  .simulacao .controles { display: flex; gap: 10px; flex-wrap: wrap; }
+  .simulacao button { font: inherit; font-weight: 600; border-radius: 12px; padding: 10px 18px; cursor: pointer;
+    border: 1px solid var(--linha); background: var(--superficie-2); color: var(--texto); }
+  .simulacao button.principal { background: var(--ambar); border-color: var(--ambar); color: var(--tinta); }
+  .simulacao button:disabled { opacity: 0.4; cursor: default; }
+  @media (max-width: 620px) { .simulacao { grid-template-columns: 1fr; } .simulacao img { max-width: 260px; margin: 0 auto; } }
+
+  /* Os jogos: um cartão por jogo, com a cor do "naipe" de cada um, como no app. */
+  .jogos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .jogo { background: var(--superficie); border: 1px solid var(--linha); border-top: 4px solid var(--cor, var(--ambar));
+    border-radius: 18px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .jogo h3 { display: flex; gap: 8px; align-items: center; }
+  .jogo ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--apagado); font-size: 15px; }
+  .jogo .ver { display: flex; gap: 8px; flex-wrap: wrap; }
+  .jogo .ver button { font: inherit; font-size: 13px; cursor: zoom-in; border-radius: 99px; padding: 5px 12px;
+    border: 1px solid var(--linha); background: var(--superficie-2); color: var(--texto); }
+  .opcional { font-size: 12px; color: var(--apagado); border: 1px solid var(--linha); border-radius: 99px; padding: 1px 8px; font-weight: 500; }
+
+  .faixas { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .faixa { background: var(--superficie); border: 1px solid var(--linha); border-radius: 16px; padding: 14px; display: grid; gap: 6px; min-width: 0; }
+  .faixa b { font-weight: 600; }
+  .faixa span { color: var(--apagado); font-size: 15px; }
+  .destaque { border-color: var(--ambar); background: var(--ambar-fundo); }
+
+  /* Cartas na manga: cartinhas de baralho de verdade. */
+  .baralho { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .manga { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; min-width: 0; }
+  .cartinha { width: 64px; aspect-ratio: 63 / 88; background: var(--papel); border-radius: 8px; padding: 3px;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--cor) 40%, transparent); }
+  .cartinha div { height: 100%; border: 3px solid var(--cor); border-radius: 6px; display: grid; place-items: center; align-content: center; gap: 2px;
+    background: color-mix(in srgb, var(--cor) 8%, var(--papel)); color: var(--tinta); }
+  .cartinha i { font-style: normal; font-size: 22px; line-height: 1; }
+  .cartinha small { font-size: 7px; font-weight: 800; letter-spacing: 0.03em; color: var(--cor); text-transform: uppercase; text-align: center; line-height: 1.1; }
+  .manga b { font-weight: 600; display: block; }
+  .manga span { color: var(--apagado); font-size: 14px; line-height: 1.4; display: block; }
+
+  .final { background: var(--superficie); border: 1px solid var(--ambar); border-radius: 24px; padding: 24px; display: grid; gap: 14px; justify-items: start; }
+
+  dialog { border: 0; padding: 0; background: transparent; max-width: min(92vw, 420px); }
+  dialog::backdrop { background: rgb(0 0 0 / 0.8); }
+  dialog img { width: 100%; border-radius: 24px; display: block; }
+  dialog form { margin-top: 12px; text-align: center; }
+  dialog button { font: inherit; font-weight: 600; background: var(--ambar); color: var(--tinta); border: 0; border-radius: 12px; padding: 10px 22px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="pagina">
+
+  <header class="topo">
+    <p class="marca">🃏 BARALHO DA RESENHA</p>
+    <h1>Como jogar o <span>Baralho da Resenha</span></h1>
+    <p class="apagado texto">O jogo da turma, cada um no seu celular. Pelo navegador, sem instalar nada e sem criar conta. Leia em dois minutos e chegue na mesa sabendo tudo.</p>
+    <div class="botoes">
+      <a class="botao" href="/">Abrir o jogo</a>
+      <a class="botao leve" href="#rodada">Ver uma rodada</a>
+    </div>
+    <nav class="indice" aria-label="Partes do guia">
+      <a href="#comeca">Como começa</a><a href="#rodada">Uma rodada</a><a href="#jogos">Os jogos</a>
+      <a href="#pontos">Pontos e goles</a><a href="#manga">Cartas na manga</a><a href="#noite">Configurar a noite</a><a href="#fim">Fim da noite</a>
+    </nav>
+  </header>
+
+  <section id="comeca">
+    <h2>Como <span>começa</span></h2>
+    <ol class="passos">
+      <li><p><b>Alguém cria a sala.</b> Põe o nome, tira uma selfie com careta (opcional) e toca em “Criar uma sala”.</p></li>
+      <li><p><b>A turma entra.</b> Aponta a câmera para o QR Code da sala de espera, ou digita o código de 4 letras. Cada um põe o nome e a selfie.</p></li>
+      <li><p><b>Quem criou a sala escolhe a noite</b> e toca em começar. Daí em diante, <b>só essa pessoa passa as cartas</b>: o resto joga pelo próprio celular.</p></li>
+    </ol>
+    <div class="telas">
+      <figure class="tela"><button type="button" data-ampliar="/como-jogar/inicio.jpg"><img src="/como-jogar/inicio.jpg" alt="Tela inicial com nome, selfie e criar sala" loading="lazy" width="390" height="844"></button><figcaption><b>Tela inicial</b>Nome, selfie e “Criar uma sala” ou entrar com o código.</figcaption></figure>
+      <figure class="tela"><button type="button" data-ampliar="/como-jogar/sala.jpg"><img src="/como-jogar/sala.jpg" alt="Sala de espera com QR Code e a turma" loading="lazy" width="390" height="844"></button><figcaption><b>Sala de espera</b>O QR Code para a turma entrar e quem já chegou.</figcaption></figure>
+      <figure class="tela"><button type="button" data-ampliar="/como-jogar/noites.jpg"><img src="/como-jogar/noites.jpg" alt="Noites prontas na sala de espera" loading="lazy" width="390" height="844"></button><figcaption><b>Noites prontas</b>Um toque e a noite está montada.</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="rodada">
+    <h2>Uma rodada, <span>passo a passo</span></h2>
+    <div class="simulacao" id="simulacao">
+      <img id="sim-imagem" src="/como-jogar/eununca.jpg" alt="" width="390" height="844">
+      <div class="etapa">
+        <p class="contador" id="sim-contador">PASSO 1 DE 4</p>
+        <h3 id="sim-titulo">A carta aparece em todos os celulares</h3>
+        <p class="apagado" id="sim-texto">Todo mundo vê a mesma carta ao mesmo tempo. Num Eu Nunca, cada um responde em segredo: “Já fiz” ou “Nunca fiz”.</p>
+        <div class="controles">
+          <button type="button" id="sim-voltar" disabled>Voltar</button>
+          <button type="button" class="principal" id="sim-avancar">Próximo passo</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="jogos">
+    <h2>Os <span>jogos</span></h2>
+    <p class="apagado texto">Quem criou a sala escolhe um jogo só ou mistura vários; o app embaralha sem repetir o mesmo jogo muitas vezes seguidas. Embaixo de toda carta tem <b>ⓘ Como joga</b> explicando aquele jogo, e na primeira vez de cada um aparece uma dica.</p>
+    <div class="jogos">
+      <article class="jogo" style="--cor: #7446e8">
+        <h3>🙊 Eu Nunca</h3>
+        <ul><li>Cada um responde em segredo: já fiz ou nunca fiz.</li><li>Quem já fez leva 1 ponto.</li><li>Só uma pessoa fez? Ela conta a história.</li></ul>
+        <div class="ver"><button type="button" data-ampliar="/como-jogar/eununca.jpg">Ver a carta</button><button type="button" data-ampliar="/como-jogar/historia.jpg">Ver a revelação</button></div>
+      </article>
+      <article class="jogo" style="--cor: #2f74e0">
+        <h3>👉 Quem é mais provável</h3>
+        <ul><li>Às vezes vota no celular, em segredo, com suspense e a foto de quem levou.</li><li>Às vezes todo mundo aponta no 3.</li><li>Quem levar mais votos leva 1 ponto. No elogio, distribui goles.</li></ul>
+        <div class="ver"><button type="button" data-ampliar="/como-jogar/votacao.jpg">Ver a votação</button></div>
+      </article>
+      <article class="jogo" style="--cor: #2f74e0">
+        <h3>⚔️ Duelo</h3>
+        <ul><li>Duas pessoas se apresentam: dança, imitação, piada, discurso…</li><li>O resto vota em quem mandou melhor.</li><li>Quem perde leva 1 ponto; quem ganha leva uma carta na manga.</li></ul>
+        <div class="ver"><button type="button" data-ampliar="/como-jogar/duelo.jpg">Ver o duelo</button></div>
+      </article>
+      <article class="jogo" style="--cor: #2f74e0">
+        <h3>✊✋✌️ Pedra, papel e tesoura</h3>
+        <ul><li>Os dois sorteados escolhem no celular, em segredo.</li><li>O app revela as duas mãos. Empate? Joguem de novo.</li><li>Quem perde leva o ponto (ou a dose da carta).</li></ul>
+        <div class="ver"><button type="button" data-ampliar="/como-jogar/jokenpo.jpg">Ver as mãos</button></div>
+      </article>
+      <article class="jogo" style="--cor: #e88a00">
+        <h3>🍺 Beba se</h3>
+        <ul><li>Alguém lê a carta em voz alta.</li><li>Se a carta te pegou, toque em “Me pegou!”. Vale a honestidade.</li><li>Carta com selo “DOSE DE VERDADE” manda beber de verdade.</li></ul>
+        <div class="ver"><button type="button" data-ampliar="/como-jogar/dose.jpg">Ver uma dose</button></div>
+      </article>
+      <article class="jogo" style="--cor: #14b8a6">
+        <h3>⚖️ Tribunal da Turma</h3>
+        <ul><li>A pessoa da carta é o réu e só espera.</li><li>O resto vota 👍 ou 👎 em segredo.</li><li>Maioria sim (ou empate) condena. Ninguém sabe quem votou o quê.</li></ul>
+        <div class="ver"><button type="button" data-ampliar="/como-jogar/tribunal.jpg">Ver o Tribunal</button></div>
+      </article>
+      <article class="jogo" style="--cor: #e4572e">
+        <h3>📮 Correio da Resenha</h3>
+        <ul><li>Quem está na foto fica de fora.</li><li>O resto escreve um bilhete de até 20 letras, anônimo de verdade.</li><li>No fim todo mundo lê, e a pessoa da foto escolhe o favorito.</li></ul>
+        <div class="ver"><button type="button" data-ampliar="/como-jogar/correio.jpg">Ver o bilhete</button><button type="button" data-ampliar="/como-jogar/bilhetes.jpg">Ver os bilhetes</button></div>
+      </article>
+      <article class="jogo" style="--cor: #22a06b">
+        <h3>🎭 Imagem e Ação</h3>
+        <ul><li>Só quem faz a mímica vê a palavra; pode dizer a categoria e o número de palavras.</li><li>Até 5 pessoas, um faz para todos; de 6 a 8, dois times; 9 ou mais, três.</li><li>60 segundos no cronômetro. O time que perde leva ponto.</li></ul>
+        <div class="ver"><button type="button" data-ampliar="/como-jogar/mimica.jpg">Ver a mímica</button></div>
+      </article>
+      <article class="jogo" style="--cor: #f5b301">
+        <h3>⚡ Regra-relâmpago</h3>
+        <ul><li>Uma regra maluca que vale por algumas cartas, como “só pode falar cantando”.</li><li>O app dá a isca: entrevista, pergunta, missão ou piada, para a regra acontecer.</li><li>Vacilou? Quem criou a sala marca e a pessoa leva 1 ponto.</li></ul>
+        <div class="ver"><button type="button" data-ampliar="/como-jogar/regra.jpg">Ver a entrevista</button></div>
+      </article>
+      <article class="jogo" style="--cor: #f5b301">
+        <h3>💛 Rodada de Elogios</h3>
+        <ul><li>Dinâmicas de elogio para alguém da mesa.</li><li>Ninguém bebe: todo mundo sai se achando.</li></ul>
+      </article>
+      <article class="jogo" style="--cor: #d9327c">
+        <h3>💞 Casais em Jogo <span class="opcional">opcional</span></h3>
+        <ul><li>Um do casal responde a verdade; o par tenta adivinhar.</li><li>Errou, o palpiteiro leva 1 ponto.</li><li>Começa desligado: liga quem quiser.</li></ul>
+      </article>
+    </div>
+  </section>
+
+  <section id="pontos">
+    <h2>Pontos e <span>goles</span></h2>
+    <p class="apagado texto">O jogo não manda beber a cada carta. Cada vez que a carta te pega, você ganha <b>1 ponto no cofrinho</b>. O gole só sai quando o cofrinho enche, e o ritmo é você que escolhe.</p>
+    <div class="faixas">
+      <div class="faixa destaque"><b>🐢 Devagar (padrão)</b><span>1 gole a cada 3 pontos. Dá para jogar a noite inteira.</span></div>
+      <div class="faixa"><b>🚶 Normal</b><span>1 gole a cada 2 pontos.</span></div>
+      <div class="faixa"><b>🔥 Raiz</b><span>Todo ponto é gole, como nos baralhos de loja.</span></div>
+      <div class="faixa"><b>🍺 Dose de verdade</b><span>Carta com esse selo (“bebe 2”) é gole de verdade, fora do cofrinho.</span></div>
+      <div class="faixa"><b>🥤 Sem álcool</b><span>Quem marca “Vou jogar sem álcool” só soma pontos e disputa os prêmios igual.</span></div>
+    </div>
+  </section>
+
+  <section id="manga">
+    <h2>Cartas na <span>manga</span></h2>
+    <p class="apagado texto">Estilo Uno. Todo mundo começa com uma, guarda até 3 e ganha mais vencendo duelo, acertando a mímica ou sendo escolhido no elogio. Só você vê as suas; a mesa vê quem usou o quê. Uma por pessoa a cada carta. Toque numa carta no app para ver o que ela faz e se vale agora.</p>
+    <div class="baralho">
+      <div class="manga" style="--cor: #2f74e0"><div class="cartinha"><div><i>🛡️</i><small>Escudo</small></div></div><div><b>Escudo</b><span>Cancela o que a carta da mesa fez com você.</span></div></div>
+      <div class="manga" style="--cor: #1b8a5a"><div class="cartinha"><div><i>🎯</i><small>Passa a bola</small></div></div><div><b>Passa a bola</b><span>O que a carta fez com você vai para quem você escolher.</span></div></div>
+      <div class="manga" style="--cor: #7446e8"><div class="cartinha"><div><i>↩️</i><small>Devolve</small></div></div><div><b>Devolve</b><span>No duelo, o ponto volta para quem te venceu.</span></div></div>
+      <div class="manga" style="--cor: #e07a00"><div class="cartinha"><div><i>🥔</i><small>Batata quente</small></div></div><div><b>Batata quente</b><span>Vira dose com +1 gole em alguém, que pode passar adiante com +1.</span></div></div>
+      <div class="manga" style="--cor: #d9452a"><div class="cartinha"><div><i>✖️2</i><small>Dobra</small></div></div><div><b>Dobra</b><span>Dobra o que a carta fez com outra pessoa.</span></div></div>
+    </div>
+    <div class="telas">
+      <figure class="tela"><button type="button" data-ampliar="/como-jogar/mao.jpg"><img src="/como-jogar/mao.jpg" alt="Mão com três cartas na manga" loading="lazy" width="390" height="844"></button><figcaption><b>Sua mão</b>A carta que vale agora brilha e diz “PODE USAR”.</figcaption></figure>
+      <figure class="tela"><button type="button" data-ampliar="/como-jogar/ficha.jpg"><img src="/como-jogar/ficha.jpg" alt="Ficha da carta Escudo" loading="lazy" width="390" height="844"></button><figcaption><b>A ficha da carta</b>O que faz, quando usar, um exemplo e o botão.</figcaption></figure>
+      <figure class="tela"><button type="button" data-ampliar="/como-jogar/guia-cartas.jpg"><img src="/como-jogar/guia-cartas.jpg" alt="Guia de todas as cartas na manga" loading="lazy" width="390" height="844"></button><figcaption><b>O guia das cartas</b>Todas as cartas e como ganhar mais.</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="noite">
+    <h2>Configurar a <span>noite</span></h2>
+    <div class="faixas">
+      <div class="faixa"><b>🧃 Leve · 🍺 Resenha · 🌶️ Picante · 🔥 Original</b><span>O nível das cartas. Resenha é o padrão; o Original pede confirmação da turma.</span></div>
+      <div class="faixa"><b>🌡️ Esquenta sozinho</b><span>Começa leve e sobe um nível a cada 8 cartas.</span></div>
+      <div class="faixa"><b>🛟 Zona Segura</b><span>Tira as cartas sobre ex, ciúme e traição. Ligada por padrão.</span></div>
+      <div class="faixa"><b>👎 Tira essa</b><span>Carta que ninguém quer jogar? Quem criou a sala tira, e ela some da noite.</span></div>
+      <div class="faixa"><b>🌙 Noites prontas</b><span>Resenha clássica, Esquenta até o Picante, Noite das brincadeiras, Só zoeira, Noite tranquila e Raiz.</span></div>
+    </div>
+  </section>
+
+  <section id="fim">
+    <h2>Fim da <span>noite</span></h2>
+    <p class="apagado texto">Quem criou a sala encerra e todo mundo vê os <b>Prêmios da Noite</b>: Rei(nha) da noite, Alvo preferido, Xodó da turma, Artista da mímica, Rei(nha) dos duelos, Mestre das cartas na manga e mais. O cartão vira imagem para mandar no grupo, e as selfies de reação formam o mural, que cada um salva no próprio celular. Quer mais? “Só mais uma” volta ao jogo com o placar mantido.</p>
+    <div class="telas">
+      <figure class="tela"><button type="button" data-ampliar="/como-jogar/premios.jpg"><img src="/como-jogar/premios.jpg" alt="Prêmios da Noite" loading="lazy" width="390" height="844"></button><figcaption><b>Prêmios da Noite</b>Com o resumo da noite e o botão para mandar no grupo.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="final">
+    <h2>Pronto para a <span>resenha</span>?</h2>
+    <p class="apagado">Abra no celular, crie a sala e chame a turma pelo QR Code.</p>
+    <a class="botao" href="/">Abrir o jogo</a>
+  </section>
+</div>
+
+<dialog id="ampliada" aria-label="Tela ampliada">
+  <img id="ampliada-imagem" src="" alt="">
+  <form method="dialog"><button type="submit">Fechar</button></form>
+</dialog>
+
+<script>
+  // Tocar numa tela amplia; tocar fora ou em "Fechar" volta.
+  const caixa = document.getElementById('ampliada');
+  const grande = document.getElementById('ampliada-imagem');
+  document.querySelectorAll('[data-ampliar]').forEach((botao) => botao.addEventListener('click', () => {
+    grande.src = botao.dataset.ampliar;
+    grande.alt = botao.querySelector('img')?.alt ?? botao.textContent;
+    caixa.showModal();
+  }));
+  caixa.addEventListener('click', (evento) => { if (evento.target === caixa) caixa.close(); });
+
+  // Uma rodada em quatro passos.
+  const passos = [
+    { img: 'eununca', titulo: 'A carta aparece em todos os celulares', texto: 'Todo mundo vê a mesma carta ao mesmo tempo. Num Eu Nunca, cada um responde em segredo: “Já fiz” ou “Nunca fiz”.' },
+    { img: 'historia', titulo: 'O app revela', texto: 'Quando todo mundo responde, a resposta aparece para a mesa. Aqui só o Caio já fez: ele leva o ponto e conta a história.' },
+    { img: 'votacao', titulo: 'Nas votações, suspense', texto: 'Num “Quem é mais provável”, o app toca o tambor e mostra a foto de quem a turma escolheu, com o ponto no cofrinho.' },
+    { img: 'premios', titulo: 'No fim, os prêmios', texto: 'Quem criou a sala encerra a noite e todo mundo vê os Prêmios da Noite e o mural de selfies.' },
+  ];
+  let atual = 0;
+  const el = (id) => document.getElementById(id);
+  const mostrar = () => {
+    const passo = passos[atual];
+    el('sim-imagem').src = `/como-jogar/${passo.img}.jpg`;
+    el('sim-imagem').alt = passo.titulo;
+    el('sim-contador').textContent = `PASSO ${atual + 1} DE ${passos.length}`;
+    el('sim-titulo').textContent = passo.titulo;
+    el('sim-texto').textContent = passo.texto;
+    el('sim-voltar').disabled = atual === 0;
+    el('sim-avancar').textContent = atual === passos.length - 1 ? 'Ver de novo' : 'Próximo passo';
+  };
+  el('sim-avancar').addEventListener('click', () => { atual = (atual + 1) % passos.length; mostrar(); });
+  el('sim-voltar').addEventListener('click', () => { atual = Math.max(0, atual - 1); mostrar(); });
+  passos.forEach((passo) => { new Image().src = `/como-jogar/${passo.img}.jpg`; });
+</script>
+</body>
+</html>

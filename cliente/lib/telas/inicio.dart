@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../infraestrutura/abrir_link.dart';
 import '../infraestrutura/api_baralho.dart';
 import '../infraestrutura/sessoes_locais.dart';
 import '../tema/tema_baralho.dart';
@@ -267,6 +268,11 @@ class _InicioState extends State<Inicio> {
                         onPressed: () => Navigator.of(context).pushReplacementNamed('/'),
                         child: const Text('Criar outra sala'),
                       ),
+                    const SizedBox(height: EspacoBaralho.base),
+                    TextButton(
+                      onPressed: () => abrirLink(widget.api.enderecoDoComoJogar),
+                      child: const Text('📖 Como jogar?'),
+                    ),
                   ],
                 ),
               ),
