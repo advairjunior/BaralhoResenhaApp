@@ -765,6 +765,5 @@
   { "id": "mu-026", "modo": "Musica", "nivel": "Picante", "texto": "Música para dançar agarradinho! {jogador} começa, com olhar 43." },
   { "id": "mu-027", "modo": "Musica", "nivel": "Picante", "texto": "Música que tocaria no motel! {jogador} começa." },
   { "id": "mu-028", "modo": "Musica", "nivel": "Picante", "texto": "Funk proibidão em versão de almoço de família: só a melodia, sem palavrão! {jogador} começa." },
-  { "id": "mu-029", "modo": "Musica", "nivel": "Original", "texto": "A trilha sonora da sua noite mais louca: {jogador} começa, e cada um conta o porquê depois de cantar." },
-  { "id": "mu-030", "modo": "Musica", "nivel": "Original", "texto": "A música que já tocou na hora H. {jogador} começa!" }
+  { "id": "mu-029", "modo": "Musica", "nivel": "Original", "texto": "A trilha sonora da sua noite mais louca: {jogador} começa, e cada um conta o porquê depois de cantar." }
 ]
