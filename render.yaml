@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: baralho-resenha
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/saude
+    autoDeployTrigger: commit
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production

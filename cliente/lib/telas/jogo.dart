@@ -1,0 +1,834 @@
+import 'package:flutter/material.dart';
+
+import '../dominio/modelos.dart';
+import '../tema/tema_baralho.dart';
+import 'carta_de_baralho.dart';
+import 'aponta_no_tres.dart';
+import 'bebida.dart';
+import 'casais.dart';
+import 'controles_do_anfitriao.dart';
+import 'cronometro.dart';
+import 'imagem_e_acao.dart';
+import 'correio.dart';
+import 'configuracao_do_jogo.dart';
+import 'momentos.dart';
+import 'regra_em_jogo.dart';
+import 'sala.dart';
+import 'suspense_da_votacao.dart';
+import 'visual.dart';
+
+const respostaJa = 'ja';
+const respostaNunca = 'nunca';
+const respostaSim = 'sim';
+const respostaNao = 'nao';
+
+/// O que acontece com quem a turma escolheu: ponto no cofrinho (ou gole), ou,
+/// no elogio, distribui goles.
+String destinoDoEscolhido(VisaoDaSala visao, Jogador jogador, {required bool elogio, int goles = 3}) =>
+    elogio ? distribuiGoles(visao, goles) : destinoDoPego(visao, jogador);
+
+class Jogo extends StatelessWidget {
+  const Jogo({super.key, required this.visao, required this.acoes});
+
+  final VisaoDaSala visao;
+  final AcoesDaSala acoes;
+
+  @override
+  Widget build(BuildContext context) {
+    final rodada = visao.rodada!;
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text('Sala ${visao.codigo}', style: const TextStyle(fontSize: 16, letterSpacing: 2)),
+        actions: [
+          IconButton(
+            tooltip: 'Placar',
+            onPressed: () => abrirPlacar(context, visao),
+            icon: const Text('🏆', style: TextStyle(fontSize: 22)),
+          ),
+          PopupMenuButton<String>(
+            onSelected: (opcao) => switch (opcao) {
+              'configurar' => abrirConfiguracao(
+                  context,
+                  configuracao: visao.configuracao,
+                  podeEditar: visao.souAnfitriao,
+                  aoMudar: acoes.configurar,
+                ),
+              'encerrar' => _confirmarEncerramento(context, acoes),
+              _ => confirmarSaida(context, acoes),
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'configurar',
+                child: Text(visao.souAnfitriao ? 'Nível e modos' : 'Ver nível e modos'),
+              ),
+              if (visao.souAnfitriao)
+                const PopupMenuItem(value: 'encerrar', child: Text('Encerrar a noite 🏆')),
+              const PopupMenuItem(value: 'sair', child: Text('Sair da sala')),
+            ],
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                  EspacoBaralho.base, EspacoBaralho.pequeno, EspacoBaralho.base, EspacoBaralho.grande),
+              children: [
+                if (visao.regra != null && rodada.modo != ModoDeJogo.regraRelampago)
+                  RegraEmJogo(visao: visao, acoes: acoes),
+                if (visao.esquenta case Esquenta(subiuAgora: true, :final agora))
+                  _AvisoSobreACarta(texto: '🌡️ Esquentou! Agora é ${agora.emoji} ${agora.titulo}', cor: CoresBaralho.coral),
+                if (visao.cartaTiradaPor case final nome?)
+                  _AvisoSobreACarta(texto: '👎 $nome tirou a carta anterior', cor: CoresBaralho.textoApagado),
+                // Quem está na foto do correio não vê a pergunta: fica de fora.
+                if (rodada.modo == ModoDeJogo.correio && rodada.alvo == visao.euId && rodada.revelacao == null)
+                  const DeForaDoCorreio()
+                else
+                  // Carta nova, carta virada: a chave nova faz a virada de novo.
+                  CartaQueVira(key: ValueKey(rodada.numero), rodada: rodada),
+                _BarraDaCarta(esquenta: visao.esquenta, souAnfitriao: visao.souAnfitriao, acoes: acoes),
+                const SizedBox(height: EspacoBaralho.base),
+                if (segundosDaCarta(rodada.texto) case final segundos? when rodada.revelacao == null)
+                  Cronometro(key: ValueKey('cronometro-${rodada.numero}'), segundos: segundos),
+                HoraDoGole(visao: visao),
+                _AreaDeAcao(visao: visao, rodada: rodada, acoes: acoes),
+              ],
+            ),
+          ),
+        ),
+          ),
+          if (rodada.revelacao case final revelacao?
+              when rodada.modo == ModoDeJogo.maisProvavel || rodada.modo == ModoDeJogo.tribunal)
+            Positioned.fill(
+              child: SuspenseDaVotacao.da(
+                key: ValueKey('suspense-${visao.codigo}-${rodada.numero}'),
+                visao: visao,
+                rodada: rodada,
+                revelacao: revelacao,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Aviso curto em cima da carta.
+class _AvisoSobreACarta extends StatelessWidget {
+  const _AvisoSobreACarta({required this.texto, required this.cor});
+
+  final String texto;
+  final Color cor;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: EspacoBaralho.pequeno),
+        child: Text(texto,
+            textAlign: TextAlign.center, style: TextStyle(color: cor, fontWeight: FontWeight.w600)),
+      );
+}
+
+/// Embaixo da carta: em que nível a noite está (Esquenta sozinho) e o
+/// "Tira essa", para a carta que ninguém quer jogar.
+class _BarraDaCarta extends StatelessWidget {
+  const _BarraDaCarta({required this.esquenta, required this.souAnfitriao, required this.acoes});
+
+  final Esquenta? esquenta;
+  final bool souAnfitriao;
+  final AcoesDaSala acoes;
+
+  Future<void> _tirar(BuildContext context) async {
+    final tirar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Tirar essa carta? 👎'),
+        content: const Text('Ela sai do baralho desta noite e vem outra no lugar.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Deixa')),
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Tira essa'),
+          ),
+        ],
+      ),
+    );
+    if (tirar == true) await acoes.tirar();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final esquenta = this.esquenta;
+    return Padding(
+      padding: const EdgeInsets.only(top: EspacoBaralho.pequeno),
+      child: Row(
+        children: [
+          if (esquenta != null)
+            Expanded(
+              child: Text(
+                switch (esquenta.sobeEm) {
+                  null => '🌡️ No máximo: ${esquenta.agora.emoji} ${esquenta.agora.titulo}',
+                  1 => '🌡️ ${esquenta.agora.titulo} · esquenta na próxima',
+                  final cartas => '🌡️ ${esquenta.agora.titulo} · esquenta em $cartas cartas',
+                },
+                style: const TextStyle(fontSize: 13, color: CoresBaralho.textoSecundario),
+              ),
+            )
+          else
+            const Spacer(),
+          if (!souAnfitriao) const SizedBox(height: 40),
+          if (souAnfitriao)
+          TextButton(
+            key: const Key('tira-essa'),
+            style: TextButton.styleFrom(foregroundColor: CoresBaralho.textoSecundario),
+            onPressed: () => _tirar(context),
+            child: const Text('👎 Tira essa'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Future<void> _confirmarEncerramento(BuildContext context, AcoesDaSala acoes) async {
+  final encerrar = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Encerrar a noite? 🏆'),
+      content: const Text('Todo mundo vai para os Prêmios da Noite e o mural. Dá para voltar com "Só mais uma".'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Ainda não')),
+        FilledButton(
+          style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Ver os prêmios'),
+        ),
+      ],
+    ),
+  );
+  if (encerrar == true) await acoes.encerrar();
+}
+
+class _AreaDeAcao extends StatelessWidget {
+  const _AreaDeAcao({required this.visao, required this.rodada, required this.acoes});
+
+  final VisaoDaSala visao;
+  final Rodada rodada;
+  final AcoesDaSala acoes;
+
+  @override
+  Widget build(BuildContext context) {
+    final revelacao = rodada.revelacao;
+    if (revelacao != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          switch (rodada.modo) {
+            ModoDeJogo.euNunca => _RevelacaoEuNunca(visao: visao, revelacao: revelacao),
+            ModoDeJogo.casaisEmJogo => RevelacaoDoCasal(visao: visao, rodada: rodada, acoes: acoes),
+            ModoDeJogo.tribunal => _RevelacaoDoTribunal(visao: visao, rodada: rodada, revelacao: revelacao),
+            ModoDeJogo.maisProvavel when rodada.duelo =>
+              _RevelacaoDoDuelo(visao: visao, rodada: rodada, revelacao: revelacao),
+            ModoDeJogo.imagemEAcao => RevelacaoDaMimica(visao: visao, rodada: rodada, revelacao: revelacao),
+            ModoDeJogo.correio => RevelacaoDoCorreio(visao: visao, rodada: rodada, revelacao: revelacao, acoes: acoes),
+            _ => _RevelacaoMaisProvavel(visao: visao, revelacao: revelacao),
+          },
+          MomentosDaRodada(visao: visao, rodada: rodada, acoes: acoes),
+          const SizedBox(height: EspacoBaralho.grande),
+          ProximaCarta(visao: visao, aoTocar: acoes.proxima),
+        ],
+      );
+    }
+
+    return switch (rodada.modo) {
+      ModoDeJogo.euNunca => _Respondendo(
+          visao: visao,
+          rodada: rodada,
+          acoes: acoes,
+          opcoes: Row(children: [
+            Expanded(child: _BotaoDeResposta(
+              rotulo: '🙋 Já fiz',
+              escolhido: rodada.minhaResposta == respostaJa,
+              aoTocar: () => acoes.responder(respostaJa),
+            )),
+            const SizedBox(width: EspacoBaralho.medio),
+            Expanded(child: _BotaoDeResposta(
+              rotulo: '😇 Nunca fiz',
+              escolhido: rodada.minhaResposta == respostaNunca,
+              aoTocar: () => acoes.responder(respostaNunca),
+            )),
+          ]),
+        ),
+      ModoDeJogo.maisProvavel when !rodada.pedeResposta => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const ContagemParaApontar(),
+            const SizedBox(height: EspacoBaralho.grande),
+            QuemFoiApontado(visao: visao, rodada: rodada, aoMarcar: acoes.marcarApontado),
+            const SizedBox(height: EspacoBaralho.grande),
+            ProximaCarta(visao: visao, aoTocar: acoes.proxima),
+          ],
+        ),
+      ModoDeJogo.maisProvavel when rodada.duelo => _Respondendo(
+          visao: visao,
+          rodada: rodada,
+          acoes: acoes,
+          opcoes: rodada.duelistas.contains(visao.euId)
+              ? const Text('Você está no duelo! Capricha 🔥',
+                  textAlign: TextAlign.center, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600))
+              : Column(children: [
+                  Text('Quem mandou melhor?', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: EspacoBaralho.medio),
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    for (final jogador in [for (final id in rodada.duelistas) ?visao.jogador(id)]) ...[
+                      if (jogador.id != rodada.duelistas.first) const SizedBox(width: EspacoBaralho.medio),
+                      _BotaoDeVoto(
+                        key: Key('votar-${jogador.id}'),
+                        jogador: jogador,
+                        escolhido: rodada.minhaResposta == jogador.id,
+                        aoTocar: () => acoes.responder(jogador.id),
+                      ),
+                    ],
+                  ]),
+                ]),
+        ),
+      ModoDeJogo.maisProvavel => _Respondendo(
+          visao: visao,
+          rodada: rodada,
+          acoes: acoes,
+          opcoes: Wrap(
+            spacing: EspacoBaralho.pequeno,
+            runSpacing: EspacoBaralho.pequeno,
+            alignment: WrapAlignment.center,
+            children: [
+              for (final jogador in visao.jogadores)
+                _BotaoDeVoto(
+                  jogador: jogador,
+                  escolhido: rodada.minhaResposta == jogador.id,
+                  aoTocar: () => acoes.responder(jogador.id),
+                ),
+            ],
+          ),
+        ),
+      ModoDeJogo.bebaSe => _MePegou(visao: visao, rodada: rodada, acoes: acoes),
+      ModoDeJogo.regraRelampago => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // A carta já mostra a regra: aqui só a isca e o vacilo.
+            RegraEmJogo(visao: visao, acoes: acoes, mostrarTexto: false),
+            ProximaCarta(visao: visao, aoTocar: acoes.proxima, rotulo: 'Valendo! Próxima carta'),
+          ],
+        ),
+      ModoDeJogo.elogios => ProximaCarta(visao: visao, aoTocar: acoes.proxima, rotulo: 'Pronto! Próxima carta'),
+      ModoDeJogo.correio => _Respondendo(
+          visao: visao,
+          rodada: rodada,
+          acoes: acoes,
+          opcoes: visao.euId == rodada.alvo
+              ? const SizedBox.shrink()
+              : EscreverBilhete(key: ValueKey('bilhete-${rodada.numero}'), visao: visao, rodada: rodada, acoes: acoes),
+        ),
+      ModoDeJogo.imagemEAcao => PainelDaMimica(visao: visao, rodada: rodada, acoes: acoes),
+      ModoDeJogo.casaisEmJogo => RespostaDoCasal(visao: visao, rodada: rodada, acoes: acoes),
+      ModoDeJogo.tribunal => _Respondendo(
+          visao: visao,
+          rodada: rodada,
+          acoes: acoes,
+          opcoes: visao.euId == rodada.alvo
+              ? const Text('😬', key: Key('reu-esperando'), textAlign: TextAlign.center, style: TextStyle(fontSize: 56))
+              : Row(children: [
+                  Expanded(child: _BotaoDeResposta(
+                    rotulo: '👍 Sim',
+                    escolhido: rodada.minhaResposta == respostaSim,
+                    aoTocar: () => acoes.responder(respostaSim),
+                  )),
+                  const SizedBox(width: EspacoBaralho.medio),
+                  Expanded(child: _BotaoDeResposta(
+                    rotulo: '👎 Não',
+                    escolhido: rodada.minhaResposta == respostaNao,
+                    aoTocar: () => acoes.responder(respostaNao),
+                  )),
+                ]),
+        ),
+    };
+  }
+}
+
+class _Respondendo extends StatelessWidget {
+  const _Respondendo({required this.visao, required this.rodada, required this.acoes, required this.opcoes});
+
+  final VisaoDaSala visao;
+  final Rodada rodada;
+  final AcoesDaSala acoes;
+  final Widget opcoes;
+
+  @override
+  Widget build(BuildContext context) {
+    final votantes = [
+      for (final jogador in visao.jogadores)
+        if ((!_ficaDeFora(rodada) || jogador.id != rodada.alvo) && !rodada.duelistas.contains(jogador.id)) jogador,
+    ];
+    final faltam = votantes.where((j) => !j.respondeu).toList();
+    final souReu = (_ficaDeFora(rodada) && visao.euId == rodada.alvo) || rodada.duelistas.contains(visao.euId);
+    final correio = rodada.modo == ModoDeJogo.correio;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          souReu
+              ? (correio
+                  ? 'A turma está escrevendo sobre você…'
+                  : rodada.duelo
+                      ? 'A turma vai votar em quem mandou melhor.'
+                      : 'A turma está te julgando…')
+              : correio
+                  ? (rodada.minhaResposta == null ? 'Escreva em segredo:' : 'Bilhete guardado. Dá para trocar até revelar.')
+                  : rodada.minhaResposta == null
+                  ? (rodada.modo == ModoDeJogo.euNunca ? 'Responda em segredo:' : 'Vote em segredo:')
+                  : 'Resposta guardada. Dá para trocar até revelar.',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: CoresBaralho.textoSecundario),
+        ),
+        const SizedBox(height: EspacoBaralho.medio),
+        opcoes,
+        const SizedBox(height: EspacoBaralho.grande),
+        Text(
+          correio
+              ? '${rodada.respostas} de ${votantes.length} já escreveram'
+              : rodada.duelo
+                  ? '${rodada.respostas} de ${votantes.length} votaram'
+                  : '${rodada.respostas} de ${votantes.length} responderam',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        if (faltam.isNotEmpty)
+          Text(
+            'Falta: ${faltam.map((j) => j.nome).join(', ')}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: CoresBaralho.textoApagado),
+          ),
+        const SizedBox(height: EspacoBaralho.medio),
+        if (visao.souAnfitriao)
+        Row(children: [
+          Expanded(child: TextButton(onPressed: acoes.proxima, child: const Text('Pular carta'))),
+          Expanded(
+            child: TextButton(
+              // No correio, com um bilhete só todo mundo sabe quem escreveu.
+              onPressed: rodada.respostas >= (correio ? 2 : 1) ? acoes.revelar : null,
+              child: const Text('Revelar agora'),
+            ),
+          ),
+        ]),
+      ],
+    );
+  }
+}
+
+/// Tribunal e correio: a carta é sobre alguém, que não vota nem escreve.
+bool _ficaDeFora(Rodada rodada) => rodada.modo == ModoDeJogo.tribunal || rodada.modo == ModoDeJogo.correio;
+
+class _BotaoDeResposta extends StatelessWidget {
+  const _BotaoDeResposta({required this.rotulo, required this.escolhido, required this.aoTocar});
+
+  final String rotulo;
+  final bool escolhido;
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 72,
+      child: escolhido
+          ? FilledButton(onPressed: aoTocar, child: Text(rotulo, style: const TextStyle(fontSize: 18)))
+          : OutlinedButton(onPressed: aoTocar, child: Text(rotulo, style: const TextStyle(fontSize: 18))),
+    );
+  }
+}
+
+class _BotaoDeVoto extends StatelessWidget {
+  const _BotaoDeVoto({super.key, required this.jogador, required this.escolhido, required this.aoTocar});
+
+  final Jogador jogador;
+  final bool escolhido;
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: escolhido ? CoresBaralho.ambarEscuro : CoresBaralho.superficie,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: escolhido ? CoresBaralho.ambar : CoresBaralho.borda, width: escolhido ? 2 : 1),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: aoTocar,
+        child: SizedBox(
+          width: 104,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: EspacoBaralho.medio, horizontal: EspacoBaralho.pequeno),
+            child: Column(children: [
+              AvatarDoJogador(jogador: jogador, tamanho: 64),
+              const SizedBox(height: EspacoBaralho.mini),
+              Text(jogador.nome, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Beba se: quem a carta pegou marca o próprio gole.
+class _MePegou extends StatelessWidget {
+  const _MePegou({
+    required this.visao,
+    required this.rodada,
+    required this.acoes,
+  });
+
+  final VisaoDaSala visao;
+  final Rodada rodada;
+  final AcoesDaSala acoes;
+
+  @override
+  Widget build(BuildContext context) {
+    final beberam = [for (final id in rodada.beberam) ?visao.jogador(id)];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          height: 64,
+          child: rodada.euBebi
+              ? FilledButton(onPressed: acoes.alternarBebi, child: Text('Me pegou! ${_unidade(visao.eu)} ✓'))
+              : OutlinedButton(onPressed: acoes.alternarBebi, child: Text('Me pegou! ${_unidade(visao.eu)}')),
+        ),
+        const SizedBox(height: EspacoBaralho.medio),
+        Text(
+          beberam.isEmpty ? 'Marque se a carta pegou você.' : 'Pegou: ${beberam.map((j) => j.nome).join(', ')}',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: CoresBaralho.textoSecundario),
+        ),
+        const SizedBox(height: EspacoBaralho.grande),
+        ProximaCarta(visao: visao, aoTocar: acoes.proxima),
+      ],
+    );
+  }
+}
+
+String _unidade(Jogador jogador) => jogador.semAlcool ? '⭐' : '🍺';
+
+class _RevelacaoEuNunca extends StatelessWidget {
+  const _RevelacaoEuNunca({required this.visao, required this.revelacao});
+
+  final VisaoDaSala visao;
+  final Revelacao revelacao;
+
+  @override
+  Widget build(BuildContext context) {
+    final ja = [for (final id in revelacao.jaFizeram) ?visao.jogador(id)];
+    final historia = revelacao.contaAHistoria == null ? null : visao.jogador(revelacao.contaAHistoria!);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Com uma pessoa só, a foto grande já diz quem foi.
+        if (historia != null)
+          _DestaqueDaHistoria(visao: visao, jogador: historia)
+        else if (ja.isEmpty)
+          const _Recado(emoji: '😇', texto: 'Ninguém fez! Que turma comportada…')
+        else ...[
+          Text(ja.length == 1 ? 'Já fez:' : 'Já fizeram (${ja.length}):',
+              textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: EspacoBaralho.medio),
+          _ListaDePerdedores(visao: visao, jogadores: ja),
+        ],
+      ],
+    );
+  }
+}
+
+class _RevelacaoMaisProvavel extends StatelessWidget {
+  const _RevelacaoMaisProvavel({required this.visao, required this.revelacao});
+
+  final VisaoDaSala visao;
+  final Revelacao revelacao;
+
+  @override
+  Widget build(BuildContext context) {
+    final ids = revelacao.escolhidos.isNotEmpty ? revelacao.escolhidos : revelacao.perderam;
+    final maisVotados = [for (final id in ids) ?visao.jogador(id)];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          maisVotados.length == 1
+              ? 'A turma escolheu:'
+              : (revelacao.elogio ? 'Empate! Todos levam:' : 'Empate! Todos bebem:'),
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: EspacoBaralho.medio),
+        _ListaDePerdedores(visao: visao, jogadores: maisVotados, elogio: revelacao.elogio),
+        const SizedBox(height: EspacoBaralho.grande),
+        _VotosDeTodos(visao: visao, revelacao: revelacao),
+      ],
+    );
+  }
+}
+
+/// Duelo: os dois lado a lado, com os votos; quem perdeu leva o ponto.
+class _RevelacaoDoDuelo extends StatelessWidget {
+  const _RevelacaoDoDuelo({required this.visao, required this.rodada, required this.revelacao});
+
+  final VisaoDaSala visao;
+  final Rodada rodada;
+  final Revelacao revelacao;
+
+  @override
+  Widget build(BuildContext context) {
+    final duelistas = [for (final id in rodada.duelistas) ?visao.jogador(id)];
+    int votos(Jogador jogador) =>
+        revelacao.votos.where((v) => v.jogadorId == jogador.id).fold(0, (soma, v) => soma + v.votos);
+    final vencedor = revelacao.escolhidos.length == 1 ? visao.jogador(revelacao.escolhidos.single) : null;
+    return Column(
+      key: const Key('resultado-do-duelo'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          vencedor != null ? '👑 ${vencedor.nome} venceu o duelo!' : '🤝 Empate! Os dois levam ponto.',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: EspacoBaralho.base),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final jogador in duelistas)
+              SizedBox(
+                width: 140,
+                child: Column(children: [
+                  AvatarDoJogador(
+                    jogador: jogador,
+                    tamanho: jogador.id == vencedor?.id ? 104 : 84,
+                    destaque: jogador.id == vencedor?.id ? CoresBaralho.ambar : null,
+                  ),
+                  const SizedBox(height: EspacoBaralho.mini),
+                  Text(jogador.nome, maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(votos(jogador) == 1 ? '1 voto' : '${votos(jogador)} votos',
+                      style: const TextStyle(color: CoresBaralho.textoSecundario)),
+                  if (revelacao.perderam.contains(jogador.id))
+                    Text(destinoDoPego(visao, jogador),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 12, color: CoresBaralho.ambar)),
+                ]),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Todo mundo da mesa com foto, nome e quantos votos levou.
+class _VotosDeTodos extends StatelessWidget {
+  const _VotosDeTodos({required this.visao, required this.revelacao});
+
+  final VisaoDaSala visao;
+  final Revelacao revelacao;
+
+  @override
+  Widget build(BuildContext context) {
+    int votos(Jogador jogador) =>
+        revelacao.votos.where((v) => v.jogadorId == jogador.id).fold(0, (soma, v) => soma + v.votos);
+    final jogadores = [...visao.jogadores]..sort((a, b) => votos(b).compareTo(votos(a)));
+    return Wrap(
+      key: const Key('votos-de-todos'),
+      alignment: WrapAlignment.center,
+      spacing: EspacoBaralho.medio,
+      runSpacing: EspacoBaralho.medio,
+      children: [
+        for (final jogador in jogadores)
+          SizedBox(
+            width: 76,
+            child: Column(children: [
+              AvatarDoJogador(
+                jogador: jogador,
+                tamanho: 52,
+                destaque: revelacao.escolhidos.contains(jogador.id) ? CoresBaralho.ambar : null,
+              ),
+              const SizedBox(height: EspacoBaralho.mini),
+              Text(jogador.nome, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+              Text(
+                votos(jogador) == 1 ? '1 voto' : '${votos(jogador)} votos',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 11, color: CoresBaralho.textoApagado),
+              ),
+            ]),
+          ),
+      ],
+    );
+  }
+}
+
+class _ListaDePerdedores extends StatelessWidget {
+  const _ListaDePerdedores({required this.visao, required this.jogadores, this.elogio = false});
+
+  final VisaoDaSala visao;
+  final List<Jogador> jogadores;
+  final bool elogio;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: EspacoBaralho.base,
+      runSpacing: EspacoBaralho.base,
+      children: [
+        for (final jogador in jogadores)
+          SizedBox(
+            width: 100,
+            child: Column(children: [
+              AvatarDoJogador(jogador: jogador, tamanho: 84, destaque: CoresBaralho.ambar),
+              const SizedBox(height: EspacoBaralho.mini),
+              Text(jogador.nome, maxLines: 1, overflow: TextOverflow.ellipsis),
+              Text(destinoDoEscolhido(visao, jogador, elogio: elogio),
+                  style: const TextStyle(fontSize: 12, color: CoresBaralho.ambar)),
+            ]),
+          ),
+      ],
+    );
+  }
+}
+
+/// Veredito do tribunal: o réu em destaque e o placar de sim e não, sem
+/// dizer quem votou o quê (a turma é júri, não delator).
+class _RevelacaoDoTribunal extends StatelessWidget {
+  const _RevelacaoDoTribunal({required this.visao, required this.rodada, required this.revelacao});
+
+  final VisaoDaSala visao;
+  final Rodada rodada;
+  final Revelacao revelacao;
+
+  @override
+  Widget build(BuildContext context) {
+    final reu = visao.jogador(rodada.alvo ?? '');
+    if (reu == null) return const Text('O réu saiu da sala. 🏃', textAlign: TextAlign.center);
+    final sim = revelacao.jaFizeram.length;
+    final nao = revelacao.nuncaFizeram.length;
+    final condenado = revelacao.escolhidos.contains(reu.id);
+    final (titulo, detalhe) = switch ((revelacao.elogio, condenado)) {
+      (false, true) => ('Culpado(a)! 🔨', '${reu.nome} ${destinoDoEscolhido(visao, reu, elogio: false)}'),
+      (false, false) => ('Absolvido(a)! 😇', 'A turma livrou a cara de ${reu.nome}.'),
+      (true, true) => ('A turma concorda! 💛', '${reu.nome} ${destinoDoEscolhido(visao, reu, elogio: true, goles: 2)}'),
+      (true, false) => ('A turma ficou em dúvida… 😅', 'Fica para a próxima, ${reu.nome}.'),
+    };
+    return Column(children: [
+      AvatarDoJogador(
+        jogador: reu,
+        tamanho: 128,
+        destaque: condenado ? CoresBaralho.ambar : CoresBaralho.tribunal,
+      ),
+      const SizedBox(height: EspacoBaralho.medio),
+      Text(titulo, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
+      Text(detalhe, textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.ambar, fontSize: 16)),
+      const SizedBox(height: EspacoBaralho.medio),
+      Text('👍 $sim   ·   👎 $nao',
+          key: const Key('placar-do-tribunal'),
+          style: Theme.of(context).textTheme.titleLarge),
+    ]);
+  }
+}
+
+class _DestaqueDaHistoria extends StatelessWidget {
+  const _DestaqueDaHistoria({required this.visao, required this.jogador});
+
+  final VisaoDaSala visao;
+  final Jogador jogador;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: EspacoBaralho.grande),
+      padding: const EdgeInsets.all(EspacoBaralho.base),
+      decoration: BoxDecoration(
+        color: CoresBaralho.coral.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: CoresBaralho.coral),
+      ),
+      child: Column(children: [
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            AvatarDoJogador(jogador: jogador, tamanho: 128, destaque: CoresBaralho.coral),
+            const Positioned(right: -6, bottom: -4, child: Text('🎤', style: TextStyle(fontSize: 40))),
+          ],
+        ),
+        const SizedBox(height: EspacoBaralho.medio),
+        Text('${jogador.nome}, conta essa história!',
+            textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
+        Text('Só ${jogador.nome} fez · ${destinoDoPego(visao, jogador)}',
+            textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.ambar)),
+        const Text('A turma quer detalhes.',
+            textAlign: TextAlign.center, style: TextStyle(color: CoresBaralho.textoSecundario)),
+      ]),
+    );
+  }
+}
+
+class _Recado extends StatelessWidget {
+  const _Recado({required this.emoji, required this.texto});
+
+  final String emoji;
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      Text(emoji, style: const TextStyle(fontSize: 40)),
+      Text(texto, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+    ]);
+  }
+}
+
+Future<void> abrirPlacar(BuildContext context, VisaoDaSala visao) {
+  final ordenados = [...visao.jogadores]..sort((a, b) => b.pontos.compareTo(a.pontos));
+  final porGole = visao.configuracao.pontosPorGole;
+  return showModalBottomSheet<void>(
+    context: context,
+    builder: (context) => SafeArea(
+      child: ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.fromLTRB(EspacoBaralho.grande, 0, EspacoBaralho.grande, EspacoBaralho.grande),
+        children: [
+          Text('🏆 Placar da noite', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: EspacoBaralho.base),
+          for (final (posicao, jogador) in ordenados.indexed)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: AvatarDoJogador(jogador: jogador),
+              title: Text(jogador.nome + (jogador.id == visao.euId ? ' (você)' : '')),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (posicao == 0 && jogador.pontos > 0)
+                    const Text('Rei(nha) da noite 👑', style: TextStyle(color: CoresBaralho.ambar)),
+                  if (!jogador.semAlcool && porGole > 1)
+                    Text('${jogador.pontos == 1 ? '1 ponto' : '${jogador.pontos} pontos'} · '
+                        'cofrinho ${jogador.cofrinho}/$porGole'),
+                ],
+              ),
+              trailing: Text(jogador.placar,
+                  style: Theme.of(context).textTheme.titleMedium),
+            ),
+        ],
+      ),
+    ),
+  );
+}

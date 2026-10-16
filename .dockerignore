@@ -1,0 +1,9 @@
+.git
+.idea
+.vscode
+.vs
+**/.dart_tool
+**/build
+**/bin
+**/obj
+**/*.user

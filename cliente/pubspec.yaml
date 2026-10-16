@@ -1,0 +1,38 @@
+name: baralho_resenha_app
+description: "Baralho da Resenha - o jogo da turma"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  camera: ^0.11.2
+  cupertino_icons: ^1.0.8
+  http: ^1.2.2
+  image_picker: ^1.2.0
+  qr_flutter: ^4.1.0
+  share_plus: ^13.3.1
+  shared_preferences: ^2.5.3
+  web: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  share_plus_platform_interface: ^7.2.0
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fontes/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fontes/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fontes/Poppins-SemiBold.ttf
+          weight: 600

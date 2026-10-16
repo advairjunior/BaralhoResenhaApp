@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- O baralho viaja dentro da DLL: não depende de pasta no servidor. -->
+    <Content Remove="Dados\cartas.json" />
+    <EmbeddedResource Include="Dados\cartas.json" LogicalName="cartas.json" />
+    <Content Remove="Dados\iscas.json" />
+    <EmbeddedResource Include="Dados\iscas.json" LogicalName="iscas.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="BaralhoResenhaApp.Testes" />
+  </ItemGroup>
+</Project>

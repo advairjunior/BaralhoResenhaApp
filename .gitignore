@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.idea/
+.vscode/
+.vs/
+.worktrees/
+*.user
+*.suo
+*.log
+.claude/settings.local.json

@@ -1,0 +1,35 @@
+{
+    "name": "Baralho da Resenha - o jogo da turma",
+    "short_name": "Baralho",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#120C0A",
+    "theme_color": "#120C0A",
+    "description": "Eu Nunca, Quem é mais provável e Beba se, cada um no seu celular.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

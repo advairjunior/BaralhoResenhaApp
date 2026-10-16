@@ -1,0 +1,597 @@
+using System.Security.Cryptography;
+
+namespace BaralhoResenhaApp.Api.Dominio;
+
+public enum FaseDaSala
+{
+    Lobby,
+    Carta,
+    Revelada,
+
+    /// <summary>Noite encerrada: prêmios e mural na tela.</summary>
+    Fim
+}
+
+public sealed class Jogador
+{
+    public required Guid Id { get; init; }
+    public required string Token { get; init; }
+    public required string Nome { get; init; }
+    public bool SemAlcool { get; init; }
+    public bool Anfitriao { get; set; }
+    /// <summary>Vezes que a carta pegou a pessoa (o placar da noite).</summary>
+    public int Pontos { get; set; }
+
+    /// <summary>Pontos guardados até virar gole (ver <see cref="ConfiguracaoDoJogo.PontosPorGole"/>).</summary>
+    public int Cofrinho { get; set; }
+
+    /// <summary>Goles de verdade: um a cada cofrinho cheio.</summary>
+    public int Goles { get; set; }
+    public FotoDoJogador? Foto { get; set; }
+
+    /// <summary>Par do casal na sala; os dois apontam um para o outro.</summary>
+    public Guid? ParId { get; set; }
+    public EstatisticasDoJogador Estatisticas { get; } = new();
+}
+
+/// <summary>O que a noite rendeu para cada um; vira os Prêmios da Noite.</summary>
+public sealed class EstatisticasDoJogador
+{
+    public int VotosRecebidos { get; set; }
+    public int Historias { get; set; }
+    public int JaFiz { get; set; }
+    public int NuncaFiz { get; set; }
+
+    /// <summary>Cartas que tirou do baralho com o "Tira essa".</summary>
+    public int Tiradas { get; set; }
+
+    /// <summary>Votos recebidos nas cartas de elogio.</summary>
+    public int Elogios { get; set; }
+
+    /// <summary>Casais em Jogo, como palpiteiro.</summary>
+    public int Acertos { get; set; }
+    public int Erros { get; set; }
+
+    public int DuelosVencidos { get; set; }
+
+    /// <summary>Imagem e Ação: vezes que fez a mímica (rodízio) e que o time acertou.</summary>
+    public int Mimicas { get; set; }
+    public int MimicasAcertadas { get; set; }
+
+    /// <summary>Vezes que quebrou uma regra-relâmpago.</summary>
+    public int Vacilos { get; set; }
+}
+
+public sealed class Rodada
+{
+    public required int Numero { get; init; }
+    public required Carta Carta { get; init; }
+    public required string Texto { get; init; }
+    public Dictionary<Guid, string> Respostas { get; } = [];
+    public HashSet<Guid> Beberam { get; } = [];
+
+    /// <summary>Quem quebrou a regra-relâmpago nesta carta.</summary>
+    public HashSet<Guid> Vacilaram { get; } = [];
+
+    /// <summary>Quem encheu o cofrinho nesta carta: bebe agora.</summary>
+    public HashSet<Guid> BebemAgora { get; } = [];
+    public Revelacao? Revelacao { get; set; }
+
+    /// <summary>Casais em Jogo: quem chuta a resposta.</summary>
+    public Guid? Palpiteiro { get; init; }
+
+    /// <summary>Casais em Jogo: de quem é a pergunta; responde a verdade e julga o palpite.</summary>
+    public Guid? Alvo { get; init; }
+
+    public bool? Acertou { get; set; }
+
+    /// <summary>Correio: o bilhete que quem está na foto mais curtiu.</summary>
+    public int? Favorito { get; set; }
+
+    /// <summary>
+    /// Quem é mais provável: votação no celular (com suspense) ou, sem ela,
+    /// a turma aponta no 3. Sorteado a cada carta, não preso à carta.
+    /// </summary>
+    public bool Votacao { get; init; }
+
+    /// <summary>Imagem e Ação: os times da carta (um só quando uma pessoa faz para todos).</summary>
+    public IReadOnlyList<TimeDaMimica> Times { get; init; } = [];
+
+    /// <summary>Imagem e Ação: o que o mímico pode dizer, ex.: "Ação · 3 palavras".</summary>
+    public string? Dica
+    {
+        get
+        {
+            if (Carta.Categoria is not { } categoria) return null;
+            var palavras = Carta.Texto.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+            return $"{categoria} · {palavras} {(palavras == 1 ? "palavra" : "palavras")}";
+        }
+    }
+
+    /// <summary>Na mímica, a palavra é segredo de quem faz até a revelação.</summary>
+    public string TextoPara(Guid jogadorId, bool revelada) =>
+        Times.Count == 0 || revelada || Times.Any(t => t.Mimico == jogadorId)
+            ? Texto
+            : "🎭 Adivinhe a mímica!";
+
+    /// <summary>Duelo: os dois da carta. Eles se apresentam e a turma vota.</summary>
+    public IReadOnlyList<Guid> Duelistas { get; init; } = [];
+
+    public bool PedeResposta =>
+        Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio ||
+        (Carta.Modo == ModoDeJogo.MaisProvavel && Votacao);
+}
+
+public sealed record VotosRecebidos(Guid JogadorId, int Votos);
+
+/// <param name="Perderam">Quem bebe (ou ganha ponto, para quem joga sem álcool).</param>
+/// <param name="ContaAHistoria">Só uma pessoa já fez: ela conta a história.</param>
+public sealed record Revelacao(
+    IReadOnlyList<Guid> JaFizeram,
+    IReadOnlyList<Guid> NuncaFizeram,
+    IReadOnlyList<VotosRecebidos> Votos,
+    IReadOnlyList<Guid> Perderam,
+    Guid? ContaAHistoria,
+    string? RespostaDoAlvo = null,
+    string? PalpiteDoPar = null,
+    bool Elogio = false)
+{
+    /// <summary>Quem é mais provável: os mais votados, bebam (normal) ou não (elogio).</summary>
+    public IReadOnlyList<Guid> Escolhidos { get; init; } = [];
+
+    /// <summary>Imagem e Ação: o time que acertou; nulo quando ninguém acertou.</summary>
+    public int? TimeVencedor { get; init; }
+
+    /// <summary>Correio: os bilhetes, embaralhados e sem autor.</summary>
+    public IReadOnlyList<string> Bilhetes { get; init; } = [];
+}
+
+/// <param name="Quem">Quem faz: entrevista, missão, pergunta ou piada.</param>
+/// <param name="Para">Para quem: quem responde ou tem que segurar a risada.</param>
+public sealed record DesafioDaRegra(IscaDaRegra Tipo, Guid? Quem, Guid? Para, IReadOnlyList<string> Textos);
+
+public sealed record RegraAtiva(string Texto, int RodadasRestantes)
+{
+    /// <summary>O {jogador} da regra, se ela é sobre alguém.</summary>
+    public Guid? Alvo { get; init; }
+    public IscaDaRegra Isca { get; init; }
+
+    /// <summary>A isca desta carta; muda a cada carta enquanto a regra vale.</summary>
+    public DesafioDaRegra? Desafio { get; init; }
+}
+
+/// <summary>
+/// Uma noite de jogo. Todo acesso passa pelo trinco da própria sala, porque
+/// vários celulares respondem ao mesmo tempo.
+/// </summary>
+public sealed partial class Sala
+{
+    public const string RespostaJa = "ja";
+    public const string RespostaNunca = "nunca";
+    public const string RespostaSim = "sim";
+    public const string RespostaNao = "nao";
+    internal const int RodadasDaRegra = 3;
+    internal const int TamanhoMaximoDoNome = 20;
+
+    /// <summary>Parte das cartas de Quem é mais provável jogadas com votação no celular.</summary>
+    internal double ChanceDeVotacao { get; set; } = 0.5;
+
+    private readonly object _trinco = new();
+    private readonly Baralho _baralho;
+    private readonly Random _sorteio;
+    private readonly List<Jogador> _jogadores = [];
+    private readonly HashSet<string> _usadas = [];
+    private readonly List<ModoDeJogo> _ultimosModos = [];
+    private readonly TimeProvider _relogio;
+
+    public Sala(string codigo, Baralho baralho, Random? sorteio = null, TimeProvider? relogio = null)
+    {
+        Codigo = codigo;
+        _baralho = baralho;
+        _sorteio = sorteio ?? Random.Shared;
+        _relogio = relogio ?? TimeProvider.System;
+        UltimaAtividade = _relogio.GetUtcNow();
+    }
+
+    public string Codigo { get; }
+    public FaseDaSala Fase { get; private set; } = FaseDaSala.Lobby;
+    public ConfiguracaoDoJogo Configuracao { get; private set; } = ConfiguracaoDoJogo.Padrao;
+    public Rodada? Rodada { get; private set; }
+    public RegraAtiva? Regra { get; private set; }
+    public DateTimeOffset? ComecouEm { get; private set; }
+    public DateTimeOffset? TerminouEm { get; private set; }
+    public DateTimeOffset UltimaAtividade { get; private set; }
+    public IReadOnlyList<Jogador> Jogadores
+    {
+        get { lock (_trinco) return _jogadores.ToList(); }
+    }
+
+    public Jogador Entrar(string nome, bool semAlcool)
+    {
+        var nomeLimpo = (nome ?? string.Empty).Trim();
+        if (nomeLimpo.Length == 0)
+            throw new AcaoNaoPermitidaException("Informe seu nome.");
+        if (nomeLimpo.Length > TamanhoMaximoDoNome)
+            throw new AcaoNaoPermitidaException($"Use um nome de até {TamanhoMaximoDoNome} letras.");
+
+        lock (_trinco)
+        {
+            if (_jogadores.Any(j => string.Equals(j.Nome, nomeLimpo, StringComparison.OrdinalIgnoreCase)))
+                throw new AcaoNaoPermitidaException("Já tem alguém com esse nome na sala.");
+            var jogador = new Jogador
+            {
+                Id = Guid.NewGuid(),
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(24))
+                    .Replace('+', '-').Replace('/', '_'),
+                Nome = nomeLimpo,
+                SemAlcool = semAlcool,
+                Anfitriao = _jogadores.Count == 0
+            };
+            _jogadores.Add(jogador);
+            Tocar();
+            return jogador;
+        }
+    }
+
+    public void Sair(string token)
+    {
+        lock (_trinco)
+        {
+            var jogador = Reconhecer(token);
+            _jogadores.Remove(jogador);
+            Rodada?.Respostas.Remove(jogador.Id);
+            DesfazerCasal(jogador);
+            if (jogador.Anfitriao && _jogadores.Count > 0)
+                _jogadores[0].Anfitriao = true;
+            RevelarSeTodosResponderam();
+            Tocar();
+        }
+    }
+
+    public bool Vazia
+    {
+        get { lock (_trinco) return _jogadores.Count == 0; }
+    }
+
+    public void Configurar(string token, ConfiguracaoDoJogo configuracao)
+    {
+        lock (_trinco)
+        {
+            ExigirAnfitriao(token);
+            if (configuracao.Modos.Count == 0)
+                throw new AcaoNaoPermitidaException("Escolha pelo menos um modo de jogo.");
+            if (!Enum.IsDefined(configuracao.Nivel))
+                throw new AcaoNaoPermitidaException("Nível de cartas desconhecido.");
+            Configuracao = configuracao with { Modos = configuracao.Modos.Distinct().ToList() };
+            Tocar();
+        }
+    }
+
+    public void Comecar(string token)
+    {
+        lock (_trinco)
+        {
+            ExigirAnfitriao(token);
+            if (Fase != FaseDaSala.Lobby) return;
+            if (_jogadores.Count < 2)
+                throw new AcaoNaoPermitidaException("Chame pelo menos mais uma pessoa para começar.");
+            ComecouEm = _relogio.GetUtcNow();
+            Distribuir();
+            Tocar();
+        }
+    }
+
+    public void Responder(string token, int numeroDaRodada, string resposta)
+    {
+        lock (_trinco)
+        {
+            var jogador = Reconhecer(token);
+            if (!RodadaEmAndamento(numeroDaRodada) || Fase != FaseDaSala.Carta) return;
+            var rodada = Rodada!;
+            if (!rodada.PedeResposta)
+                throw new AcaoNaoPermitidaException("Esta carta não pede resposta.");
+            if (rodada.Carta.Modo == ModoDeJogo.CasaisEmJogo)
+                resposta = ValidarRespostaDoCasal(rodada, jogador, resposta);
+            if (rodada.Carta.Modo == ModoDeJogo.Tribunal)
+            {
+                if (jogador.Id == rodada.Alvo)
+                    throw new AcaoNaoPermitidaException("Essa é sobre você: espera o veredito da turma.");
+                if (resposta is not (RespostaSim or RespostaNao))
+                    throw new AcaoNaoPermitidaException("Vote sim ou não.");
+            }
+
+            if (rodada.Carta.Modo == ModoDeJogo.Correio) resposta = ValidarBilhete(rodada, jogador, resposta);
+
+            if (rodada.Carta.Modo == ModoDeJogo.EuNunca && resposta is not (RespostaJa or RespostaNunca))
+                throw new AcaoNaoPermitidaException("Responda se já fez ou se nunca fez.");
+            if (rodada.Duelistas.Count > 0)
+            {
+                if (rodada.Duelistas.Contains(jogador.Id))
+                    throw new AcaoNaoPermitidaException("Você está no duelo: quem decide é a turma.");
+                if (!(Guid.TryParse(resposta, out var duelista) && rodada.Duelistas.Contains(duelista)))
+                    throw new AcaoNaoPermitidaException("Vote em um dos dois do duelo.");
+            }
+            if (rodada.Carta.Modo == ModoDeJogo.MaisProvavel &&
+                !(Guid.TryParse(resposta, out var votado) && _jogadores.Any(j => j.Id == votado)))
+                throw new AcaoNaoPermitidaException("Vote em alguém da sala.");
+
+            rodada.Respostas[jogador.Id] = resposta;
+            RevelarSeTodosResponderam();
+            Tocar();
+        }
+    }
+
+    /// <summary>Revela sem esperar quem largou o celular na mesa.</summary>
+    public void Revelar(string token, int numeroDaRodada)
+    {
+        lock (_trinco)
+        {
+            ExigirAnfitriao(token, SoQuemCriouPuxaCarta);
+            if (!RodadaEmAndamento(numeroDaRodada) || Fase != FaseDaSala.Carta || !Rodada!.PedeResposta)
+                return;
+            if (Rodada.Respostas.Count == 0)
+                throw new AcaoNaoPermitidaException("Ninguém respondeu ainda.");
+            if (Rodada.Carta.Modo == ModoDeJogo.CasaisEmJogo && !CasalRespondeu(Rodada))
+                throw new AcaoNaoPermitidaException("Os dois do casal precisam responder.");
+            if (Rodada.Carta.Modo == ModoDeJogo.Correio && Rodada.Respostas.Count < 2)
+                throw new AcaoNaoPermitidaException(
+                    "Espere pelo menos 2 bilhetes: com um só, todo mundo sabe quem escreveu.");
+            AplicarRevelacao();
+            Tocar();
+        }
+    }
+
+    /// <summary>Vale para seguir depois da revelação e para pular uma carta.</summary>
+    public void Proxima(string token, int numeroDaRodada)
+    {
+        lock (_trinco)
+        {
+            ExigirAnfitriao(token, SoQuemCriouPuxaCarta);
+            if (Fase is FaseDaSala.Lobby or FaseDaSala.Fim || !RodadaEmAndamento(numeroDaRodada)) return;
+            if (Rodada!.Carta.Modo != ModoDeJogo.RegraRelampago) GastarUmaCartaDaRegra();
+            Distribuir();
+            Tocar();
+        }
+    }
+
+    /// <summary>"Me pegou!" nas cartas de Beba se: marca e desmarca o próprio gole.</summary>
+    public void AlternarBebi(string token, int numeroDaRodada)
+    {
+        lock (_trinco)
+        {
+            var jogador = Reconhecer(token);
+            if (!RodadaEmAndamento(numeroDaRodada)) return;
+            if (Rodada!.Carta.Modo != ModoDeJogo.BebaSe)
+                throw new AcaoNaoPermitidaException("Só vale nas cartas de Beba se.");
+            if (Rodada.Beberam.Remove(jogador.Id)) Despegar(jogador);
+            else
+            {
+                Rodada.Beberam.Add(jogador.Id);
+                Pegar(jogador);
+            }
+            Tocar();
+        }
+    }
+
+    /// <summary>
+    /// Apontar no 3: quem criou a sala toca em quem a turma apontou (empate,
+    /// toca em mais de um). Tocar de novo desfaz.
+    /// </summary>
+    public void MarcarApontado(string token, int numeroDaRodada, Guid apontadoId)
+    {
+        lock (_trinco)
+        {
+            ExigirAnfitriao(token, "Quem marca o apontado é quem criou a sala.");
+            if (!RodadaEmAndamento(numeroDaRodada)) return;
+            if (Rodada!.Carta.Modo != ModoDeJogo.MaisProvavel || Rodada.Votacao)
+                throw new AcaoNaoPermitidaException("Só vale quando a turma aponta no 3.");
+            var apontado = _jogadores.FirstOrDefault(j => j.Id == apontadoId)
+                ?? throw new AcaoNaoPermitidaException("Essa pessoa não está na sala.");
+            if (Rodada.Beberam.Remove(apontado.Id))
+            {
+                Despegar(apontado);
+                apontado.Estatisticas.VotosRecebidos--;
+            }
+            else
+            {
+                Rodada.Beberam.Add(apontado.Id);
+                Pegar(apontado);
+                apontado.Estatisticas.VotosRecebidos++;
+            }
+            Tocar();
+        }
+    }
+
+    public void DefinirFoto(string token, byte[] conteudo)
+    {
+        var foto = FotoDoJogador.Criar(conteudo);
+        lock (_trinco)
+        {
+            Reconhecer(token).Foto = foto;
+            Tocar();
+        }
+    }
+
+    /// <summary>Selfie ou foto do mural pelo id, que só quem está na sala recebe.</summary>
+    public FotoDoJogador? Foto(string fotoId)
+    {
+        lock (_trinco)
+            return _jogadores.Select(j => j.Foto)
+                .Concat(_momentos.Select(m => m.Foto))
+                .FirstOrDefault(f => f?.Id == fotoId);
+    }
+
+    public VisaoDaSala Visao(string token)
+    {
+        lock (_trinco)
+        {
+            var eu = Reconhecer(token);
+            return VisaoDaSala.Montar(this, eu, _jogadores);
+        }
+    }
+
+    internal Jogador Reconhecer(string token)
+    {
+        lock (_trinco)
+            return _jogadores.FirstOrDefault(j => j.Token == token)
+                ?? throw new JogadorNaoReconhecidoException();
+    }
+
+    private Jogador ExigirAnfitriao(string token, string mensagem = "Só quem criou a sala pode fazer isso.")
+    {
+        var jogador = Reconhecer(token);
+        if (!jogador.Anfitriao) throw new AcaoNaoPermitidaException(mensagem);
+        return jogador;
+    }
+
+    /// <summary>Passar carta é com quem criou a sala: com todo mundo podendo, vira bagunça.</summary>
+    internal const string SoQuemCriouPuxaCarta = "Só quem criou a sala puxa a próxima carta.";
+
+    /// <summary>A regra-relâmpago vale por algumas cartas; cada carta que passa gasta uma.</summary>
+    private void GastarUmaCartaDaRegra() =>
+        Regra = Regra is null || Regra.RodadasRestantes <= 1
+            ? null
+            : Regra with { RodadasRestantes = Regra.RodadasRestantes - 1 };
+
+    private bool RodadaEmAndamento(int numero) => Rodada is not null && Rodada.Numero == numero;
+
+    private void Distribuir()
+    {
+        // Esquenta sozinho: o nível desta carta depende de quantas já saíram.
+        var indice = Rodada?.Numero ?? 0;
+        var configuracao = Configuracao with { Nivel = Configuracao.NivelNaCarta(indice) };
+        CartaTiradaPor = null;
+        var carta = _baralho.Sortear(
+                configuracao, _usadas, _jogadores.Count, Regra is not null, _sorteio, Casais().Count,
+                _ultimosModos, _tiradas)
+            ?? throw new AcaoNaoPermitidaException("Nenhuma carta combina com essa configuração.");
+        _usadas.Add(carta.Id);
+        _ultimosModos.Add(carta.Modo);
+        if (_ultimosModos.Count > Baralho.MaximoSeguidas) _ultimosModos.RemoveAt(0);
+        // Duelos usam duas pessoas diferentes: {jogador} e {jogador2}.
+        var sorteados = _jogadores.OrderBy(_ => _sorteio.Next()).Take(2).ToList();
+        var texto = carta.Texto
+            .Replace("{jogador2}", sorteados[^1].Nome)
+            .Replace("{jogador}", sorteados[0].Nome);
+        var (palpiteiro, alvo) = carta.Modo == ModoDeJogo.CasaisEmJogo ? EscolherCasal() : (null, null);
+        if (alvo is not null) texto = texto.Replace("{par}", alvo.Nome);
+        Rodada = new Rodada
+        {
+            Numero = (Rodada?.Numero ?? 0) + 1,
+            Carta = carta,
+            Texto = texto,
+            Palpiteiro = palpiteiro?.Id,
+            // No tribunal, o réu é o {jogador} da carta; no correio, quem está na foto.
+            Alvo = carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio ? sorteados[0].Id : alvo?.Id,
+            // Elogio e duelo são sempre no celular: a graça é a foto de quem a turma escolheu.
+            Votacao = carta.Modo == ModoDeJogo.MaisProvavel &&
+                (carta.Elogio || carta.Duelo || _sorteio.NextDouble() < ChanceDeVotacao),
+            Duelistas = carta.Duelo && sorteados.Count == 2 ? [sorteados[0].Id, sorteados[1].Id] : [],
+            Times = carta.Modo == ModoDeJogo.ImagemEAcao ? MontarTimes() : []
+        };
+        if (carta.Modo == ModoDeJogo.RegraRelampago)
+            ComecarRegra(carta, texto, carta.Texto.Contains("{jogador}") ? sorteados[0] : null);
+        else if (Regra is not null)
+            Regra = Regra with { Desafio = NovoDesafio(Regra, primeiraCarta: false) };
+        Fase = FaseDaSala.Carta;
+    }
+
+    private void RevelarSeTodosResponderam()
+    {
+        if (Fase != FaseDaSala.Carta || Rodada is not { PedeResposta: true } rodada) return;
+        var todosResponderam = rodada.Carta.Modo switch
+        {
+            ModoDeJogo.CasaisEmJogo => CasalRespondeu(rodada),
+            ModoDeJogo.Tribunal or ModoDeJogo.Correio => rodada.Respostas.Count > 0 &&
+                _jogadores.Where(j => j.Id != rodada.Alvo).All(j => rodada.Respostas.ContainsKey(j.Id)),
+            ModoDeJogo.MaisProvavel when rodada.Duelistas.Count > 0 => rodada.Respostas.Count > 0 &&
+                _jogadores.Where(j => !rodada.Duelistas.Contains(j.Id)).All(j => rodada.Respostas.ContainsKey(j.Id)),
+            _ => rodada.Respostas.Count > 0 && _jogadores.All(j => rodada.Respostas.ContainsKey(j.Id))
+        };
+        if (todosResponderam) AplicarRevelacao();
+    }
+
+    private void AplicarRevelacao()
+    {
+        var rodada = Rodada!;
+        var presentes = _jogadores.Select(j => j.Id).ToHashSet();
+        var respostas = rodada.Respostas.Where(r => presentes.Contains(r.Key)).ToList();
+        Revelacao revelacao;
+
+        if (rodada.Carta.Modo == ModoDeJogo.CasaisEmJogo)
+        {
+            // Ninguém bebe ainda: o alvo julga se o palpite bateu.
+            revelacao = new Revelacao([], [], [], [], null,
+                rodada.Respostas[rodada.Alvo!.Value], rodada.Respostas[rodada.Palpiteiro!.Value]);
+        }
+        else if (rodada.Duelistas.Count > 0)
+        {
+            revelacao = RevelarDuelo(rodada, respostas);
+        }
+        else if (rodada.Carta.Modo == ModoDeJogo.Correio)
+        {
+            revelacao = RevelarBilhetes(rodada, respostas);
+        }
+        else if (rodada.Carta.Modo == ModoDeJogo.Tribunal)
+        {
+            // Empate condena: a turma não salva ninguém em cima do muro.
+            var sim = respostas.Where(r => r.Value == RespostaSim).Select(r => r.Key).ToList();
+            var nao = respostas.Where(r => r.Value == RespostaNao).Select(r => r.Key).ToList();
+            var reu = _jogadores.FirstOrDefault(j => j.Id == rodada.Alvo);
+            var condenado = reu is not null && sim.Count > 0 && sim.Count >= nao.Count;
+            var elogio = rodada.Carta.Elogio;
+            revelacao = new Revelacao(sim, nao, [], condenado && !elogio ? [reu!.Id] : [], null, Elogio: elogio)
+            {
+                Escolhidos = condenado ? [reu!.Id] : []
+            };
+            if (reu is not null)
+            {
+                if (elogio) reu.Estatisticas.Elogios += sim.Count;
+                else reu.Estatisticas.VotosRecebidos += sim.Count;
+            }
+        }
+        else if (rodada.Carta.Modo == ModoDeJogo.EuNunca)
+        {
+            var ja = respostas.Where(r => r.Value == RespostaJa).Select(r => r.Key).ToList();
+            var nunca = respostas.Where(r => r.Value == RespostaNunca).Select(r => r.Key).ToList();
+            revelacao = new Revelacao(ja, nunca, [], ja,
+                ja.Count == 1 && respostas.Count >= 2 ? ja[0] : null);
+            foreach (var jogador in _jogadores)
+            {
+                if (ja.Contains(jogador.Id)) jogador.Estatisticas.JaFiz++;
+                if (nunca.Contains(jogador.Id)) jogador.Estatisticas.NuncaFiz++;
+                if (revelacao.ContaAHistoria == jogador.Id) jogador.Estatisticas.Historias++;
+            }
+        }
+        else
+        {
+            var votos = respostas
+                .GroupBy(r => Guid.Parse(r.Value))
+                .Where(grupo => presentes.Contains(grupo.Key))
+                .Select(grupo => new VotosRecebidos(grupo.Key, grupo.Count()))
+                .OrderByDescending(v => v.Votos)
+                .ToList();
+            var maximo = votos.Count > 0 ? votos[0].Votos : 0;
+            var maisVotados = votos.Where(v => v.Votos == maximo).Select(v => v.JogadorId).ToList();
+            // No elogio, o mais votado não bebe: ganha um brinde e distribui goles.
+            var elogio = rodada.Carta.Elogio;
+            revelacao = new Revelacao([], [], votos, elogio ? [] : maisVotados, null, Elogio: elogio)
+            {
+                Escolhidos = maisVotados
+            };
+            foreach (var voto in votos)
+            {
+                var estatisticas = _jogadores.First(j => j.Id == voto.JogadorId).Estatisticas;
+                if (elogio) estatisticas.Elogios += voto.Votos;
+                else estatisticas.VotosRecebidos += voto.Votos;
+            }
+        }
+
+        foreach (var jogador in _jogadores.Where(j => revelacao.Perderam.Contains(j.Id)))
+            Pegar(jogador);
+        rodada.Revelacao = revelacao;
+        Fase = FaseDaSala.Revelada;
+    }
+
+    private void Tocar() => UltimaAtividade = _relogio.GetUtcNow();
+}
