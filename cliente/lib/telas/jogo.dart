@@ -550,10 +550,11 @@ class _MePegou extends StatelessWidget {
                 height: 64,
                 // Quem já respondeu que não pegou vê o botão marcado.
                 child: !rodada.euBebi && rodada.prontos.contains(visao.euId)
-                    ? FilledButton(onPressed: null, child: const Text('Não me pegou ✓'))
+                    ? FilledButton(onPressed: null, child: const Text('Não ✓'))
                     : OutlinedButton(
-                        onPressed: rodada.euBebi ? null : acoes.marcarPronto,
-                        child: const Text('Não me pegou 👍'),
+                        // Marcou "Me pegou" por engano? O "Não" desfaz.
+                        onPressed: rodada.euBebi ? acoes.alternarBebi : acoes.marcarPronto,
+                        child: const Text('Não 👍'),
                       ),
               ),
             ),

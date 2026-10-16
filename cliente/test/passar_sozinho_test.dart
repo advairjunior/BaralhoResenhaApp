@@ -9,9 +9,16 @@ final _mesa = [
   jogadorJson('bia', 'Bia'),
 ];
 
-Map<String, dynamic> _bebaSe({List<String> prontos = const [], int? passaEmMs, String? seguradaPor}) => visaoJson(
-      euId: 'bia',
-      souAnfitriao: false,
+Map<String, dynamic> _bebaSe({
+  List<String> prontos = const [],
+  int? passaEmMs,
+  String? seguradaPor,
+  String euId = 'bia',
+  bool euBebi = false,
+}) =>
+    visaoJson(
+      euId: euId,
+      souAnfitriao: euId == 'ana',
       fase: 'Carta',
       jogadores: _mesa,
       rodada: {
@@ -19,6 +26,7 @@ Map<String, dynamic> _bebaSe({List<String> prontos = const [], int? passaEmMs, S
         'prontos': prontos,
         'passaEmMs': passaEmMs,
         'seguradaPor': seguradaPor,
+        'euBebi': euBebi,
       },
     );
 
@@ -47,13 +55,38 @@ void main() {
         ..respostas['POST /api/salas/ABCD/pronto'] = _bebaSe(prontos: ['bia']);
       await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
 
-      await rolarAte(tester, find.text('Não me pegou 👍'));
-      await tester.tap(find.text('Não me pegou 👍'));
+      await rolarAte(tester, find.text('Não 👍'));
+      await tester.tap(find.text('Não 👍'));
       await tester.pumpAndSettle();
 
       expect(servidor.recebidas.last.rota, 'POST /api/salas/ABCD/pronto');
       expect(servidor.recebidas.last.corpo, {'rodada': 1});
       expect(find.text('Responderam: 1 de 2 · falta Ana'), findsOneWidget);
+      await fecharApp(tester);
+    });
+
+    testWidgets('quem criou a sala também tem o "Não" no Beba se', (tester) async {
+      final servidor = ServidorFalso()..respostas['GET /api/salas/ABCD'] = _bebaSe(euId: 'ana');
+      await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+      await rolarAte(tester, find.text('Não 👍'));
+      expect(find.text('Não 👍'), findsOneWidget);
+      expect(find.text('Me pegou! 🍺'), findsOneWidget);
+      await fecharApp(tester);
+    });
+
+    testWidgets('quem marcou "Me pegou" por engano troca para "Não"', (tester) async {
+      final servidor = ServidorFalso()
+        ..respostas['GET /api/salas/ABCD'] = _bebaSe(euBebi: true)
+        ..respostas['POST /api/salas/ABCD/bebi'] = _bebaSe(prontos: ['bia']);
+      await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+      await rolarAte(tester, find.text('Não 👍'));
+      await tester.tap(find.text('Não 👍'));
+      await tester.pumpAndSettle();
+
+      expect(servidor.recebidas.last.rota, 'POST /api/salas/ABCD/bebi');
+      expect(find.text('Não ✓'), findsOneWidget);
       await fecharApp(tester);
     });
 

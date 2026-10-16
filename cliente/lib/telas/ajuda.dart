@@ -56,7 +56,7 @@ ComoJoga comoJoga(Rodada rodada) {
       ]),
     Rodada(modo: ModoDeJogo.bebaSe) => ('bebaSe', ModoDeJogo.bebaSe.titulo, [
         'Alguém lê a carta em voz alta.',
-        'Se a carta te pegou, toque em "Me pegou!" no seu celular; se não, em "Não me pegou". Vale a honestidade!',
+        'Se a carta te pegou, toque em "Me pegou!" no seu celular; se não, em "Não". Vale a honestidade!',
         'Cada "Me pegou" é 1 ponto no cofrinho.',
       ]),
     Rodada(modo: ModoDeJogo.regraRelampago) => ('regra', ModoDeJogo.regraRelampago.titulo, [
