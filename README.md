@@ -1,0 +1,2 @@
+# BaralhoResenhaApp
+Baralho Resenha App
