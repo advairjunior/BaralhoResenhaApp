@@ -46,6 +46,9 @@ Correio da Resenha (bilhetes anônimos de até 20 letras) · Imagem e Ação (1 
 - **Níveis:** 85% das cartas são do nível escolhido; o que vem de baixo são só as cartas `destaque`.
 - **Leve não é infantil:** humor de adulto sem malícia.
 - **Votação nunca é Beba se:** vira votação no celular, duelo ou tribunal.
+- **Dose de verdade:** carta com `goles` ("bebe 2") é gole direto, fora do cofrinho (`Punir`/`Perdoar`).
+- **Cronômetro sincronizado:** o servidor guarda o fim; cada celular conta a partir do que falta.
+- **Noites prontas:** presets só no app (`noites_prontas.dart`), sem mudança no servidor.
 - **Mural não fica no servidor:** cada um salva as fotos no fim.
 
 ## Revisão das cartas
@@ -58,5 +61,5 @@ que ele escrever. Quando ele avisar que terminou, ler as marcações e aplicar e
 
 - Testes: servidor (xUnit) e cliente (flutter test) passando.
 - Ainda não testado com a turma em celulares reais (só Chrome com tela de celular).
-- Ideias em aberto: Esquenta começando no Resenha, noites prontas (presets), peso por jogo,
+- Ideias em aberto: Esquenta começando no Resenha, peso por jogo,
   velocidade do esquenta, cartas da turma permanentes (exigiriam banco).

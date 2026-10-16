@@ -28,7 +28,7 @@ A tela mostra o resumo: "🎯 Só Eu Nunca" ou "🎲 Misturando: …".
 | Modo | Como joga |
 |------|-----------|
 | 🙊 Eu Nunca | Cada um responde em segredo. Quem já fez bebe. Se só uma pessoa fez: "conta essa história!" |
-| 👉 Quem é mais provável | A cada carta o jogo sorteia: 🗳️ votação no celular (tambor, foto e nome do mais votado; na revelação aparecem todos com os votos) ou 👉 todo mundo aponta no 3 (contagem na tela; quem criou a sala toca na foto de quem foi apontado). Cartas 💛 de elogio são sempre votadas e o escolhido distribui goles em vez de beber. ⚔️ **Duelo**: {jogador} contra {jogador2} se apresentam (dancinha, piada, imitação, vendedor…), só o resto da turma vota, entre os dois, e quem perde leva o ponto (empate: os dois). Prêmio Rei(nha) dos duelos. |
+| 👉 Quem é mais provável | A cada carta o jogo sorteia: 🗳️ votação no celular (tambor, foto e nome do mais votado; na revelação aparecem todos com os votos) ou 👉 todo mundo aponta no 3 (contagem na tela; quem criou a sala toca na foto de quem foi apontado). Cartas 💛 de elogio são sempre votadas e o escolhido distribui goles em vez de beber. ⚔️ **Duelo**: {jogador} contra {jogador2} se apresentam (dancinha, piada, imitação, vendedor…), só o resto da turma vota, entre os dois, e quem perde leva o ponto (empate: os dois). ✊✋✌️ **Pedra, papel e tesoura**: os dois sorteados escolhem em segredo no celular, o app revela e quem perde leva (empate: jogam de novo). Prêmio Rei(nha) dos duelos. |
 | ⚖️ Tribunal da Turma | "{jogador} tem cara de…?": a turma vota 👍/👎 em segredo, o réu só espera; suspense com a foto. Maioria sim (empate também) condena e o réu bebe; no elogio, distribui goles. Placar sem dizer quem votou. |
 | 💛 Rodada de Elogios | Dinâmicas de elogio para alguém da mesa. Ninguém bebe. |
 | 📮 Correio da Resenha | Uma pessoa fica de fora ("aguarde…") e o resto escreve um bilhete anônimo de até 20 letras sobre ela, guiado pela carta (apelido, superpoder, mania…). Com todos escritos (ou pelo menos 2, se quem criou a sala revelar antes), todos os celulares mostram a foto e os bilhetes embaralhados, sem autor. Quem está na foto escolhe o favorito ⭐. Ninguém bebe; precisa de 4 pessoas. |
@@ -37,13 +37,19 @@ A tela mostra o resumo: "🎯 Só Eu Nunca" ou "🎲 Misturando: …".
 | ⚡ Regra-relâmpago | Regra temporária que vale pelas próximas 3 cartas. Regra que depende de alguém falar traz uma **isca** a cada carta, para não ser desperdiçada: 🎤 entrevista (quem só pode falar cantando é entrevistado(a) por alguém sorteado, com perguntas do app), 🎤 pergunta-isca para a mesa (ex.: na regra "proibido falar de trabalho", "Como anda o trabalho?"), 😂 missão para fazer alguém rir, ❓ perguntas para o Mestre das Perguntas e 🥁 piada ruim para o piadista. Quem criou a sala marca **🚨 quem vacilou** (+1 ponto; prêmio Vacilão(ona) da regra). Iscas em `Dados/iscas.json`. |
 | 💞 Casais em Jogo | Um do casal escreve a verdade sobre si, o par tenta adivinhar; quem respondeu julga. Errou, o palpiteiro bebe. Os casais se revezam. **Começa desligado**; ligado, aparece de vez em quando, como tempero. Os pares são marcados na sala de espera. |
 
-**Cronômetro:** carta que fala em "N segundos" ganha um cronômetro na tela (tocar de novo recomeça).
+**Cronômetro:** carta que fala em "N segundos" (e a mímica, com 60 s) tem cronômetro sincronizado: quem criou a sala dá o "valendo" e todos os celulares contam o mesmo tempo (de novo, recomeça).
+
+**Dose de verdade:** a carta que diz "bebe 2" (`"goles": 2`) é gole de verdade, fora do cofrinho, com o selo "🍺 DOSE DE VERDADE". As outras somam ponto no cofrinho.
 
 **Votação não é Beba se:** carta que pede para a turma votar ou decidir é sempre votação no celular (Quem é mais provável, Duelo ou Tribunal), nunca Beba se.
 
 **Ritmo da bebida (cofrinho de goles):** cada vez que a carta pega alguém vale 1 ponto; o gole só sai quando o cofrinho enche: 🐢 Devagar (1 gole a cada 3 pontos, o padrão), 🚶 Normal (a cada 2) ou 🔥 Raiz (todo ponto é gole). A tela avisa "🍺 Cofrinho cheio! Fulano bebe agora." e o placar mostra goles e cofrinho. No elogio, o número de goles distribuídos também cai.
 
 **Quem manda nas cartas:** só quem criou a sala puxa a próxima carta, pula, revela antes da hora e usa o "Tira essa". Os outros veem "Esperando Fulano puxar a próxima carta".
+
+### Noites prontas
+
+Na sala de espera, um toque monta a noite: 🍻 Resenha clássica, 🌡️ Esquenta até o Picante, 🎭 Noite das brincadeiras, 😂 Só zoeira, 💛 Noite tranquila e 🔥 Raiz (pede confirmação). A noite escolhida aparece marcada; mexer em qualquer coisa embaixo vira noite personalizada.
 
 ### Níveis
 
