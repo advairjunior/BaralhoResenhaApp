@@ -235,4 +235,17 @@ public sealed class BaralhoTestes
         // Eu Nunca e Beba se com a mesma pergunta saem uma atrás da outra no mesmo nível.
         Assert.True(cartas.Count <= 1, $"\"{assunto}\" aparece em {string.Join(", ", cartas)}");
     }
+
+    [Theory]
+    [InlineData(ModoDeJogo.EuNunca)]
+    [InlineData(ModoDeJogo.MaisProvavel)]
+    [InlineData(ModoDeJogo.BebaSe)]
+    [InlineData(ModoDeJogo.Tribunal)]
+    public void NoLeveCadaJogoPrincipalTemCartaParaUmaNoiteSemRepetir(ModoDeJogo modo)
+    {
+        // Uma noite de 60 cartas com tudo ligado tira umas 15 de cada jogo principal.
+        var noLeve = CatalogoDeCartas.Carregar().Cartas.Count(c => c.Modo == modo && c.Nivel == NivelDaCarta.Leve);
+
+        Assert.True(noLeve >= 20, $"{modo} tem só {noLeve} cartas no Leve");
+    }
 }
