@@ -11,6 +11,7 @@ Deploy automático via `main` → Render (Docker). Mesmas convenções do TocaEs
 - **Push:** somente após autorização explícita; apresentar commits e resultados de testes antes.
 - **Credenciais:** nenhuma chave, senha ou `.env` entra no repositório. O login do GitHub vem do `gh`.
 - **`.vs/`, `bin/`, `obj/`:** nunca incluir em commits.
+- **Guia "Como jogar":** toda funcionalidade nova que a turma vê atualiza o guia `/como-jogar` e o "ⓘ Como joga" do app, na medida da importância (`docs/GUIA_COMO_JOGAR.md`).
 
 ## Regras detalhadas
 
@@ -36,4 +37,5 @@ Deploy automático via `main` → Render (Docker). Mesmas convenções do TocaEs
 ## Referências rápidas
 
 - Deploy e smoke test: `docs/DEPLOY_RENDER.md`
+- Guia para a turma (`/como-jogar`) e como refazer as capturas: `docs/GUIA_COMO_JOGAR.md`
 - Executar localmente: `.\rodar.ps1`

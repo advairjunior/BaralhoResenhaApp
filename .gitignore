@@ -12,3 +12,4 @@ build/
 *.suo
 *.log
 .claude/settings.local.json
+node_modules/

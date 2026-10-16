@@ -30,6 +30,15 @@ cd cliente; dart analyze; flutter test
 - Depois de incluir um plugin novo, rode `flutter clean` antes do `flutter build web`
   (o registro dos plugins web fica desatualizado e dá `MissingPluginException`).
 
+## Guia "Como jogar" e ajuda do app
+
+- Funcionalidade nova que a turma vê entra no guia `/como-jogar` na mesma entrega, na medida da
+  importância (tabela em `docs/GUIA_COMO_JOGAR.md`): jogo ou mecânica nova ganha seção e captura;
+  regra que muda o jeito de jogar atualiza o texto; opção nova vira uma linha; ajuste pequeno só
+  refaz a captura afetada; correção interna não mexe no guia.
+- Junto: o "ⓘ Como joga" (`cliente/lib/telas/ajuda.dart`) e, para carta na manga, a ficha.
+- O jogo tem que se explicar sozinho: ninguém precisa ensinar ninguém na mesa.
+
 ## Commits
 
 - Mensagem em português, imperativo: `feat:`, `fix:`, `test:`, `refactor:`, `docs:`.

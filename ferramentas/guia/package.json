@@ -1,0 +1,9 @@
+{
+  "name": "capturar-guia",
+  "private": true,
+  "type": "module",
+  "description": "Tira as telas do guia /como-jogar com o Chrome da máquina.",
+  "dependencies": {
+    "puppeteer-core": "^23.11.1"
+  }
+}

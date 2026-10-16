@@ -150,6 +150,10 @@ Não faça deploy durante uma noite de jogo: as salas ficam em memória e caem n
 No plano gratuito o serviço dorme depois de 15 minutos sem uso: a primeira pessoa a
 abrir espera uns 30 a 60 segundos. Durante o jogo a conexão de tempo real o mantém acordado.
 
+## Guia para a turma
+
+[`/como-jogar`](https://baralho-resenha.onrender.com/como-jogar): o link para mandar no grupo, com como começa, uma rodada passo a passo, todos os jogos com telas reais, pontos e goles, cartas na manga e fim da noite. O botão "📖 Como jogar?" da tela inicial abre o mesmo guia. Toda novidade que a turma vê atualiza o guia ([`docs/GUIA_COMO_JOGAR.md`](docs/GUIA_COMO_JOGAR.md)).
+
 ## Documentação
 
 - [`CLAUDE.md`](CLAUDE.md) e [`.claude/rules/`](.claude/rules): regras de trabalho, segurança e convenções.
