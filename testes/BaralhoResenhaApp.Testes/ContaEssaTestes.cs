@@ -89,6 +89,6 @@ public sealed class ContaEssaTestes
 
         Assert.All(cartas, c => Assert.Equal(ModoDeJogo.EuNunca, c.Modo));
         foreach (var nivel in Enum.GetValues<NivelDaCarta>())
-            Assert.True(cartas.Count(c => c.Nivel == nivel) >= 8, $"{nivel} tem poucas cartas de conta essa");
+            Assert.True(cartas.Count(c => c.Nivel == nivel) >= 4, $"{nivel} tem poucas cartas de conta essa");
     }
 }

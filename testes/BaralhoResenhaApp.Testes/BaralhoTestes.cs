@@ -237,15 +237,16 @@ public sealed class BaralhoTestes
     }
 
     [Theory]
-    [InlineData(ModoDeJogo.EuNunca)]
-    [InlineData(ModoDeJogo.MaisProvavel)]
-    [InlineData(ModoDeJogo.BebaSe)]
-    [InlineData(ModoDeJogo.Tribunal)]
-    public void NoLeveCadaJogoPrincipalTemCartaParaUmaNoiteSemRepetir(ModoDeJogo modo)
+    [InlineData(ModoDeJogo.EuNunca, 20)]
+    [InlineData(ModoDeJogo.MaisProvavel, 20)]
+    [InlineData(ModoDeJogo.Tribunal, 20)]
+    [InlineData(ModoDeJogo.BebaSe, 15)]
+    public void NoLeveCadaJogoPrincipalTemCartaParaUmaNoiteSemRepetir(ModoDeJogo modo, int minimo)
     {
-        // Uma noite de 60 cartas com tudo ligado tira umas 15 de cada jogo principal.
+        // Uma noite de 60 cartas com tudo ligado tira umas 15 de cada jogo principal
+        // (o Beba se, que pesa menos na mistura, umas 5).
         var noLeve = CatalogoDeCartas.Carregar().Cartas.Count(c => c.Modo == modo && c.Nivel == NivelDaCarta.Leve);
 
-        Assert.True(noLeve >= 20, $"{modo} tem só {noLeve} cartas no Leve");
+        Assert.True(noLeve >= minimo, $"{modo} tem só {noLeve} cartas no Leve");
     }
 }
