@@ -256,7 +256,11 @@ class _AreaDeAcao extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           switch (rodada.modo) {
-            ModoDeJogo.euNunca => _RevelacaoEuNunca(visao: visao, revelacao: revelacao),
+            ModoDeJogo.euNunca => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                if (revelacao.contadores.isNotEmpty)
+                  _FilaDeHistorias(visao: visao, rodada: rodada, revelacao: revelacao, acoes: acoes),
+                _RevelacaoEuNunca(visao: visao, revelacao: revelacao),
+              ]),
             ModoDeJogo.casaisEmJogo => RevelacaoDoCasal(visao: visao, rodada: rodada, acoes: acoes),
             ModoDeJogo.tribunal => _RevelacaoDoTribunal(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.maisProvavel when rodada.jokenpo =>
@@ -840,6 +844,80 @@ class _RevelacaoDoTribunal extends StatelessWidget {
           key: const Key('placar-do-tribunal'),
           style: Theme.of(context).textTheme.titleLarge),
     ]);
+  }
+}
+
+/// "Conta essa": quem já fez conta a sua, um de cada vez, com a foto na tela.
+class _FilaDeHistorias extends StatelessWidget {
+  const _FilaDeHistorias({required this.visao, required this.rodada, required this.revelacao, required this.acoes});
+
+  final VisaoDaSala visao;
+  final Rodada rodada;
+  final Revelacao revelacao;
+  final AcoesDaSala acoes;
+
+  @override
+  Widget build(BuildContext context) {
+    final contadores = [for (final id in revelacao.contadores) ?visao.jogador(id)];
+    final daVezId = rodada.pendentes
+        .where((p) => p.motivo == MotivoPendente.historia && revelacao.contadores.contains(p.jogadorId))
+        .firstOrNull
+        ?.jogadorId;
+    final daVez = daVezId == null ? null : visao.jogador(daVezId);
+    final indice = daVez == null ? contadores.length : contadores.indexWhere((j) => j.id == daVez.id);
+    return Container(
+      margin: const EdgeInsets.only(bottom: EspacoBaralho.grande),
+      padding: const EdgeInsets.all(EspacoBaralho.base),
+      decoration: BoxDecoration(
+        color: CoresBaralho.coral.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: CoresBaralho.coral),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        if (daVez == null)
+          Text('Todo mundo contou! 🎉', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge)
+        else ...[
+          Center(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                AvatarDoJogador(key: ValueKey(daVez.id), jogador: daVez, tamanho: 128, destaque: CoresBaralho.coral),
+                const Positioned(right: -6, bottom: -4, child: Text('🎤', style: TextStyle(fontSize: 40))),
+              ],
+            ),
+          ),
+          const SizedBox(height: EspacoBaralho.medio),
+          Text('🎤 Conta essa, ${daVez.nome}!',
+              textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
+          Text('${indice + 1} de ${contadores.length}',
+              textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.ambar)),
+          const SizedBox(height: EspacoBaralho.medio),
+          if (daVez.id == visao.euId)
+            FilledButton(onPressed: acoes.marcarPronto, child: const Text('🎤 Contei'))
+          else if (visao.souAnfitriao)
+            OutlinedButton(onPressed: () => acoes.confirmarHistoria(daVez.id), child: Text('${daVez.nome} contou ✓'))
+          else
+            Text('Esperando ${daVez.nome} contar…',
+                textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoSecundario)),
+        ],
+        const SizedBox(height: EspacoBaralho.medio),
+        // Quem já contou fica marcado; quem vem depois, apagado.
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: EspacoBaralho.pequeno,
+          children: [
+            for (final (i, jogador) in contadores.indexed)
+              Opacity(
+                opacity: i > indice ? 0.45 : 1,
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  AvatarDoJogador(jogador: jogador, tamanho: 36),
+                  Text(i < indice ? '✓' : jogador.nome, style: const TextStyle(fontSize: 11)),
+                ]),
+              ),
+          ],
+        ),
+      ]),
+    );
   }
 }
 

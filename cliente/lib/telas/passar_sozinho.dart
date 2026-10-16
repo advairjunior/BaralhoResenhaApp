@@ -106,7 +106,11 @@ class _PassarSozinhoState extends State<PassarSozinho> {
     final anfitriao = visao.anfitriao?.nome ?? 'Quem criou a sala';
     final faltam = [for (final jogador in visao.jogadores) if (!rodada.prontos.contains(jogador.id)) jogador.nome];
     final faltando = faltam.isEmpty ? '' : ' · falta ${faltam.join(', ')}';
-    final minha = rodada.pendentes.where((p) => p.jogadorId == visao.euId).firstOrNull;
+    // No "conta essa", o "Contei" fica na fila de histórias, junto da foto.
+    final contaEssa = rodada.revelacao?.contadores.isNotEmpty ?? false;
+    final minha = rodada.pendentes
+        .where((p) => p.jogadorId == visao.euId && !(contaEssa && p.motivo == MotivoPendente.historia))
+        .firstOrNull;
     final esperando = [
       for (final pendente in rodada.pendentes)
         if (pendente.jogadorId != visao.euId)

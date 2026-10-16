@@ -50,6 +50,7 @@ String? _jeitoDaCarta(Rodada rodada) => switch (rodada) {
       Rodada(jokenpo: true) => '✊✋✌️ PEDRA, PAPEL E TESOURA',
       Rodada(duelo: true) => '⚔️ DUELO · A TURMA VOTA',
       Rodada(:final goles?) => '🍺 DOSE DE VERDADE · BEBE $goles',
+      Rodada(contaEssa: true) => '🎤 CONTA ESSA · QUEM JÁ FEZ CONTA',
       Rodada(modo: ModoDeJogo.imagemEAcao, :final dica?) => '🎭 ${dica.toUpperCase()}',
       Rodada(elogio: true, modo: ModoDeJogo.tribunal) => '💛 ELOGIO · A TURMA DECIDE',
       Rodada(elogio: true) => '💛 ELOGIO · VOTAÇÃO NO CELULAR',

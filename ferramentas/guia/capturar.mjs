@@ -105,6 +105,16 @@ await rolar(p, 200);
 await foto(p, 'historia');
 await p.close();
 
+// "Conta essa": cada um que já fez conta a sua, com a foto na tela.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['EuNunca'] }, (r) => r.contaEssa);
+await api('POST', `${s.sala}/respostas`, s.turma.Advair, { rodada: v.rodada.numero, resposta: 'nunca' });
+for (const n of ['Júlia', 'Caio', 'Bruna']) await api('POST', `${s.sala}/respostas`, s.turma[n], { rodada: v.rodada.numero, resposta: 'ja' });
+p = await abrir(s, 'Advair');
+await rolar(p, 650);
+await foto(p, 'contaessa');
+await p.close();
+
 // Votação: o suspense com a foto do mais votado.
 s = await novaSala();
 v = await comecar(s, { nivel: 'Resenha', modos: ['MaisProvavel'] }, (r) => r.votacao && !r.elogio && !r.duelistas.length);

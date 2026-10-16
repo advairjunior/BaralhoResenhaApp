@@ -199,6 +199,9 @@ public sealed record Revelacao(
     /// <summary>Eu Nunca: a maioria já fez, então quem leva é quem nunca fez.</summary>
     public bool MinoriaLeva { get; init; }
 
+    /// <summary>"Conta essa": quem já fez, na ordem em que cada um conta a sua.</summary>
+    public IReadOnlyList<Guid> Contadores { get; init; } = [];
+
     /// <summary>Imagem e Ação: o time que acertou; nulo quando ninguém acertou.</summary>
     public int? TimeVencedor { get; init; }
 
@@ -658,16 +661,20 @@ public sealed partial class Sala
             // Virada: todo mundo já fez, ninguém leva; a maioria já fez, leva quem nunca fez.
             var minoriaLeva = nunca.Count > 0 && ja.Count > nunca.Count;
             IReadOnlyList<Guid> perderam = nunca.Count == 0 ? [] : minoriaLeva ? nunca : ja;
+            // "Conta essa": todo mundo que já fez conta a sua, numa ordem sorteada.
+            var contaEssa = rodada.Carta.Conta;
             revelacao = new Revelacao(ja, nunca, [], perderam,
-                ja.Count == 1 && respostas.Count >= 2 ? ja[0] : null)
+                !contaEssa && ja.Count == 1 && respostas.Count >= 2 ? ja[0] : null)
             {
-                MinoriaLeva = minoriaLeva
+                MinoriaLeva = minoriaLeva,
+                Contadores = contaEssa ? ja.OrderBy(_ => _sorteio.Next()).ToList() : [],
             };
             foreach (var jogador in _jogadores)
             {
                 if (ja.Contains(jogador.Id)) jogador.Estatisticas.JaFiz++;
                 if (nunca.Contains(jogador.Id)) jogador.Estatisticas.NuncaFiz++;
-                if (revelacao.ContaAHistoria == jogador.Id) jogador.Estatisticas.Historias++;
+                if (revelacao.ContaAHistoria == jogador.Id || revelacao.Contadores.Contains(jogador.Id))
+                    jogador.Estatisticas.Historias++;
             }
         }
         else

@@ -26,6 +26,7 @@ ComoJoga comoJoga(Rodada rodada) {
         'Quem já fez leva 1 ponto no cofrinho.',
         'Virada: se a maioria já fez, quem leva é quem nunca fez! E se todo mundo fez, ninguém leva.',
         'Se só uma pessoa fez, ela conta a história para a turma!',
+        'Carta 🎤 CONTA ESSA: todo mundo que já fez conta a sua, um de cada vez. A foto de quem está na vez aparece e a pessoa toca em "Contei".',
       ]),
     Rodada(jokenpo: true) => ('jokenpo', 'Pedra, papel e tesoura', [
         'Só as duas pessoas da carta jogam: cada uma escolhe pedra, papel ou tesoura no celular, em segredo.',

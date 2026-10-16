@@ -110,6 +110,10 @@ class ApiBaralho {
           corpo: {'rodada': rodada, 'carta': paraServidor(carta), 'alvo': alvo});
 
   /// Passar sozinho: respondi / estou pronto, segura aí e "acabou a contagem".
+  /// "Conta essa": quem criou a sala confirma que a pessoa da vez contou.
+  Future<VisaoDaSala> confirmarHistoria(String codigo, String token, int rodada, String jogadorId) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/contou', token, corpo: {'rodada': rodada, 'jogadorId': jogadorId});
+
   Future<VisaoDaSala> marcarPronto(String codigo, String token, int rodada) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/pronto', token, corpo: {'rodada': rodada});
 

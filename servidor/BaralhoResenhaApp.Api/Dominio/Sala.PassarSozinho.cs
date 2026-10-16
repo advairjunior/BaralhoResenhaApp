@@ -54,6 +54,33 @@ public sealed partial class Sala
         }
     }
 
+    /// <summary>"Conta essa": quem está na vez de contar; nulo quando todo mundo já contou.</summary>
+    private Guid? DaVezDeContar(Rodada rodada) =>
+        rodada.Revelacao?.Contadores
+            .Where(id => !rodada.Confirmaram.Contains(id) && _jogadores.Any(j => j.Id == id))
+            .Select(id => (Guid?)id)
+            .FirstOrDefault();
+
+    /// <summary>
+    /// "Conta essa": quem criou a sala confirma que a pessoa da vez contou, para
+    /// ela não precisar largar a história e pegar o celular.
+    /// </summary>
+    public void ConfirmarHistoria(string token, int numeroDaRodada, Guid jogadorId)
+    {
+        lock (_trinco)
+        {
+            ExigirAnfitriao(token, "Quem passa a vez é quem criou a sala ou quem contou.");
+            if (!RodadaEmAndamento(numeroDaRodada) || Fase != FaseDaSala.Revelada) return;
+            var rodada = Rodada!;
+            if (DaVezDeContar(rodada) is not { } daVez) return;
+            if (daVez != jogadorId)
+                throw new AcaoNaoPermitidaException(
+                    $"Agora é a vez de {_jogadores.First(j => j.Id == daVez).Nome} contar.");
+            rodada.Confirmaram.Add(jogadorId);
+            Tocar();
+        }
+    }
+
     /// <summary>"Segura aí": para a contagem; a carta só passa pela mão de quem criou a sala.</summary>
     public void Segurar(string token, int numeroDaRodada)
     {
@@ -104,6 +131,7 @@ public sealed partial class Sala
         if (revelada && rodada.Revelacao is { } revelacao)
         {
             Adicionar(revelacao.ContaAHistoria, MotivoPendente.Historia);
+            Adicionar(DaVezDeContar(rodada), MotivoPendente.Historia);
             if (revelacao.Elogio) foreach (var id in revelacao.Escolhidos) Adicionar(id, MotivoPendente.Elogio);
             if (rodada.Carta.Modo == ModoDeJogo.Correio) Adicionar(rodada.Alvo, MotivoPendente.Correio);
         }

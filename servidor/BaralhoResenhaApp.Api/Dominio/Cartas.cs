@@ -64,6 +64,7 @@ public enum NivelDaCarta
 /// <param name="Duelo">Quem é mais provável: {jogador} contra {jogador2}, a turma vota em quem mandou melhor.</param>
 /// <param name="Isca">Regra-relâmpago: o que o jogo gera a cada carta para a regra acontecer.</param>
 /// <param name="Iscas">Perguntas feitas para esta regra (ex.: sobre trabalho, na regra que proíbe falar de trabalho).</param>
+/// <param name="Conta">Eu Nunca "conta essa": na revelação, cada um que já fez conta a sua, um de cada vez.</param>
 /// <param name="Sensivel">
 /// Assunto que pode virar DR de verdade entre casais (ex, ciúme, traição).
 /// Fica fora do baralho quando a Zona Segura está ligada.
@@ -81,7 +82,8 @@ public sealed record Carta(
     string? Categoria = null,
     bool Destaque = false,
     bool Jokenpo = false,
-    int? Goles = null);
+    int? Goles = null,
+    bool Conta = false);
 
 /// <summary>De onde saem as iscas das regras-relâmpago.</summary>
 /// <param name="Perguntas">Perguntas abertas, para a pessoa ter que falar bastante.</param>

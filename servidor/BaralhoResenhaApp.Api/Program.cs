@@ -156,6 +156,12 @@ app.MapPost("/api/salas/{codigo}/pronto", (
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
     Agir(codigo, http, salas, notificador, (sala, token) => sala.MarcarPronto(token, requisicao.Rodada)));
 
+app.MapPost("/api/salas/{codigo}/contou", (
+    string codigo, HistoriaContada requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador,
+        (sala, token) => sala.ConfirmarHistoria(token, requisicao.Rodada, requisicao.JogadorId)));
+
 app.MapPost("/api/salas/{codigo}/segurar", (
     string codigo, AcaoNaRodada requisicao, HttpRequest http,
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
@@ -284,6 +290,7 @@ public sealed record EntrarNaSala(string Nome, bool SemAlcool = false);
 public sealed record EntradaNaSala(string Codigo, string Token);
 public sealed record ResponderCarta(int Rodada, string Resposta);
 public sealed record AcaoNaRodada(int Rodada);
+public sealed record HistoriaContada(int Rodada, Guid JogadorId);
 /// <param name="Vistas">Cartas das noites anteriores, guardadas no celular de quem criou a sala.</param>
 public sealed record ComecarNoite(IReadOnlyList<string>? Vistas);
 public sealed record DefinirPar(Guid? ParId);

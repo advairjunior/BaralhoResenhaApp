@@ -253,6 +253,7 @@ class Revelacao {
     this.timeVencedor,
     this.jogadas = const {},
     this.minoriaLeva = false,
+    this.contadores = const [],
   });
 
   factory Revelacao.deJson(Map<String, dynamic> json) => Revelacao(
@@ -272,7 +273,11 @@ class Revelacao {
         timeVencedor: json['timeVencedor'] as int?,
         jogadas: Map<String, String>.from((json['jogadas'] as Map?) ?? const {}),
         minoriaLeva: json['minoriaLeva'] as bool? ?? false,
+        contadores: List<String>.from((json['contadores'] as List?) ?? const []),
       );
+
+  /// "Conta essa": quem já fez, na ordem em que cada um conta a sua.
+  final List<String> contadores;
 
   final List<String> jaFizeram;
   final List<String> nuncaFizeram;
@@ -351,6 +356,7 @@ class Rodada {
     this.pendentes = const [],
     this.cartaId,
     this.vezDaRegra = false,
+    this.contaEssa = false,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -399,6 +405,7 @@ class Rodada {
         ],
         cartaId: json['cartaId'] as String?,
         vezDaRegra: json['vezDaRegra'] as bool? ?? false,
+        contaEssa: json['contaEssa'] as bool? ?? false,
       );
 
   final int numero;
@@ -484,6 +491,9 @@ class Rodada {
 
   /// Carta só com a pergunta (ou missão, piada…) da regra-relâmpago valendo.
   final bool vezDaRegra;
+
+  /// Eu Nunca "conta essa": cada um que já fez conta a sua.
+  final bool contaEssa;
 }
 
 class Momento {
