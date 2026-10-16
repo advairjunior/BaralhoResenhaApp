@@ -25,6 +25,7 @@ class NoitePronta {
       outra.zonaSegura == configuracao.zonaSegura &&
       outra.esquentar == configuracao.esquentar &&
       outra.ritmo == configuracao.ritmo &&
+      outra.cofrinho == configuracao.cofrinho &&
       outra.cartasNaManga == configuracao.cartasNaManga &&
       outra.passarSozinho == configuracao.passarSozinho &&
       outra.modos.length == configuracao.modos.length &&

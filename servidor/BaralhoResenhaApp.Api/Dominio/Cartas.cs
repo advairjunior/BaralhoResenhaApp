@@ -115,11 +115,14 @@ public sealed record ConfiguracaoDoJogo(
     bool Esquentar = false,
     RitmoDaBebida Ritmo = RitmoDaBebida.Devagar,
     bool CartasNaManga = true,
-    bool PassarSozinho = true)
+    bool PassarSozinho = true,
+    int? Cofrinho = null)
 {
     public const int CartasPorNivel = 8;
+    public const int CofrinhoMaximo = 20;
 
-    public int PontosPorGole => Ritmo switch
+    /// <summary>Tamanho do cofrinho: o escolhido na mão ou o do ritmo.</summary>
+    public int PontosPorGole => Cofrinho ?? Ritmo switch
     {
         RitmoDaBebida.Raiz => 1,
         RitmoDaBebida.Normal => 2,

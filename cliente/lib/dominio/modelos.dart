@@ -72,7 +72,11 @@ class ConfiguracaoDoJogo {
     this.ritmo = RitmoDaBebida.devagar,
     this.cartasNaManga = true,
     this.passarSozinho = true,
+    this.cofrinho,
   });
+
+  /// Maior cofrinho que dá para escolher (igual ao servidor).
+  static const cofrinhoMaximo = 20;
 
   factory ConfiguracaoDoJogo.deJson(Map<String, dynamic> json) => ConfiguracaoDoJogo(
         nivel: _enum(NivelDaCarta.values, json['nivel']),
@@ -82,6 +86,7 @@ class ConfiguracaoDoJogo {
         ritmo: json['ritmo'] == null ? RitmoDaBebida.devagar : _enum(RitmoDaBebida.values, json['ritmo']),
         cartasNaManga: json['cartasNaManga'] as bool? ?? true,
         passarSozinho: json['passarSozinho'] as bool? ?? true,
+        cofrinho: json['cofrinho'] as int?,
       );
 
   /// Com [esquentar], é até onde a noite pode chegar.
@@ -101,7 +106,12 @@ class ConfiguracaoDoJogo {
   /// Com todo mundo pronto, a carta passa sozinha em 3 segundos.
   final bool passarSozinho;
 
-  int get pontosPorGole => switch (ritmo) {
+  /// Tamanho do cofrinho escolhido na mão; nulo segue o [ritmo].
+  final int? cofrinho;
+
+  int get pontosPorGole =>
+      cofrinho ??
+      switch (ritmo) {
         RitmoDaBebida.devagar => 7,
         RitmoDaBebida.normal => 2,
         RitmoDaBebida.raiz => 1,
@@ -115,6 +125,7 @@ class ConfiguracaoDoJogo {
     RitmoDaBebida? ritmo,
     bool? cartasNaManga,
     bool? passarSozinho,
+    int? cofrinho,
   }) =>
       ConfiguracaoDoJogo(
         nivel: nivel ?? this.nivel,
@@ -124,6 +135,8 @@ class ConfiguracaoDoJogo {
         ritmo: ritmo ?? this.ritmo,
         cartasNaManga: cartasNaManga ?? this.cartasNaManga,
         passarSozinho: passarSozinho ?? this.passarSozinho,
+        // Escolher um ritmo volta o cofrinho para o tamanho dele.
+        cofrinho: cofrinho ?? (ritmo != null ? null : this.cofrinho),
       );
 
   Map<String, dynamic> paraJson() => {
@@ -134,6 +147,7 @@ class ConfiguracaoDoJogo {
         'ritmo': paraServidor(ritmo),
         'cartasNaManga': cartasNaManga,
         'passarSozinho': passarSozinho,
+        if (cofrinho != null) 'cofrinho': cofrinho,
       };
 }
 

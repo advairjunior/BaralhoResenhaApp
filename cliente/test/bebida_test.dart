@@ -69,5 +69,25 @@ void main() {
       expect(servidor.recebidas.last.corpo!['ritmo'], 'Normal');
       await fecharApp(tester);
     });
+
+    testWidgets('quem criou a sala ajusta o tamanho do cofrinho, até no meio do jogo', (tester) async {
+      final servidor = ServidorFalso()
+        ..respostas['GET /api/salas/ABCD'] = visaoJson(ritmo: 'Devagar')
+        ..respostas['PUT /api/salas/ABCD/configuracao'] = visaoJson(ritmo: 'Devagar', cofrinho: 8);
+      await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+      await rolarAte(tester, find.byKey(const Key('cofrinho-mais')));
+      expect(find.text('🐷 Cofrinho de 7 pontos'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('cofrinho-mais')));
+      await tester.pumpAndSettle();
+
+      expect(servidor.recebidas.last.corpo!['cofrinho'], 8);
+      expect(find.text('🐷 Cofrinho de 8 pontos'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('cofrinho-menos')));
+      await tester.pumpAndSettle();
+      expect(servidor.recebidas.last.corpo!['cofrinho'], 7);
+      await fecharApp(tester);
+    });
   });
 }

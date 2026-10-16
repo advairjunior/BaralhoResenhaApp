@@ -93,4 +93,44 @@ public sealed class BebidaTestes
         Assert.Equal(0, bia.Goles);
         Assert.Empty(sala.Rodada!.BebemAgora);
     }
+
+    [Fact]
+    public void OTamanhoDoCofrinhoEhConfiguravelEMudaNoMeioDoJogo()
+    {
+        var (sala, ana, _) = Mesa(RitmoDaBebida.Devagar);
+        var comCofrinhoDe3 = sala.Configuracao with { Cofrinho = 3 };
+
+        sala.Configurar(ana.Token, comCofrinhoDe3);
+        Assert.Equal(3, sala.Configuracao.PontosPorGole);
+        Pegou(sala, ana, ana, 3);
+
+        Assert.Equal(1, ana.Goles);
+        Assert.Equal(0, ana.Cofrinho);
+    }
+
+    [Fact]
+    public void CofrinhoQueJaPassouDoNovoTamanhoEnchenaProximaVez()
+    {
+        var (sala, ana, _) = Mesa(RitmoDaBebida.Devagar);
+        Pegou(sala, ana, ana, 5);
+        sala.Proxima(ana.Token, sala.Rodada!.Numero);
+
+        sala.Configurar(ana.Token, sala.Configuracao with { Cofrinho = 2 });
+        Pegou(sala, ana, ana, 1);
+
+        Assert.Equal(1, ana.Goles);
+        Assert.Equal(0, ana.Cofrinho);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(21)]
+    public void CofrinhoForaDe1A20NaoVale(int tamanho)
+    {
+        var (sala, ana, _) = Mesa(RitmoDaBebida.Devagar);
+
+        var erro = Assert.Throws<AcaoNaoPermitidaException>(
+            () => sala.Configurar(ana.Token, sala.Configuracao with { Cofrinho = tamanho }));
+        Assert.Equal("O cofrinho vai de 1 a 20 pontos.", erro.Message);
+    }
 }

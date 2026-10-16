@@ -126,12 +126,16 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
               Expanded(
                 child: _CartaoDeRitmo(
                   ritmo: ritmo,
-                  escolhido: configuracao.ritmo == ritmo,
+                  escolhido: configuracao.cofrinho == null && configuracao.ritmo == ritmo,
                   aoTocar: podeEditar ? () => aoMudar(configuracao.copiar(ritmo: ritmo)) : null,
                 ),
               ),
             ],
           ],
+        ),
+        _TamanhoDoCofrinho(
+          pontos: configuracao.pontosPorGole,
+          aoMudar: podeEditar ? (pontos) => aoMudar(configuracao.copiar(cofrinho: pontos)) : null,
         ),
         SwitchListTile(
           key: const Key('passar-sozinho'),
@@ -232,6 +236,50 @@ class _ResumoDaMistura extends StatelessWidget {
       child: Text(
         texto,
         style: const TextStyle(color: CoresBaralho.ambar, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+/// Ajuste fino do cofrinho: 1 gole a cada quantos pontos. Vale também no meio do jogo.
+class _TamanhoDoCofrinho extends StatelessWidget {
+  const _TamanhoDoCofrinho({required this.pontos, required this.aoMudar});
+
+  final int pontos;
+  final ValueChanged<int>? aoMudar;
+
+  @override
+  Widget build(BuildContext context) {
+    final mudar = aoMudar;
+    return Padding(
+      padding: const EdgeInsets.only(top: EspacoBaralho.pequeno),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('🐷 Cofrinho de $pontos ${pontos == 1 ? 'ponto' : 'pontos'}',
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  pontos == 1 ? 'Todo ponto é gole.' : 'Encheu, bebe 1 gole.',
+                  style: const TextStyle(fontSize: 12, color: CoresBaralho.textoApagado),
+                ),
+              ],
+            ),
+          ),
+          IconButton.outlined(
+            key: const Key('cofrinho-menos'),
+            onPressed: mudar == null || pontos <= 1 ? null : () => mudar(pontos - 1),
+            icon: const Icon(Icons.remove),
+          ),
+          const SizedBox(width: EspacoBaralho.pequeno),
+          IconButton.outlined(
+            key: const Key('cofrinho-mais'),
+            onPressed: mudar == null || pontos >= ConfiguracaoDoJogo.cofrinhoMaximo ? null : () => mudar(pontos + 1),
+            icon: const Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }

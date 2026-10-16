@@ -321,6 +321,8 @@ public sealed partial class Sala
                 throw new AcaoNaoPermitidaException("Escolha pelo menos um modo de jogo.");
             if (!Enum.IsDefined(configuracao.Nivel))
                 throw new AcaoNaoPermitidaException("Nível de cartas desconhecido.");
+            if (configuracao.Cofrinho is < 1 or > ConfiguracaoDoJogo.CofrinhoMaximo)
+                throw new AcaoNaoPermitidaException($"O cofrinho vai de 1 a {ConfiguracaoDoJogo.CofrinhoMaximo} pontos.");
             Configuracao = configuracao with { Modos = configuracao.Modos.Distinct().ToList() };
             Tocar();
         }

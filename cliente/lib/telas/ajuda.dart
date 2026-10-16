@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
-import 'bebida.dart';
 import 'visual.dart';
 
 /// O jogo se explica sozinho: ninguém precisa ensinar ninguém na mesa.
@@ -103,7 +102,7 @@ ComoJoga comoJoga(Rodada rodada) {
 String explicacaoDosPontos(ConfiguracaoDoJogo configuracao) => switch (configuracao.pontosPorGole) {
       1 => 'Ritmo Raiz: cada ponto no cofrinho é 1 gole. Quem joga sem álcool só soma pontos.',
       final pontos => 'Cada vez que a carta te pega, você ganha 1 ponto no cofrinho. '
-          'A cada $pontos pontos, o cofrinho enche e você bebe 1 gole (${configuracao.ritmo.titulo}). '
+          'A cada $pontos pontos, o cofrinho enche e você bebe 1 gole. '
           'Quem joga sem álcool só soma pontos.',
     };
 
