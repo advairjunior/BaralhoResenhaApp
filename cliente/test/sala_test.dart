@@ -43,6 +43,23 @@ void main() {
     await fecharApp(tester);
   });
 
+  testWidgets('na sala de espera, o celular manda as cartas que já viu em outras noites', (tester) async {
+    final servidor = ServidorFalso()
+      ..respostas['GET /api/salas/ABCD'] = visaoJson()
+      ..respostas['POST /api/salas/ABCD/vistas'] = visaoJson();
+    await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: {
+      ..._logado,
+      'cartas_vistas': ['en-001', 'tr-002'],
+    });
+
+    final enviadas = servidor.recebidas.where((r) => r.rota == 'POST /api/salas/ABCD/vistas').toList();
+    expect(enviadas, hasLength(1));
+    expect(enviadas.single.corpo, {
+      'vistas': ['en-001', 'tr-002'],
+    });
+    await fecharApp(tester);
+  });
+
   testWidgets('Baralho Original só entra depois de a turma topar', (tester) async {
     final servidor = ServidorFalso()
       ..respostas['GET /api/salas/ABCD'] = visaoJson()

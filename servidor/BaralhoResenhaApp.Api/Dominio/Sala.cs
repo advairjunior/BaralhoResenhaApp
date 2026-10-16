@@ -360,13 +360,33 @@ public sealed partial class Sala
             if (Fase != FaseDaSala.Lobby) return;
             if (_jogadores.Count < 2)
                 throw new AcaoNaoPermitidaException("Chame pelo menos mais uma pessoa para começar.");
-            var existentes = _baralho.Cartas.Select(carta => carta.Id).ToHashSet();
-            _usadas.UnionWith((vistas ?? []).Where(existentes.Contains));
+            LembrarVistasDaTurma(vistas);
             ComecouEm = _relogio.GetUtcNow();
             foreach (var jogador in _jogadores) DarCarta(jogador);
             Distribuir();
             Tocar();
         }
+    }
+
+    /// <summary>
+    /// Cada celular que entra manda as cartas que já viu em outras noites: se
+    /// qualquer um da turma já viu, a carta vai para o fim do monte, mesmo que
+    /// outra pessoa crie a sala. Depois de começar, não muda mais nada.
+    /// </summary>
+    public void LembrarVistas(string token, IEnumerable<string>? vistas)
+    {
+        lock (_trinco)
+        {
+            Reconhecer(token);
+            if (Fase != FaseDaSala.Lobby) return;
+            LembrarVistasDaTurma(vistas);
+        }
+    }
+
+    private void LembrarVistasDaTurma(IEnumerable<string>? vistas)
+    {
+        var existentes = _baralho.Cartas.Select(carta => carta.Id).ToHashSet();
+        _usadas.UnionWith((vistas ?? []).Where(existentes.Contains));
     }
 
     public void Responder(string token, int numeroDaRodada, string resposta)

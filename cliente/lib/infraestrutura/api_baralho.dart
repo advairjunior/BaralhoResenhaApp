@@ -55,6 +55,10 @@ class ApiBaralho {
   Future<VisaoDaSala> configurar(String codigo, String token, ConfiguracaoDoJogo configuracao) =>
       _visao('PUT', '/api/salas/${_codigo(codigo)}/configuracao', token, corpo: configuracao.paraJson());
 
+  /// Na sala de espera, cada celular manda as cartas que já viu em outras noites.
+  Future<VisaoDaSala> lembrarVistas(String codigo, String token, List<String> vistas) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/vistas', token, corpo: {'vistas': vistas});
+
   /// [vistas]: cartas das noites anteriores, que vão para o fim do monte.
   Future<VisaoDaSala> comecar(String codigo, String token, {List<String> vistas = const []}) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/comecar', token, corpo: {'vistas': vistas});

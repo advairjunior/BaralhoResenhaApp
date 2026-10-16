@@ -147,7 +147,23 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   void _mostrar(VisaoDaSala visao) {
     final carta = visao.rodada?.cartaId;
     if (carta != null && carta != _visao?.rodada?.cartaId) widget.sessoes.marcarVista(carta);
+    if (visao.fase == FaseDaSala.lobby && !_vistasEnviadas) _enviarVistas();
     if (mounted) setState(() => _visao = visao);
+  }
+
+  /// Uma vez por sala: se alguém da turma já viu a carta, ela vai para o fim do monte.
+  bool _vistasEnviadas = false;
+
+  Future<void> _enviarVistas() async {
+    _vistasEnviadas = true;
+    final token = _token;
+    final vistas = await widget.sessoes.cartasVistas();
+    if (token == null || vistas.isEmpty) return;
+    try {
+      await widget.api.lembrarVistas(_codigo, token, vistas);
+    } on FalhaNaApi {
+      // Sem a memória deste celular a noite funciona igual; não vale atrapalhar.
+    }
   }
 
   int get _rodada => _visao?.rodada?.numero ?? 0;

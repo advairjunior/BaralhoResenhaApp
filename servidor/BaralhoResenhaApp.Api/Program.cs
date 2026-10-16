@@ -205,6 +205,11 @@ app.MapPost("/api/salas/{codigo}/comecar", (
     HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
     Agir(codigo, http, salas, notificador, (sala, token) => sala.Comecar(token, requisicao?.Vistas)));
 
+app.MapPost("/api/salas/{codigo}/vistas", (
+    string codigo, ComecarNoite requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.LembrarVistas(token, requisicao.Vistas)));
+
 app.MapPost("/api/salas/{codigo}/respostas", (
     string codigo, ResponderCarta requisicao, HttpRequest http,
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>

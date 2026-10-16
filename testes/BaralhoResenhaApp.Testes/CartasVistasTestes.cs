@@ -58,6 +58,32 @@ public sealed class CartasVistasTestes(WebApplicationFactory<Program> fabrica)
     }
 
     [Fact]
+    public void CadaCelularDaTurmaContribuiComAsCartasQueJaViu()
+    {
+        var (sala, ana) = Mesa();
+        var bia = sala.Visao(ana.Token).Jogadores.Single(j => j.Nome == "Bia");
+        var tokenDaBia = sala.Jogadores.Single(j => j.Id == bia.Id).Token;
+
+        // A Bia jogou outras noites no celular dela; a Ana, que criou a sala, não.
+        sala.LembrarVistas(tokenDaBia, ["en-1", "en-2"]);
+        sala.Comecar(ana.Token);
+
+        Assert.Equal("en-3", sala.Rodada!.Carta.Id);
+    }
+
+    [Fact]
+    public void DepoisDeComecarAsVistasNaoMudamMais()
+    {
+        var (sala, ana) = Mesa();
+        sala.Comecar(ana.Token);
+
+        sala.LembrarVistas(ana.Token, ["en-1", "en-2", "en-3"]);
+
+        sala.Proxima(ana.Token, sala.Rodada!.Numero);
+        Assert.NotNull(sala.Rodada);
+    }
+
+    [Fact]
     public async Task ComecarAceitaAsCartasVistasESemCorpoContinuaFuncionando()
     {
         var cliente = fabrica.CreateClient();
