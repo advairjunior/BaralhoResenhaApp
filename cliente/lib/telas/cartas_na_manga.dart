@@ -30,6 +30,22 @@ extension VisualDaCartaNaManga on CartaNaManga {
         CartaNaManga.dobra => 'Dobra o que esta carta fez com outra pessoa.',
       };
 
+  String get quando => switch (this) {
+        CartaNaManga.devolve => 'Quando você perde um duelo ou um pedra, papel e tesoura, depois do resultado.',
+        CartaNaManga.dobra => 'Quando a carta da mesa pegou outra pessoa (não você).',
+        _ => 'Quando a carta da mesa te pegar: no Beba se, depois do "Me pegou!"; '
+            'nas votações, duelos, Tribunal e mímica, depois do resultado.',
+      };
+
+  String get exemplo => switch (this) {
+        CartaNaManga.escudo => 'A carta mandou você beber 2? Escudo, e você não leva nada.',
+        CartaNaManga.passaABola => 'O Tribunal te condenou? Passa a bola para a Bia, e ela leva no seu lugar.',
+        CartaNaManga.devolve => 'Perdeu no pedra, papel e tesoura para o Caio? Devolve, e quem leva é ele.',
+        CartaNaManga.batataQuente => 'Você levou 2 goles: joga no Caio, ele recebe 3. '
+            'Se o Caio tiver uma batata, joga na Bia com 4…',
+        CartaNaManga.dobra => 'O Caio levou 1 ponto? Dobra, e ele leva 2.',
+      };
+
   /// Precisa escolher em quem jogar?
   bool get temAlvo => this == CartaNaManga.passaABola || this == CartaNaManga.batataQuente || this == CartaNaManga.dobra;
 }
@@ -57,70 +73,76 @@ class MinhaMao extends StatelessWidget {
   final Rodada rodada;
   final AcoesDaSala acoes;
 
-  Future<void> _usar(BuildContext context, CartaNaManga carta) async {
+  Future<void> _abrirFicha(BuildContext context, CartaNaManga carta) async {
     final impedimento = _impedimento(visao, rodada, carta);
-    if (impedimento != null) {
-      avisar(context, impedimento);
-      return;
-    }
-    if (!carta.temAlvo) {
-      final usar = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('${carta.emoji} ${carta.titulo}'),
-          content: Text(carta.explicacao),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Guardar')),
-            FilledButton(
-              style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
-              onPressed: () => Navigator.pop(context, true),
-              child: Text('Usar ${carta.emoji}'),
-            ),
-          ],
-        ),
-      );
-      if (usar == true) await acoes.usarCarta(carta, null);
-      return;
-    }
     // Dobra só vale em quem a carta pegou; as outras, em qualquer um.
     final alvos = [
       for (final jogador in visao.jogadores)
         if (jogador.id != visao.euId && (carta != CartaNaManga.dobra || rodada.pegos.contains(jogador.id))) jogador,
     ];
-    if (!context.mounted) return;
-    final alvo = await showModalBottomSheet<String>(
+    final escolha = await showModalBottomSheet<({bool usar, String? alvo})>(
       context: context,
+      isScrollControlled: true,
       builder: (context) => SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(EspacoBaralho.grande, 0, EspacoBaralho.grande, EspacoBaralho.grande),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text('${carta.emoji} ${carta.titulo}', style: Theme.of(context).textTheme.titleLarge),
-            Text(carta.explicacao, style: const TextStyle(color: CoresBaralho.textoSecundario)),
+            Text('${carta.emoji} ${carta.titulo}', style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: EspacoBaralho.medio),
+            const Text('O que faz', style: TextStyle(fontWeight: FontWeight.w600)),
+            Text(carta.explicacao, style: const TextStyle(height: 1.4)),
+            const SizedBox(height: EspacoBaralho.medio),
+            const Text('Quando dá para usar', style: TextStyle(fontWeight: FontWeight.w600)),
+            Text(carta.quando, style: const TextStyle(height: 1.4)),
+            const SizedBox(height: EspacoBaralho.medio),
+            const Text('Exemplo', style: TextStyle(fontWeight: FontWeight.w600)),
+            Text(carta.exemplo, style: const TextStyle(height: 1.4, color: CoresBaralho.textoSecundario)),
             const SizedBox(height: EspacoBaralho.base),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: EspacoBaralho.medio,
-              runSpacing: EspacoBaralho.medio,
-              children: [
-                for (final jogador in alvos)
-                  GestureDetector(
-                    key: Key('alvo-${jogador.id}'),
-                    onTap: () => Navigator.pop(context, jogador.id),
-                    child: SizedBox(
-                      width: 76,
-                      child: Column(children: [
-                        AvatarDoJogador(jogador: jogador, tamanho: 56),
-                        Text(jogador.nome, maxLines: 1, overflow: TextOverflow.ellipsis),
-                      ]),
+            if (impedimento != null) ...[
+              Text('⏳ $impedimento',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: CoresBaralho.textoSecundario, fontWeight: FontWeight.w600)),
+              const SizedBox(height: EspacoBaralho.medio),
+              OutlinedButton(onPressed: () => Navigator.pop(context), child: const Text('Guardar para depois')),
+            ] else if (carta.temAlvo) ...[
+              const Text('✅ Dá para usar agora. Em quem jogar?',
+                  textAlign: TextAlign.center, style: TextStyle(color: CoresBaralho.ambar, fontWeight: FontWeight.w600)),
+              const SizedBox(height: EspacoBaralho.medio),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: EspacoBaralho.medio,
+                runSpacing: EspacoBaralho.medio,
+                children: [
+                  for (final jogador in alvos)
+                    GestureDetector(
+                      key: Key('alvo-${jogador.id}'),
+                      onTap: () => Navigator.pop(context, (usar: true, alvo: jogador.id)),
+                      child: SizedBox(
+                        width: 76,
+                        child: Column(children: [
+                          AvatarDoJogador(jogador: jogador, tamanho: 56),
+                          Text(jogador.nome, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ]),
+                      ),
                     ),
-                  ),
-              ],
-            ),
+                ],
+              ),
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Guardar para depois')),
+            ] else ...[
+              const Text('✅ Dá para usar agora.',
+                  textAlign: TextAlign.center, style: TextStyle(color: CoresBaralho.ambar, fontWeight: FontWeight.w600)),
+              const SizedBox(height: EspacoBaralho.medio),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, (usar: true, alvo: null)),
+                child: Text('Usar ${carta.emoji}'),
+              ),
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Guardar para depois')),
+            ],
           ]),
         ),
       ),
     );
-    if (alvo != null) await acoes.usarCarta(carta, alvo);
+    if (escolha?.usar == true) await acoes.usarCarta(carta, escolha!.alvo);
   }
 
   @override
@@ -135,7 +157,16 @@ class MinhaMao extends StatelessWidget {
         border: Border.all(color: CoresBaralho.borda),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        const Text('🃏 Suas cartas na manga', style: TextStyle(fontWeight: FontWeight.w600)),
+        Row(children: [
+          const Expanded(child: Text('🃏 Suas cartas na manga', style: TextStyle(fontWeight: FontWeight.w600))),
+          TextButton(
+            key: const Key('guia-das-cartas'),
+            onPressed: () => abrirGuiaDasCartas(context),
+            child: const Text('ⓘ Como funcionam'),
+          ),
+        ]),
+        const Text('Toque numa carta para ver o que ela faz.',
+            style: TextStyle(fontSize: 12, color: CoresBaralho.textoApagado)),
         const SizedBox(height: EspacoBaralho.pequeno),
         Wrap(spacing: EspacoBaralho.pequeno, runSpacing: EspacoBaralho.pequeno, children: [
           for (final (indice, carta) in visao.minhaMao.indexed)
@@ -145,7 +176,7 @@ class MinhaMao extends StatelessWidget {
               label: Text(carta.titulo),
               backgroundColor:
                   _impedimento(visao, rodada, carta) == null ? CoresBaralho.ambarEscuro : CoresBaralho.superficieElevada,
-              onPressed: () => _usar(context, carta),
+              onPressed: () => _abrirFicha(context, carta),
             ),
         ]),
       ]),
@@ -195,3 +226,47 @@ class UsosDasCartas extends StatelessWidget {
     );
   }
 }
+
+/// Todas as cartas na manga e como ganhar mais.
+Future<void> abrirGuiaDasCartas(BuildContext context) => showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.8,
+        maxChildSize: 0.95,
+        // Coluna, não lista: todas as cartas ficam montadas (e o guia é curto).
+        builder: (context, rolagem) => SingleChildScrollView(
+          controller: rolagem,
+          padding: const EdgeInsets.fromLTRB(EspacoBaralho.grande, 0, EspacoBaralho.grande, EspacoBaralho.grande),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text('🃏 Cartas na manga', style: Theme.of(context).textTheme.titleLarge),
+            const Text(
+              'Estilo Uno: cada um guarda até 3 e usa na hora certa. Uma por pessoa a cada carta da mesa, '
+              'e todo mundo vê quem usou o quê. Só você vê as suas.',
+              style: TextStyle(color: CoresBaralho.textoSecundario, height: 1.4),
+            ),
+            const SizedBox(height: EspacoBaralho.base),
+            for (final carta in CartaNaManga.values)
+              Padding(
+                padding: const EdgeInsets.only(bottom: EspacoBaralho.base),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('${carta.emoji} ${carta.titulo}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                  Text(carta.explicacao, style: const TextStyle(height: 1.4)),
+                  Text('Quando: ${carta.quando}',
+                      style: const TextStyle(fontSize: 12, height: 1.4, color: CoresBaralho.textoApagado)),
+                ]),
+              ),
+            const Text('Como ganhar mais', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            const Text(
+              'Todo mundo começa com uma. Ganha mais quem vence duelo ou pedra, papel e tesoura, o time que '
+              'acerta a mímica e quem a turma escolhe no elogio. A cada 10 cartas, quem está há mais tempo '
+              'sem ganhar recebe uma.',
+              style: TextStyle(height: 1.4),
+            ),
+            const SizedBox(height: EspacoBaralho.base),
+            FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Entendi 👍')),
+          ]),
+        ),
+      ),
+    );

@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
+import 'ajuda.dart';
 import 'configuracao_do_jogo.dart';
 import 'sala.dart';
 import 'selfie.dart';
@@ -27,6 +28,11 @@ class Lobby extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: const Text('Sala de espera'),
         actions: [
+          IconButton(
+            tooltip: 'Como funciona o jogo',
+            onPressed: () => abrirComoFunciona(context, visao),
+            icon: const Icon(Icons.help_outline_rounded),
+          ),
           IconButton(
             tooltip: 'Sair da sala',
             onPressed: () => confirmarSaida(context, acoes),

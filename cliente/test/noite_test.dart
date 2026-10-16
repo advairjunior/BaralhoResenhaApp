@@ -90,6 +90,7 @@ void main() {
 
       expect(find.text('“Jiló”'), findsOneWidget);
       expect(find.text('“Quiabo”'), findsOneWidget);
+      await rolarAte(tester, find.text('😬 Errou'));
       await tester.tap(find.text('😬 Errou'));
       await tester.pumpAndSettle();
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
 import 'carta_de_baralho.dart';
+import 'ajuda.dart';
 import 'aponta_no_tres.dart';
 import 'bebida.dart';
 import 'cartas_na_manga.dart';
@@ -57,9 +58,11 @@ class Jogo extends StatelessWidget {
                   aoMudar: acoes.configurar,
                 ),
               'encerrar' => _confirmarEncerramento(context, acoes),
+              'como-funciona' => abrirComoFunciona(context, visao),
               _ => confirmarSaida(context, acoes),
             },
             itemBuilder: (_) => [
+              const PopupMenuItem(value: 'como-funciona', child: Text('Como funciona o jogo ⓘ')),
               PopupMenuItem(
                 value: 'configurar',
                 child: Text(visao.souAnfitriao ? 'Nível e modos' : 'Ver nível e modos'),
@@ -93,7 +96,8 @@ class Jogo extends StatelessWidget {
                 else
                   // Carta nova, carta virada: a chave nova faz a virada de novo.
                   CartaQueVira(key: ValueKey(rodada.numero), rodada: rodada),
-                _BarraDaCarta(esquenta: visao.esquenta, souAnfitriao: visao.souAnfitriao, acoes: acoes),
+                _BarraDaCarta(visao: visao, rodada: rodada, acoes: acoes),
+                DicaDePrimeiraVez(key: ValueKey('dica-${rodada.numero}'), visao: visao, rodada: rodada),
                 const SizedBox(height: EspacoBaralho.base),
                 // A mímica tem o cronômetro no painel dela.
                 if (rodada.cronometroSegundos != null &&
@@ -148,11 +152,14 @@ class _AvisoSobreACarta extends StatelessWidget {
 /// Embaixo da carta: em que nível a noite está (Esquenta sozinho) e o
 /// "Tira essa", para a carta que ninguém quer jogar.
 class _BarraDaCarta extends StatelessWidget {
-  const _BarraDaCarta({required this.esquenta, required this.souAnfitriao, required this.acoes});
+  const _BarraDaCarta({required this.visao, required this.rodada, required this.acoes});
 
-  final Esquenta? esquenta;
-  final bool souAnfitriao;
+  final VisaoDaSala visao;
+  final Rodada rodada;
   final AcoesDaSala acoes;
+
+  Esquenta? get esquenta => visao.esquenta;
+  bool get souAnfitriao => visao.souAnfitriao;
 
   Future<void> _tirar(BuildContext context) async {
     final tirar = await showDialog<bool>(
@@ -193,7 +200,12 @@ class _BarraDaCarta extends StatelessWidget {
             )
           else
             const Spacer(),
-          if (!souAnfitriao) const SizedBox(height: 40),
+          TextButton(
+            key: const Key('como-joga'),
+            style: TextButton.styleFrom(foregroundColor: CoresBaralho.textoSecundario),
+            onPressed: () => abrirComoJoga(context, visao, rodada),
+            child: const Text('ⓘ Como joga'),
+          ),
           if (souAnfitriao)
           TextButton(
             key: const Key('tira-essa'),
@@ -525,7 +537,7 @@ class _MePegou extends StatelessWidget {
         ),
         const SizedBox(height: EspacoBaralho.medio),
         Text(
-          beberam.isEmpty ? 'Marque se a carta pegou você.' : 'Pegou: ${beberam.map((j) => j.nome).join(', ')}',
+          beberam.isEmpty ? 'Marque se a carta pegou você.' : 'Pegou: ${beberam.map((j) => _comDestino(rodada, visao, j)).join(', ')}',
           textAlign: TextAlign.center,
           style: const TextStyle(color: CoresBaralho.textoSecundario),
         ),
@@ -534,6 +546,19 @@ class _MePegou extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Quem a carta pegou e, se usou carta na manga, para onde foi: "Ana → 🎯 passou para Bia".
+String _comDestino(Rodada rodada, VisaoDaSala visao, Jogador jogador) {
+  final uso = rodada.usos.where((u) => u.quem == jogador.id).firstOrNull;
+  final alvo = visao.jogador(uso?.alvo ?? '')?.nome;
+  return switch (uso?.carta) {
+    null || CartaNaManga.dobra => jogador.nome,
+    CartaNaManga.escudo => '${jogador.nome} → 🛡️ se livrou',
+    CartaNaManga.passaABola => '${jogador.nome} → 🎯 passou para $alvo',
+    CartaNaManga.devolve => '${jogador.nome} → ↩️ devolveu para $alvo',
+    CartaNaManga.batataQuente => '${jogador.nome} → 🥔 jogou em $alvo',
+  };
 }
 
 /// "Me pegou! 🍺"; na dose, quanto bebe de verdade.

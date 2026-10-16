@@ -61,6 +61,10 @@ Cada um começa a noite com uma carta na manga e guarda até 3. Ganha mais quem 
 
 Uma por pessoa a cada carta da mesa; todos os celulares mostram quem usou o quê. Prêmio "🃏 Mestre das cartas na manga". Dá para desligar na configuração.
 
+### O jogo se explica sozinho
+
+Ninguém precisa ensinar ninguém: embaixo de toda carta tem **ⓘ Como joga** com as regras daquele jogo (e de cada jeito dele: votação, aponta no 3, duelo, pedra-papel-tesoura, mímica com times ou não), os pontos e goles do ritmo da noite e quem passa as cartas. Na primeira vez que um jogo aparece no celular, uma faixa "💡 Primeira vez de…" convida a ver. Tocar numa carta na manga abre a ficha (o que faz, quando dá para usar, exemplo e se vale agora), e "ⓘ Como funcionam" mostra todas e como ganhar mais. A sala de espera e o menu têm "Como funciona o jogo".
+
 ### Noites prontas
 
 Na sala de espera, um toque monta a noite: 🍻 Resenha clássica, 🌡️ Esquenta até o Picante, 🎭 Noite das brincadeiras, 😂 Só zoeira, 💛 Noite tranquila e 🔥 Raiz (pede confirmação). A noite escolhida aparece marcada; mexer em qualquer coisa embaixo vira noite personalizada.
