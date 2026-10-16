@@ -40,7 +40,7 @@ void main() {
       await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
 
       await rolarAte(tester, find.byKey(const Key('manga-escudo')));
-      expect(find.text('🃏 Suas cartas na manga'), findsOneWidget);
+      expect(find.text('🃏 Sua mão'), findsOneWidget);
       await tester.tap(find.byKey(const Key('manga-escudo')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Usar 🛡️'));
