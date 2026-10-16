@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace BaralhoResenhaApp.Api.Dominio;
 
@@ -73,6 +74,17 @@ public sealed class Rodada
     /// <summary>Quem quebrou a regra-relâmpago nesta carta.</summary>
     public HashSet<Guid> Vacilaram { get; } = [];
 
+    /// <summary>Pedra, papel e tesoura: as jogadas que empataram, na ordem.</summary>
+    public List<string> Empates { get; } = [];
+
+    /// <summary>Quando acaba o cronômetro da carta; nulo antes do "valendo".</summary>
+    public DateTimeOffset? CronometroAte { get; set; }
+
+    /// <summary>Mímica tem 60 s; outras cartas, o tempo que o texto pede ("em 5 segundos").</summary>
+    public int? SegundosDoCronometro => Carta.Modo == ModoDeJogo.ImagemEAcao
+        ? 60
+        : Regex.Match(Texto, @"(\d+) segundos") is { Success: true } achado ? int.Parse(achado.Groups[1].Value) : null;
+
     /// <summary>Quem encheu o cofrinho nesta carta: bebe agora.</summary>
     public HashSet<Guid> BebemAgora { get; } = [];
     public Revelacao? Revelacao { get; set; }
@@ -141,6 +153,9 @@ public sealed record Revelacao(
 
     /// <summary>Imagem e Ação: o time que acertou; nulo quando ninguém acertou.</summary>
     public int? TimeVencedor { get; init; }
+
+    /// <summary>Pedra, papel e tesoura: o que cada um dos dois jogou.</summary>
+    public IReadOnlyDictionary<Guid, string> Jogadas { get; init; } = new Dictionary<Guid, string>();
 
     /// <summary>Correio: os bilhetes, embaralhados e sem autor.</summary>
     public IReadOnlyList<string> Bilhetes { get; init; } = [];
@@ -304,14 +319,15 @@ public sealed partial class Sala
 
             if (rodada.Carta.Modo == ModoDeJogo.EuNunca && resposta is not (RespostaJa or RespostaNunca))
                 throw new AcaoNaoPermitidaException("Responda se já fez ou se nunca fez.");
-            if (rodada.Duelistas.Count > 0)
+            if (rodada.Carta.Jokenpo) resposta = ValidarJogada(rodada, jogador, resposta);
+            else if (rodada.Duelistas.Count > 0)
             {
                 if (rodada.Duelistas.Contains(jogador.Id))
                     throw new AcaoNaoPermitidaException("Você está no duelo: quem decide é a turma.");
                 if (!(Guid.TryParse(resposta, out var duelista) && rodada.Duelistas.Contains(duelista)))
                     throw new AcaoNaoPermitidaException("Vote em um dos dois do duelo.");
             }
-            if (rodada.Carta.Modo == ModoDeJogo.MaisProvavel &&
+            if (rodada.Carta.Modo == ModoDeJogo.MaisProvavel && !rodada.Carta.Jokenpo &&
                 !(Guid.TryParse(resposta, out var votado) && _jogadores.Any(j => j.Id == votado)))
                 throw new AcaoNaoPermitidaException("Vote em alguém da sala.");
 
@@ -329,6 +345,8 @@ public sealed partial class Sala
             ExigirAnfitriao(token, SoQuemCriouPuxaCarta);
             if (!RodadaEmAndamento(numeroDaRodada) || Fase != FaseDaSala.Carta || !Rodada!.PedeResposta)
                 return;
+            if (Rodada.Carta.Jokenpo)
+                throw new AcaoNaoPermitidaException("Os dois do duelo precisam jogar.");
             if (Rodada.Respostas.Count == 0)
                 throw new AcaoNaoPermitidaException("Ninguém respondeu ainda.");
             if (Rodada.Carta.Modo == ModoDeJogo.CasaisEmJogo && !CasalRespondeu(Rodada))
@@ -363,11 +381,11 @@ public sealed partial class Sala
             if (!RodadaEmAndamento(numeroDaRodada)) return;
             if (Rodada!.Carta.Modo != ModoDeJogo.BebaSe)
                 throw new AcaoNaoPermitidaException("Só vale nas cartas de Beba se.");
-            if (Rodada.Beberam.Remove(jogador.Id)) Despegar(jogador);
+            if (Rodada.Beberam.Remove(jogador.Id)) Perdoar(jogador);
             else
             {
                 Rodada.Beberam.Add(jogador.Id);
-                Pegar(jogador);
+                Punir(jogador);
             }
             Tocar();
         }
@@ -499,6 +517,11 @@ public sealed partial class Sala
     private void RevelarSeTodosResponderam()
     {
         if (Fase != FaseDaSala.Carta || Rodada is not { PedeResposta: true } rodada) return;
+        if (rodada.Carta.Jokenpo)
+        {
+            ResolverJokenpo(rodada);
+            return;
+        }
         var todosResponderam = rodada.Carta.Modo switch
         {
             ModoDeJogo.CasaisEmJogo => CasalRespondeu(rodada),
@@ -588,7 +611,7 @@ public sealed partial class Sala
         }
 
         foreach (var jogador in _jogadores.Where(j => revelacao.Perderam.Contains(j.Id)))
-            Pegar(jogador);
+            Punir(jogador);
         rodada.Revelacao = revelacao;
         Fase = FaseDaSala.Revelada;
     }

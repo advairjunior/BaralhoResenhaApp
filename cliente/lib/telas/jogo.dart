@@ -9,6 +9,7 @@ import 'casais.dart';
 import 'controles_do_anfitriao.dart';
 import 'cronometro.dart';
 import 'imagem_e_acao.dart';
+import 'jokenpo.dart';
 import 'correio.dart';
 import 'configuracao_do_jogo.dart';
 import 'momentos.dart';
@@ -93,8 +94,16 @@ class Jogo extends StatelessWidget {
                   CartaQueVira(key: ValueKey(rodada.numero), rodada: rodada),
                 _BarraDaCarta(esquenta: visao.esquenta, souAnfitriao: visao.souAnfitriao, acoes: acoes),
                 const SizedBox(height: EspacoBaralho.base),
-                if (segundosDaCarta(rodada.texto) case final segundos? when rodada.revelacao == null)
-                  Cronometro(key: ValueKey('cronometro-${rodada.numero}'), segundos: segundos),
+                // A mímica tem o cronômetro no painel dela.
+                if (rodada.cronometroSegundos != null &&
+                    rodada.revelacao == null &&
+                    rodada.modo != ModoDeJogo.imagemEAcao)
+                  Cronometro(
+                    key: ValueKey('cronometro-${rodada.numero}'),
+                    visao: visao,
+                    rodada: rodada,
+                    aoIniciar: acoes.iniciarCronometro,
+                  ),
                 HoraDoGole(visao: visao),
                 _AreaDeAcao(visao: visao, rodada: rodada, acoes: acoes),
               ],
@@ -232,6 +241,8 @@ class _AreaDeAcao extends StatelessWidget {
             ModoDeJogo.euNunca => _RevelacaoEuNunca(visao: visao, revelacao: revelacao),
             ModoDeJogo.casaisEmJogo => RevelacaoDoCasal(visao: visao, rodada: rodada, acoes: acoes),
             ModoDeJogo.tribunal => _RevelacaoDoTribunal(visao: visao, rodada: rodada, revelacao: revelacao),
+            ModoDeJogo.maisProvavel when rodada.jokenpo =>
+              RevelacaoDoJokenpo(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.maisProvavel when rodada.duelo =>
               _RevelacaoDoDuelo(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.imagemEAcao => RevelacaoDaMimica(visao: visao, rodada: rodada, revelacao: revelacao),
@@ -274,6 +285,7 @@ class _AreaDeAcao extends StatelessWidget {
             ProximaCarta(visao: visao, aoTocar: acoes.proxima),
           ],
         ),
+      ModoDeJogo.maisProvavel when rodada.jokenpo => PainelDoJokenpo(visao: visao, rodada: rodada, acoes: acoes),
       ModoDeJogo.maisProvavel when rodada.duelo => _Respondendo(
           visao: visao,
           rodada: rodada,
@@ -505,8 +517,8 @@ class _MePegou extends StatelessWidget {
         SizedBox(
           height: 64,
           child: rodada.euBebi
-              ? FilledButton(onPressed: acoes.alternarBebi, child: Text('Me pegou! ${_unidade(visao.eu)} ✓'))
-              : OutlinedButton(onPressed: acoes.alternarBebi, child: Text('Me pegou! ${_unidade(visao.eu)}')),
+              ? FilledButton(onPressed: acoes.alternarBebi, child: Text('${_mePegou(visao, rodada)} ✓'))
+              : OutlinedButton(onPressed: acoes.alternarBebi, child: Text(_mePegou(visao, rodada))),
         ),
         const SizedBox(height: EspacoBaralho.medio),
         Text(
@@ -521,7 +533,14 @@ class _MePegou extends StatelessWidget {
   }
 }
 
-String _unidade(Jogador jogador) => jogador.semAlcool ? '⭐' : '🍺';
+/// "Me pegou! 🍺"; na dose, quanto bebe de verdade.
+String _mePegou(VisaoDaSala visao, Rodada rodada) {
+  final unidade = visao.eu.semAlcool ? '⭐' : '🍺';
+  return switch (rodada.goles) {
+    final goles? => visao.eu.semAlcool ? 'Me pegou! +$goles $unidade' : 'Me pegou! Bebe $goles $unidade',
+    null => 'Me pegou! $unidade',
+  };
+}
 
 class _RevelacaoEuNunca extends StatelessWidget {
   const _RevelacaoEuNunca({required this.visao, required this.revelacao});

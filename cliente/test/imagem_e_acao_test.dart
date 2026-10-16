@@ -38,6 +38,7 @@ Map<String, dynamic> _mimica({
       'pedeResposta': false,
       'times': times,
       'dica': 'Ação · 3 palavras',
+      'cronometroSegundos': 60,
     },
   );
 }

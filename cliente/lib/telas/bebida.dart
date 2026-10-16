@@ -23,6 +23,7 @@ extension VisualDoRitmo on RitmoDaBebida {
 
 /// O que a carta fez com quem ela pegou.
 String destinoDoPego(VisaoDaSala visao, Jogador jogador) {
+  if (visao.rodada?.goles case final goles?) return jogador.semAlcool ? '+$goles pontos ⭐' : 'bebe $goles 🍺';
   if (jogador.semAlcool) return '+1 ponto ⭐';
   final porGole = visao.configuracao.pontosPorGole;
   if (porGole == 1 || (visao.rodada?.bebemAgora.contains(jogador.id) ?? false)) return 'bebe 🍺';
@@ -44,13 +45,16 @@ class HoraDoGole extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rodada = visao.rodada;
-    // No Raiz todo ponto já diz "bebe": a faixa seria repetição.
-    if (rodada == null || visao.configuracao.pontosPorGole == 1) return const SizedBox.shrink();
+    if (rodada == null) return const SizedBox.shrink();
+    final dose = rodada.goles;
+    // No Raiz todo ponto já diz "bebe": a faixa seria repetição (menos na dose).
+    if (dose == null && visao.configuracao.pontosPorGole == 1) return const SizedBox.shrink();
     final nomes = [for (final id in rodada.bebemAgora) ?visao.jogador(id)?.nome];
     if (nomes.isEmpty) return const SizedBox.shrink();
     final quem = nomes.length == 1
         ? '${nomes.single} bebe'
         : '${nomes.take(nomes.length - 1).join(', ')} e ${nomes.last} bebem';
+    final texto = dose == null ? '🍺 Cofrinho cheio! $quem agora.' : '🍺 Dose! $quem $dose agora.';
     return Container(
       key: const Key('hora-do-gole'),
       margin: const EdgeInsets.only(bottom: EspacoBaralho.base),
@@ -60,7 +64,7 @@ class HoraDoGole extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: CoresBaralho.ambar),
       ),
-      child: Text('🍺 Cofrinho cheio! $quem agora.',
+      child: Text(texto,
           textAlign: TextAlign.center,
           style: const TextStyle(color: CoresBaralho.ambar, fontWeight: FontWeight.w600, fontSize: 16)),
     );

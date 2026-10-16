@@ -38,6 +38,7 @@ void main() {
       await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
 
       expect(find.text('⚔️ DUELO · A TURMA VOTA'), findsOneWidget);
+      expect(find.text('QUEM É MAIS PROVÁVEL'), findsNothing);
       await rolarAte(tester, find.text('0 de 2 votaram'));
       expect(find.text('Quem mandou melhor?'), findsOneWidget);
       expect(find.byKey(const Key('votar-bia')), findsOneWidget);

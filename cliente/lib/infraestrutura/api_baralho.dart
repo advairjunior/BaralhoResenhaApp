@@ -96,6 +96,10 @@ class ApiBaralho {
       _visao('POST', '/api/salas/${_codigo(codigo)}/mimica', token,
           corpo: {'rodada': rodada, 'vencedor': vencedor});
 
+  /// Cronômetro da carta: quem criou a sala dá o valendo (de novo, recomeça).
+  Future<VisaoDaSala> iniciarCronometro(String codigo, String token, int rodada) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/cronometro', token, corpo: {'rodada': rodada});
+
   /// "Tira essa": a carta sai do baralho da noite e vem outra.
   Future<VisaoDaSala> tirar(String codigo, String token, int rodada) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/tirar', token, corpo: {'rodada': rodada});

@@ -181,6 +181,7 @@ class Revelacao {
     this.escolhidos = const [],
     this.bilhetes = const [],
     this.timeVencedor,
+    this.jogadas = const {},
   });
 
   factory Revelacao.deJson(Map<String, dynamic> json) => Revelacao(
@@ -198,6 +199,7 @@ class Revelacao {
         escolhidos: List<String>.from((json['escolhidos'] as List?) ?? const []),
         bilhetes: List<String>.from((json['bilhetes'] as List?) ?? const []),
         timeVencedor: json['timeVencedor'] as int?,
+        jogadas: Map<String, String>.from((json['jogadas'] as Map?) ?? const {}),
       );
 
   final List<String> jaFizeram;
@@ -221,6 +223,9 @@ class Revelacao {
 
   /// Imagem e Ação: o time que acertou; nulo quando ninguém acertou.
   final int? timeVencedor;
+
+  /// Pedra, papel e tesoura: o que cada um dos dois jogou.
+  final Map<String, String> jogadas;
 }
 
 /// Imagem e Ação: quem faz a mímica e quem adivinha (o mímico está junto).
@@ -257,6 +262,11 @@ class Rodada {
     this.duelistas = const [],
     this.times = const [],
     this.dica,
+    this.goles,
+    this.jokenpo = false,
+    this.empates = const [],
+    this.cronometroSegundos,
+    this.cronometroRestanteMs,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -286,6 +296,11 @@ class Rodada {
             TimeDaMimica.deJson(time as Map<String, dynamic>),
         ],
         dica: json['dica'] as String?,
+        goles: json['goles'] as int?,
+        jokenpo: json['jokenpo'] as bool? ?? false,
+        empates: List<String>.from((json['empates'] as List?) ?? const []),
+        cronometroSegundos: json['cronometroSegundos'] as int?,
+        cronometroRestanteMs: json['cronometroRestanteMs'] as int?,
       );
 
   final int numero;
@@ -331,6 +346,19 @@ class Rodada {
 
   /// Imagem e Ação: o que o mímico pode dizer.
   final String? dica;
+
+  /// "Bebe 2": gole de verdade, fora do cofrinho.
+  final int? goles;
+
+  /// Duelo de pedra, papel e tesoura.
+  final bool jokenpo;
+
+  /// Pedra, papel e tesoura: as jogadas que empataram.
+  final List<String> empates;
+
+  /// Cronômetro da carta: quanto dura e quanto falta (nulo antes do valendo).
+  final int? cronometroSegundos;
+  final int? cronometroRestanteMs;
 }
 
 class Momento {

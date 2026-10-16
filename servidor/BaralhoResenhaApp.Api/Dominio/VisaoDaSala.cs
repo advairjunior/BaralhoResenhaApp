@@ -29,7 +29,12 @@ public sealed record RodadaVisivel(
     IReadOnlyList<Guid> Vacilaram,
     IReadOnlyList<Guid> Duelistas,
     IReadOnlyList<TimeDaMimica> Times,
-    string? Dica);
+    string? Dica,
+    int? Goles,
+    bool Jokenpo,
+    IReadOnlyList<string> Empates,
+    int? CronometroSegundos,
+    int? CronometroRestanteMs);
 
 /// <summary>Esquenta sozinho: em que nível a noite está e quando sobe.</summary>
 /// <param name="SobeEm">Cartas até subir; nulo quando já chegou ao limite.</param>
@@ -97,7 +102,12 @@ public sealed record VisaoDaSala(
                     rodada.Vacilaram.ToList(),
                     rodada.Duelistas,
                     rodada.Times,
-                    rodada.Dica),
+                    rodada.Dica,
+                    rodada.Carta.Goles,
+                    rodada.Carta.Jokenpo,
+                    rodada.Empates.ToList(),
+                    rodada.SegundosDoCronometro,
+                    sala.RestanteDoCronometro(rodada)),
             sala.Regra,
             sala.Momentos.Select(m => new MomentoVisivel(
                 m.Id, m.JogadorId, m.NomeDoJogador, m.Rodada, m.Texto, Endereco(m.Foto))).ToList(),

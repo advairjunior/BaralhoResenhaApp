@@ -7,9 +7,6 @@ import 'cronometro.dart';
 import 'sala.dart';
 import 'visual.dart';
 
-/// Tempo de cada mímica.
-const segundosDaMimica = 60;
-
 /// Cor de cada time, na ordem em que o servidor manda.
 const coresDosTimes = ['🔴', '🔵', '🟢'];
 
@@ -48,7 +45,7 @@ class PainelDaMimica extends StatelessWidget {
         else
           for (final (indice, time) in rodada.times.indexed) _Time(visao: visao, time: time, indice: indice),
         const SizedBox(height: EspacoBaralho.base),
-        Cronometro(key: ValueKey('mimica-${rodada.numero}'), segundos: segundosDaMimica),
+        Cronometro(key: ValueKey('mimica-${rodada.numero}'), visao: visao, rodada: rodada, aoIniciar: acoes.iniciarCronometro),
         if (visao.souAnfitriao) ...[
           if (umaPessoaSo)
             FilledButton(onPressed: () => acoes.resultadoDaMimica(0), child: const Text('✅ Acertaram!'))

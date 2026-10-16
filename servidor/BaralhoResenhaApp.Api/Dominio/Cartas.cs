@@ -57,6 +57,8 @@ public enum NivelDaCarta
     Original = 4
 }
 
+/// <param name="Jokenpo">Duelo de pedra, papel e tesoura: os dois escolhem no celular, sem votação.</param>
+/// <param name="Goles">"Bebe 2": quem a carta pega bebe isso de verdade, fora do cofrinho.</param>
 /// <param name="Destaque">Das melhores do nível: só elas aparecem quando a noite está num nível acima.</param>
 /// <param name="Categoria">Imagem e Ação: a dica que o mímico pode dizer (Ação, Objeto, Filme…).</param>
 /// <param name="Duelo">Quem é mais provável: {jogador} contra {jogador2}, a turma vota em quem mandou melhor.</param>
@@ -77,7 +79,9 @@ public sealed record Carta(
     IReadOnlyList<string>? Iscas = null,
     bool Duelo = false,
     string? Categoria = null,
-    bool Destaque = false);
+    bool Destaque = false,
+    bool Jokenpo = false,
+    int? Goles = null);
 
 /// <summary>De onde saem as iscas das regras-relâmpago.</summary>
 /// <param name="Perguntas">Perguntas abertas, para a pessoa ter que falar bastante.</param>

@@ -138,6 +138,11 @@ app.MapPost("/api/salas/{codigo}/mimica", (
     Agir(codigo, http, salas, notificador,
         (sala, token) => sala.ResultadoDaMimica(token, requisicao.Rodada, requisicao.Vencedor)));
 
+app.MapPost("/api/salas/{codigo}/cronometro", (
+    string codigo, AcaoNaRodada requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.IniciarCronometro(token, requisicao.Rodada)));
+
 app.MapPost("/api/salas/{codigo}/tirar", (
     string codigo, AcaoNaRodada requisicao, HttpRequest http,
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
