@@ -107,8 +107,7 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
     final token = _token;
     if (token == null) return;
     try {
-      final visao = await widget.api.visao(_codigo, token);
-      if (mounted) setState(() => _visao = visao);
+      _mostrar(await widget.api.visao(_codigo, token));
     } on FalhaNaApi catch (falha) {
       if (falha.perdeuASala) await _perderASala();
     } finally {
@@ -131,8 +130,7 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
     if (token == null || _ocupado) return;
     setState(() => _ocupado = true);
     try {
-      final visao = await acao(token);
-      if (mounted) setState(() => _visao = visao);
+      _mostrar(await acao(token));
     } on FalhaNaApi catch (falha) {
       if (falha.perdeuASala) {
         await _perderASala();
@@ -144,6 +142,13 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
     }
   }
 
+  /// Desenha a visão nova e lembra a carta, para a próxima noite não começar por ela.
+  void _mostrar(VisaoDaSala visao) {
+    final carta = visao.rodada?.cartaId;
+    if (carta != null && carta != _visao?.rodada?.cartaId) widget.sessoes.marcarVista(carta);
+    if (mounted) setState(() => _visao = visao);
+  }
+
   int get _rodada => _visao?.rodada?.numero ?? 0;
 
   @override
@@ -151,7 +156,8 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
       _agir((token) => widget.api.configurar(_codigo, token, configuracao));
 
   @override
-  Future<void> comecar() => _agir((token) => widget.api.comecar(_codigo, token));
+  Future<void> comecar() => _agir(
+      (token) async => widget.api.comecar(_codigo, token, vistas: await widget.sessoes.cartasVistas()));
 
   @override
   Future<void> responder(String resposta) =>

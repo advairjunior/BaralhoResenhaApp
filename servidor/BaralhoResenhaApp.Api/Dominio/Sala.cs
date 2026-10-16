@@ -326,7 +326,11 @@ public sealed partial class Sala
         }
     }
 
-    public void Comecar(string token)
+    /// <param name="vistas">
+    /// Cartas que já saíram nas noites anteriores (o celular de quem criou a sala
+    /// lembra): vão para o fim do monte, e a noite não começa sempre pelas mesmas.
+    /// </param>
+    public void Comecar(string token, IEnumerable<string>? vistas = null)
     {
         lock (_trinco)
         {
@@ -334,6 +338,8 @@ public sealed partial class Sala
             if (Fase != FaseDaSala.Lobby) return;
             if (_jogadores.Count < 2)
                 throw new AcaoNaoPermitidaException("Chame pelo menos mais uma pessoa para começar.");
+            var existentes = _baralho.Cartas.Select(carta => carta.Id).ToHashSet();
+            _usadas.UnionWith((vistas ?? []).Where(existentes.Contains));
             ComecouEm = _relogio.GetUtcNow();
             foreach (var jogador in _jogadores) DarCarta(jogador);
             Distribuir();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'apoio.dart';
 
@@ -17,6 +18,28 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Eu nunca dormi no sofá depois de uma briga.'), findsOneWidget);
+    await fecharApp(tester);
+  });
+
+  testWidgets('o celular lembra as cartas que saíram e manda ao começar a próxima noite', (tester) async {
+    final servidor = ServidorFalso()
+      ..respostas['GET /api/salas/ABCD'] = visaoJson()
+      ..respostas['POST /api/salas/ABCD/comecar'] =
+          visaoJson(fase: 'Carta', rodada: {...rodadaJson(), 'cartaId': 'en-009'});
+    await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: {
+      ..._logado,
+      'cartas_vistas': ['en-001', 'bs-002'],
+    });
+
+    await rolarAte(tester, find.text('Começar a resenha 🍻'));
+    await tester.tap(find.text('Começar a resenha 🍻'));
+    await tester.pumpAndSettle();
+
+    expect(servidor.recebidas.last.corpo, {
+      'vistas': ['en-001', 'bs-002'],
+    });
+    final guardadas = (await SharedPreferences.getInstance()).getStringList('cartas_vistas');
+    expect(guardadas, ['en-001', 'bs-002', 'en-009']);
     await fecharApp(tester);
   });
 

@@ -6,6 +6,10 @@ class SessoesLocais {
   static const _prefixoSala = 'sala_';
   static const _chaveNome = 'ultimo_nome';
   static const _chaveSemAlcool = 'sem_alcool';
+  static const _chaveCartasVistas = 'cartas_vistas';
+
+  /// Cartas guardadas: o bastante para lembrar várias noites sem pesar no aparelho.
+  static const _limiteDeCartasVistas = 600;
 
   Future<String?> token(String codigo) async =>
       (await SharedPreferences.getInstance()).getString('$_prefixoSala${codigo.toUpperCase()}');
@@ -22,6 +26,20 @@ class SessoesLocais {
       nome: preferencias.getString(_chaveNome) ?? '',
       semAlcool: preferencias.getBool(_chaveSemAlcool) ?? false,
     );
+  }
+
+  /// Cartas que já saíram neste aparelho, da mais antiga à mais nova.
+  Future<List<String>> cartasVistas() async =>
+      (await SharedPreferences.getInstance()).getStringList(_chaveCartasVistas) ?? const [];
+
+  /// Lembra a carta para a próxima noite não começar pelas mesmas.
+  Future<void> marcarVista(String cartaId) async {
+    final preferencias = await SharedPreferences.getInstance();
+    final vistas = [...?preferencias.getStringList(_chaveCartasVistas)]
+      ..remove(cartaId)
+      ..add(cartaId);
+    final excesso = vistas.length - _limiteDeCartasVistas;
+    await preferencias.setStringList(_chaveCartasVistas, excesso > 0 ? vistas.sublist(excesso) : vistas);
   }
 
   Future<void> lembrar({required String nome, required bool semAlcool}) async {

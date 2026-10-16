@@ -335,6 +335,7 @@ class Rodada {
     this.passaEmMs,
     this.seguradaPor,
     this.pendentes = const [],
+    this.cartaId,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -381,6 +382,7 @@ class Rodada {
           for (final pendente in (json['pendentes'] as List?) ?? const [])
             Pendente.deJson(pendente as Map<String, dynamic>),
         ],
+        cartaId: json['cartaId'] as String?,
       );
 
   final int numero;
@@ -460,6 +462,9 @@ class Rodada {
 
   /// Quem ainda tem que beber, contar a história… antes de a carta passar sozinha.
   final List<Pendente> pendentes;
+
+  /// Id da carta no baralho: o celular lembra as que já saíram.
+  final String? cartaId;
 }
 
 class Momento {

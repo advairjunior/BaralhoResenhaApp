@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using BaralhoResenhaApp.Api.Dominio;
 using BaralhoResenhaApp.Api.Infraestrutura;
 
@@ -193,8 +195,9 @@ app.MapPut("/api/salas/{codigo}/configuracao", (
     Agir(codigo, http, salas, notificador, (sala, token) => sala.Configurar(token, configuracao)));
 
 app.MapPost("/api/salas/{codigo}/comecar", (
-    string codigo, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
-    Agir(codigo, http, salas, notificador, (sala, token) => sala.Comecar(token)));
+    string codigo, [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] ComecarNoite? requisicao,
+    HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.Comecar(token, requisicao?.Vistas)));
 
 app.MapPost("/api/salas/{codigo}/respostas", (
     string codigo, ResponderCarta requisicao, HttpRequest http,
@@ -281,6 +284,8 @@ public sealed record EntrarNaSala(string Nome, bool SemAlcool = false);
 public sealed record EntradaNaSala(string Codigo, string Token);
 public sealed record ResponderCarta(int Rodada, string Resposta);
 public sealed record AcaoNaRodada(int Rodada);
+/// <param name="Vistas">Cartas das noites anteriores, guardadas no celular de quem criou a sala.</param>
+public sealed record ComecarNoite(IReadOnlyList<string>? Vistas);
 public sealed record DefinirPar(Guid? ParId);
 public sealed record JulgarPalpite(int Rodada, bool Acertou);
 public sealed record MarcarApontado(int Rodada, Guid JogadorId);
