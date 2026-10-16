@@ -32,6 +32,8 @@ Map<String, dynamic> _comRegra({
         'alvo': 'caio',
         'isca': desafio['tipo'],
         'desafio': desafio,
+        // Entrevista: só quem está na regra vacila; regra da mesa: todo mundo.
+        'podemVacilar': desafio['tipo'] == 'Entrevista' ? ['caio'] : ['ana', 'bia', 'caio'],
       },
     );
 
@@ -80,6 +82,20 @@ void main() {
       expect(servidor.recebidas.last.rota, 'POST /api/salas/ABCD/vacilo');
       expect(servidor.recebidas.last.corpo, {'rodada': 1, 'jogadorId': 'caio'});
       expect(find.text('🚨 Vacilou: Caio'), findsOneWidget);
+      await fecharApp(tester);
+    });
+
+    testWidgets('na regra de uma pessoa, só ela aparece para marcar o vacilo', (tester) async {
+      final servidor = ServidorFalso()
+        ..respostas['GET /api/salas/ABCD'] = _comRegra(modo: 'BebaSe', desafio: {..._entrevista, 'textos': ['Qual seu talento escondido?']});
+      await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+      await tester.tap(find.text('🚨 Alguém vacilou?'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('vacilou-caio')), findsOneWidget);
+      expect(find.byKey(const Key('vacilou-bia')), findsNothing);
+      expect(find.byKey(const Key('vacilou-ana')), findsNothing);
       await fecharApp(tester);
     });
 

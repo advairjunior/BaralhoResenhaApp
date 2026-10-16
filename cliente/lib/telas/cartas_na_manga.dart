@@ -343,8 +343,9 @@ Future<void> abrirGuiaDasCartas(BuildContext context) => showModalBottomSheet<vo
   ),
 );
 
-/// Tinta das cartas: o "2" do Dobra e os emojis de texto ficam escuros no papel claro.
-const _tinta = Color(0xFF241812);
+/// Alguns navegadores desenham o 🛡️ e o ✖️ com uma cor só, a do texto (branca no tema
+/// escuro). Com a cor da moldura, esses saem na cor da carta; emoji colorido ignora a cor.
+Color _corDoEmoji(CartaNaManga carta) => carta.cor;
 
 /// A carta na manga com cara de carta de baralho: papel claro, moldura na cor
 /// da carta, o emoji grande e o nome. A que vale agora brilha.
@@ -389,7 +390,7 @@ class Cartinha extends StatelessWidget {
             Positioned(
               top: 3,
               left: 4,
-              child: Text(carta.emoji, style: TextStyle(fontSize: largura * 0.13, color: _tinta)),
+              child: Text(carta.emoji, style: TextStyle(fontSize: largura * 0.13, color: _corDoEmoji(carta))),
             ),
             Positioned.fill(
               child: Padding(
@@ -402,7 +403,7 @@ class Cartinha extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(carta.emoji, style: TextStyle(fontSize: largura * 0.42, color: _tinta)),
+                        Text(carta.emoji, style: TextStyle(fontSize: largura * 0.42, color: _corDoEmoji(carta))),
                         SizedBox(height: largura * 0.04),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 2),

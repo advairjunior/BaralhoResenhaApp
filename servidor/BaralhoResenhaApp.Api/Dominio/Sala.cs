@@ -107,6 +107,15 @@ public sealed class Rodada
     /// <summary>Cartas na manga usadas nesta carta, na ordem.</summary>
     public List<UsoDeCarta> Usos { get; } = [];
 
+    /// <summary>Quem já respondeu ou marcou "Pronto" (passar a carta sozinho).</summary>
+    public HashSet<Guid> Prontos { get; } = [];
+
+    /// <summary>Quando a carta passa sozinha; nulo sem contagem.</summary>
+    public DateTimeOffset? PassaEm { get; set; }
+
+    /// <summary>Quem tocou em "Segura aí"; aí só quem criou a sala passa.</summary>
+    public string? SeguradaPor { get; set; }
+
     /// <summary>Quem ganhou carta na manga nesta carta.</summary>
     public List<Guid> Ganharam { get; } = [];
     public Revelacao? Revelacao { get; set; }
@@ -173,6 +182,9 @@ public sealed record Revelacao(
     /// <summary>Quem é mais provável: os mais votados, bebam (normal) ou não (elogio).</summary>
     public IReadOnlyList<Guid> Escolhidos { get; init; } = [];
 
+    /// <summary>Eu Nunca: a maioria já fez, então quem leva é quem nunca fez.</summary>
+    public bool MinoriaLeva { get; init; }
+
     /// <summary>Imagem e Ação: o time que acertou; nulo quando ninguém acertou.</summary>
     public int? TimeVencedor { get; init; }
 
@@ -195,6 +207,9 @@ public sealed record RegraAtiva(string Texto, int RodadasRestantes)
 
     /// <summary>A isca desta carta; muda a cada carta enquanto a regra vale.</summary>
     public DesafioDaRegra? Desafio { get; init; }
+
+    /// <summary>Quem pode ser marcado como vacilão: na regra de uma pessoa, só ela.</summary>
+    public IReadOnlyList<Guid> PodemVacilar { get; init; } = [];
 }
 
 /// <summary>
@@ -281,6 +296,7 @@ public sealed partial class Sala
             if (jogador.Anfitriao && _jogadores.Count > 0)
                 _jogadores[0].Anfitriao = true;
             RevelarSeTodosResponderam();
+            ConferirProntos();
             Tocar();
         }
     }
@@ -389,8 +405,7 @@ public sealed partial class Sala
         {
             ExigirAnfitriao(token, SoQuemCriouPuxaCarta);
             if (Fase is FaseDaSala.Lobby or FaseDaSala.Fim || !RodadaEmAndamento(numeroDaRodada)) return;
-            if (Rodada!.Carta.Modo != ModoDeJogo.RegraRelampago) GastarUmaCartaDaRegra();
-            Distribuir();
+            AvancarCarta();
             Tocar();
         }
     }
@@ -410,6 +425,9 @@ public sealed partial class Sala
                 Rodada.Beberam.Add(jogador.Id);
                 Punir(jogador);
             }
+            // Respondeu (pegou ou desmarcou): conta para passar sozinho.
+            Rodada.Prontos.Add(jogador.Id);
+            ConferirProntos();
             Tocar();
         }
     }
@@ -602,8 +620,14 @@ public sealed partial class Sala
         {
             var ja = respostas.Where(r => r.Value == RespostaJa).Select(r => r.Key).ToList();
             var nunca = respostas.Where(r => r.Value == RespostaNunca).Select(r => r.Key).ToList();
-            revelacao = new Revelacao(ja, nunca, [], ja,
-                ja.Count == 1 && respostas.Count >= 2 ? ja[0] : null);
+            // Virada: todo mundo já fez, ninguém leva; a maioria já fez, leva quem nunca fez.
+            var minoriaLeva = nunca.Count > 0 && ja.Count > nunca.Count;
+            IReadOnlyList<Guid> perderam = nunca.Count == 0 ? [] : minoriaLeva ? nunca : ja;
+            revelacao = new Revelacao(ja, nunca, [], perderam,
+                ja.Count == 1 && respostas.Count >= 2 ? ja[0] : null)
+            {
+                MinoriaLeva = minoriaLeva
+            };
             foreach (var jogador in _jogadores)
             {
                 if (ja.Contains(jogador.Id)) jogador.Estatisticas.JaFiz++;

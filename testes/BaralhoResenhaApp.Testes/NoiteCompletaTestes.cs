@@ -157,6 +157,7 @@ public sealed class NoiteCompletaTestes
         var mesa = MontarMesa(ModoDeJogo.EuNunca);
         var rodada = mesa.Sala.Rodada!.Numero;
         mesa.Sala.Responder(mesa.Ana.Token, rodada, Sala.RespostaJa);
+        mesa.Sala.Responder(mesa.Beto.Token, rodada, Sala.RespostaNunca);
         mesa.Sala.Revelar(mesa.Ana.Token, rodada);
 
         Assert.Throws<AcaoNaoPermitidaException>(() => mesa.Sala.Encerrar(mesa.Beto.Token));

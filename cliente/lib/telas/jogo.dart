@@ -15,6 +15,7 @@ import 'jokenpo.dart';
 import 'correio.dart';
 import 'configuracao_do_jogo.dart';
 import 'momentos.dart';
+import 'passar_sozinho.dart';
 import 'regra_em_jogo.dart';
 import 'sala.dart';
 import 'suspense_da_votacao.dart';
@@ -112,6 +113,7 @@ class Jogo extends StatelessWidget {
                 HoraDoGole(visao: visao),
                 UsosDasCartas(visao: visao, rodada: rodada),
                 _AreaDeAcao(visao: visao, rodada: rodada, acoes: acoes),
+                PassarSozinho(key: ValueKey('passar-${rodada.numero}'), visao: visao, rodada: rodada, acoes: acoes),
                 MinhaMao(visao: visao, rodada: rodada, acoes: acoes),
               ],
             ),
@@ -529,12 +531,33 @@ class _MePegou extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          height: 64,
-          child: rodada.euBebi
-              ? FilledButton(onPressed: acoes.alternarBebi, child: Text('${_mePegou(visao, rodada)} ✓'))
-              : OutlinedButton(onPressed: acoes.alternarBebi, child: Text(_mePegou(visao, rodada))),
-        ),
+        Row(children: [
+          Expanded(
+            flex: 3,
+            child: SizedBox(
+              height: 64,
+              child: rodada.euBebi
+                  ? FilledButton(onPressed: acoes.alternarBebi, child: Text('${_mePegou(visao, rodada)} ✓'))
+                  : OutlinedButton(onPressed: acoes.alternarBebi, child: Text(_mePegou(visao, rodada))),
+            ),
+          ),
+          if (visao.configuracao.passarSozinho) ...[
+            const SizedBox(width: EspacoBaralho.pequeno),
+            Expanded(
+              flex: 2,
+              child: SizedBox(
+                height: 64,
+                // Quem já respondeu que não pegou vê o botão marcado.
+                child: !rodada.euBebi && rodada.prontos.contains(visao.euId)
+                    ? FilledButton(onPressed: null, child: const Text('Não me pegou ✓'))
+                    : OutlinedButton(
+                        onPressed: rodada.euBebi ? null : acoes.marcarPronto,
+                        child: const Text('Não me pegou 👍'),
+                      ),
+              ),
+            ),
+          ],
+        ]),
         const SizedBox(height: EspacoBaralho.medio),
         Text(
           beberam.isEmpty ? 'Marque se a carta pegou você.' : 'Pegou: ${beberam.map((j) => _comDestino(rodada, visao, j)).join(', ')}',
@@ -579,7 +602,9 @@ class _RevelacaoEuNunca extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ja = [for (final id in revelacao.jaFizeram) ?visao.jogador(id)];
+    final nunca = [for (final id in revelacao.nuncaFizeram) ?visao.jogador(id)];
     final historia = revelacao.contaAHistoria == null ? null : visao.jogador(revelacao.contaAHistoria!);
+    final titulo = Theme.of(context).textTheme.titleMedium;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -588,7 +613,18 @@ class _RevelacaoEuNunca extends StatelessWidget {
           _DestaqueDaHistoria(visao: visao, jogador: historia)
         else if (ja.isEmpty)
           const _Recado(emoji: '😇', texto: 'Ninguém fez! Que turma comportada…')
-        else ...[
+        else if (nunca.isEmpty) ...[
+          Text('Todo mundo já fez! Ninguém leva ponto 🙈', textAlign: TextAlign.center, style: titulo),
+          const SizedBox(height: EspacoBaralho.medio),
+          _ListaDePerdedores(visao: visao, jogadores: ja, mostrarDestino: false),
+        ] else if (revelacao.minoriaLeva) ...[
+          Text('Virou! A maioria já fez, então leva quem nunca fez 😇', textAlign: TextAlign.center, style: titulo),
+          const SizedBox(height: EspacoBaralho.medio),
+          _ListaDePerdedores(visao: visao, jogadores: nunca),
+          const SizedBox(height: EspacoBaralho.medio),
+          Text('Já fizeram: ${ja.map((j) => j.nome).join(', ')}',
+              textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoApagado)),
+        ] else ...[
           Text(ja.length == 1 ? 'Já fez:' : 'Já fizeram (${ja.length}):',
               textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: EspacoBaralho.medio),
@@ -725,11 +761,19 @@ class _VotosDeTodos extends StatelessWidget {
 }
 
 class _ListaDePerdedores extends StatelessWidget {
-  const _ListaDePerdedores({required this.visao, required this.jogadores, this.elogio = false});
+  const _ListaDePerdedores({
+    required this.visao,
+    required this.jogadores,
+    this.elogio = false,
+    this.mostrarDestino = true,
+  });
 
   final VisaoDaSala visao;
   final List<Jogador> jogadores;
   final bool elogio;
+
+  /// Falso quando ninguém leva (todo mundo já fez): só as fotos.
+  final bool mostrarDestino;
 
   @override
   Widget build(BuildContext context) {
@@ -745,8 +789,9 @@ class _ListaDePerdedores extends StatelessWidget {
               AvatarDoJogador(jogador: jogador, tamanho: 84, destaque: CoresBaralho.ambar),
               const SizedBox(height: EspacoBaralho.mini),
               Text(jogador.nome, maxLines: 1, overflow: TextOverflow.ellipsis),
-              Text(destinoDoEscolhido(visao, jogador, elogio: elogio),
-                  style: const TextStyle(fontSize: 12, color: CoresBaralho.ambar)),
+              if (mostrarDestino)
+                Text(destinoDoEscolhido(visao, jogador, elogio: elogio),
+                    style: const TextStyle(fontSize: 12, color: CoresBaralho.ambar)),
             ]),
           ),
       ],

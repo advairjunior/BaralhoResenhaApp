@@ -134,6 +134,18 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
           ],
         ),
         SwitchListTile(
+          key: const Key('passar-sozinho'),
+          contentPadding: EdgeInsets.zero,
+          value: configuracao.passarSozinho,
+          onChanged: podeEditar ? (ligado) => aoMudar(configuracao.copiar(passarSozinho: ligado)) : null,
+          title: const Text('⏩  Passar a carta sozinho'),
+          subtitle: const Text(
+            'Quando todo mundo responde ou marca "Pronto", a carta passa em 3 segundos. '
+            'Qualquer um pode segurar.',
+            style: TextStyle(color: CoresBaralho.textoApagado),
+          ),
+        ),
+        SwitchListTile(
           key: const Key('cartas-na-manga'),
           contentPadding: EdgeInsets.zero,
           value: configuracao.cartasNaManga,

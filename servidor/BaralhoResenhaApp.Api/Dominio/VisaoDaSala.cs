@@ -37,7 +37,10 @@ public sealed record RodadaVisivel(
     int? CronometroRestanteMs,
     IReadOnlyList<UsoDeCarta> Usos,
     IReadOnlyList<Guid> Ganharam,
-    IReadOnlyList<Guid> Pegos);
+    IReadOnlyList<Guid> Pegos,
+    IReadOnlyList<Guid> Prontos,
+    int? PassaEmMs,
+    string? SeguradaPor);
 
 /// <summary>Esquenta sozinho: em que nível a noite está e quando sobe.</summary>
 /// <param name="SobeEm">Cartas até subir; nulo quando já chegou ao limite.</param>
@@ -115,8 +118,11 @@ public sealed record VisaoDaSala(
                     sala.RestanteDoCronometro(rodada),
                     rodada.Usos.ToList(),
                     rodada.Ganharam.ToList(),
-                    rodada.Contas.Where(c => !c.Value.Vazia).Select(c => c.Key).ToList()),
-            sala.Regra,
+                    rodada.Contas.Where(c => !c.Value.Vazia).Select(c => c.Key).ToList(),
+                    rodada.Prontos.ToList(),
+                    sala.RestanteParaPassar(rodada),
+                    rodada.SeguradaPor),
+            sala.Regra is { } regra ? regra with { PodemVacilar = sala.QuemPodeVacilar(regra) } : null,
             sala.Momentos.Select(m => new MomentoVisivel(
                 m.Id, m.JogadorId, m.NomeDoJogador, m.Rodada, m.Texto, Endereco(m.Foto))).ToList(),
             fim ? PremiosDaNoite.Calcular(jogadores, sala.Casais()) : null,

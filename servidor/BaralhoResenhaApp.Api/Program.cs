@@ -149,6 +149,21 @@ app.MapPost("/api/salas/{codigo}/carta-na-manga", (
     Agir(codigo, http, salas, notificador,
         (sala, token) => sala.UsarCarta(token, requisicao.Rodada, requisicao.Carta, requisicao.Alvo)));
 
+app.MapPost("/api/salas/{codigo}/pronto", (
+    string codigo, AcaoNaRodada requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.MarcarPronto(token, requisicao.Rodada)));
+
+app.MapPost("/api/salas/{codigo}/segurar", (
+    string codigo, AcaoNaRodada requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.Segurar(token, requisicao.Rodada)));
+
+app.MapPost("/api/salas/{codigo}/passar-sozinho", (
+    string codigo, AcaoNaRodada requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.PassarSozinho(token, requisicao.Rodada)));
+
 app.MapPost("/api/salas/{codigo}/tirar", (
     string codigo, AcaoNaRodada requisicao, HttpRequest http,
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>

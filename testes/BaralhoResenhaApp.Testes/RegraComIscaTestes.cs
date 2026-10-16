@@ -134,6 +134,30 @@ public sealed class RegraComIscaTestes
     }
 
     [Fact]
+    public void NaRegraDeUmaPessoaSoEssaPessoaPodeVacilar()
+    {
+        var mesa = Montar(new("rr-1", ModoDeJogo.RegraRelampago, NivelDaCarta.Leve,
+            "{jogador} só pode falar cantando.", Isca: IscaDaRegra.Entrevista));
+        var cantor = mesa.Quem(mesa.Sala.Regra!.Alvo);
+        var outro = mesa.Todos.First(j => j.Id != cantor.Id);
+
+        var erro = Assert.Throws<AcaoNaoPermitidaException>(
+            () => mesa.Sala.MarcarVacilo(mesa.Ana.Token, mesa.Sala.Rodada!.Numero, outro.Id));
+        Assert.Equal($"Nessa regra, só {cantor.Nome} pode vacilar.", erro.Message);
+        Assert.Equal([cantor.Id], mesa.Sala.Visao(mesa.Ana.Token).Regra!.PodemVacilar);
+    }
+
+    [Fact]
+    public void NaRegraDaMesaQualquerUmPodeVacilar()
+    {
+        var mesa = Montar(new("rr-2", ModoDeJogo.RegraRelampago, NivelDaCarta.Leve,
+            "Proibido falar de trabalho.", Isca: IscaDaRegra.Conversa));
+
+        Assert.Equal(4, mesa.Sala.Visao(mesa.Ana.Token).Regra!.PodemVacilar.Count);
+        mesa.Sala.MarcarVacilo(mesa.Ana.Token, mesa.Sala.Rodada!.Numero, mesa.Todos[3].Id);
+    }
+
+    [Fact]
     public void SemRegraValendoNaoTemVacilo()
     {
         var sala = new Sala("ABCD", new Baralho([Comum], Banco), new Random(1));

@@ -22,6 +22,9 @@ public sealed partial class Sala
             if (Regra is null) throw new AcaoNaoPermitidaException("Não tem regra valendo agora.");
             var vacilao = _jogadores.FirstOrDefault(j => j.Id == jogadorId)
                 ?? throw new AcaoNaoPermitidaException("Essa pessoa não está na sala.");
+            if (!QuemPodeVacilar(Regra).Contains(vacilao.Id))
+                throw new AcaoNaoPermitidaException(
+                    $"Nessa regra, só {_jogadores.First(j => j.Id == Regra.Alvo).Nome} pode vacilar.");
             if (Rodada!.Vacilaram.Remove(vacilao.Id))
             {
                 Despegar(vacilao);
@@ -36,6 +39,15 @@ public sealed partial class Sala
             Tocar();
         }
     }
+
+    /// <summary>
+    /// Regra sobre a fala ou a risada de uma pessoa ("só pode falar cantando",
+    /// "proibido sorrir"): só ela vacila. Regra da mesa: qualquer um.
+    /// </summary>
+    internal IReadOnlyList<Guid> QuemPodeVacilar(RegraAtiva regra) =>
+        regra.Isca is IscaDaRegra.Entrevista or IscaDaRegra.Risada && _jogadores.Any(j => j.Id == regra.Alvo)
+            ? [regra.Alvo!.Value]
+            : _jogadores.Select(j => j.Id).ToList();
 
     private void ComecarRegra(Carta carta, string texto, Jogador? alvo)
     {

@@ -43,24 +43,28 @@ class _RegraEmJogoState extends State<RegraEmJogo> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (widget.mostrarTexto)
-            Row(children: [
-              const Text('⚡', style: TextStyle(fontSize: 20)),
-              const SizedBox(width: EspacoBaralho.medio),
-              Expanded(child: Text(regra.texto, style: const TextStyle(fontSize: 13, height: 1.35))),
-              const SizedBox(width: EspacoBaralho.pequeno),
-              Text(
-                regra.rodadasRestantes == 1 ? 'última\ncarta' : 'mais ${regra.rodadasRestantes}\ncartas',
-                textAlign: TextAlign.right,
-                style: const TextStyle(fontSize: 11, color: CoresBaralho.textoSecundario),
-              ),
-            ]),
+            Row(
+              children: [
+                const Text('⚡', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: EspacoBaralho.medio),
+                Expanded(child: Text(regra.texto, style: const TextStyle(fontSize: 13, height: 1.35))),
+                const SizedBox(width: EspacoBaralho.pequeno),
+                Text(
+                  regra.rodadasRestantes == 1 ? 'última\ncarta' : 'mais ${regra.rodadasRestantes}\ncartas',
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(fontSize: 11, color: CoresBaralho.textoSecundario),
+                ),
+              ],
+            ),
           if (regra.desafio case final desafio?) _Desafio(visao: visao, desafio: desafio, espaco: widget.mostrarTexto),
           if (vacilaram.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: EspacoBaralho.pequeno),
-              child: Text('🚨 Vacilou: ${vacilaram.map((j) => j.nome).join(', ')}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: CoresBaralho.coral, fontWeight: FontWeight.w600)),
+              child: Text(
+                '🚨 Vacilou: ${vacilaram.map((j) => j.nome).join(', ')}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: CoresBaralho.coral, fontWeight: FontWeight.w600),
+              ),
             ),
           if (visao.souAnfitriao) ...[
             TextButton(
@@ -74,22 +78,29 @@ class _RegraEmJogoState extends State<RegraEmJogo> {
                 runSpacing: EspacoBaralho.pequeno,
                 children: [
                   for (final jogador in visao.jogadores)
-                    GestureDetector(
-                      key: Key('vacilou-${jogador.id}'),
-                      onTap: () => widget.acoes.marcarVacilo(jogador.id),
-                      child: SizedBox(
-                        width: 64,
-                        child: Column(children: [
-                          AvatarDoJogador(
-                            jogador: jogador,
-                            tamanho: 44,
-                            destaque: rodada.vacilaram.contains(jogador.id) ? CoresBaralho.coral : null,
+                    if (regra.podemVacilar.isEmpty || regra.podemVacilar.contains(jogador.id))
+                      GestureDetector(
+                        key: Key('vacilou-${jogador.id}'),
+                        onTap: () => widget.acoes.marcarVacilo(jogador.id),
+                        child: SizedBox(
+                          width: 64,
+                          child: Column(
+                            children: [
+                              AvatarDoJogador(
+                                jogador: jogador,
+                                tamanho: 44,
+                                destaque: rodada.vacilaram.contains(jogador.id) ? CoresBaralho.coral : null,
+                              ),
+                              Text(
+                                jogador.nome,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
                           ),
-                          Text(jogador.nome,
-                              maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-                        ]),
+                        ),
                       ),
-                    ),
                 ],
               ),
           ],
@@ -122,14 +133,15 @@ class _Desafio extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(top: espaco ? EspacoBaralho.medio : 0),
       padding: const EdgeInsets.all(EspacoBaralho.medio),
-      decoration: BoxDecoration(
-        color: CoresBaralho.superficie,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: CoresBaralho.superficie, borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(titulo, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+          Text(
+            titulo,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+          ),
           const SizedBox(height: EspacoBaralho.pequeno),
           for (final (indice, texto) in desafio.textos.indexed)
             Padding(
@@ -142,9 +154,11 @@ class _Desafio extends StatelessWidget {
               ),
             ),
           if (rodape != null)
-            Text(rodape,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: CoresBaralho.textoSecundario)),
+            Text(
+              rodape,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: CoresBaralho.textoSecundario),
+            ),
         ],
       ),
     );

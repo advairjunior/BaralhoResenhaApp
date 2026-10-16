@@ -140,7 +140,8 @@
     <ol class="passos">
       <li><p><b>Alguém cria a sala.</b> Põe o nome, tira uma selfie com careta (opcional) e toca em “Criar uma sala”.</p></li>
       <li><p><b>A turma entra.</b> Aponta a câmera para o QR Code da sala de espera, ou digita o código de 4 letras. Cada um põe o nome e a selfie.</p></li>
-      <li><p><b>Quem criou a sala escolhe a noite</b> e toca em começar. Daí em diante, <b>só essa pessoa passa as cartas</b>: o resto joga pelo próprio celular.</p></li>
+      <li><p><b>Quem criou a sala escolhe a noite</b> e toca em começar. Daí em diante, <b>só essa pessoa passa as cartas</b> na mão: o resto joga pelo próprio celular.</p></li>
+      <li><p><b>A carta passa sozinha.</b> Quando todo mundo responde (ou toca em “Pronto ✓” depois da revelação), a próxima carta vem em 3 segundos. Precisa de mais tempo para a história? Qualquer um toca em “⏸️ Segura aí”.</p></li>
     </ol>
     <div class="telas">
       <figure class="tela"><button type="button" data-ampliar="/como-jogar/inicio.jpg"><img src="/como-jogar/inicio.jpg" alt="Tela inicial com nome, selfie e criar sala" loading="lazy" width="390" height="844"></button><figcaption><b>Tela inicial</b>Nome, selfie e “Criar uma sala” ou entrar com o código.</figcaption></figure>
@@ -171,7 +172,7 @@
     <div class="jogos">
       <article class="jogo" style="--cor: #7446e8">
         <h3>🙊 Eu Nunca</h3>
-        <ul><li>Cada um responde em segredo: já fiz ou nunca fiz.</li><li>Quem já fez leva 1 ponto.</li><li>Só uma pessoa fez? Ela conta a história.</li></ul>
+        <ul><li>Cada um responde em segredo: já fiz ou nunca fiz.</li><li>Quem já fez leva 1 ponto. Mas se a maioria já fez, vira: quem leva é quem nunca fez.</li><li>Todo mundo fez? Ninguém leva. Só uma pessoa fez? Ela conta a história.</li></ul>
         <div class="ver"><button type="button" data-ampliar="/como-jogar/eununca.jpg">Ver a carta</button><button type="button" data-ampliar="/como-jogar/historia.jpg">Ver a revelação</button></div>
       </article>
       <article class="jogo" style="--cor: #2f74e0">
@@ -191,7 +192,7 @@
       </article>
       <article class="jogo" style="--cor: #e88a00">
         <h3>🍺 Beba se</h3>
-        <ul><li>Alguém lê a carta em voz alta.</li><li>Se a carta te pegou, toque em “Me pegou!”. Vale a honestidade.</li><li>Carta com selo “DOSE DE VERDADE” manda beber de verdade.</li></ul>
+        <ul><li>Alguém lê a carta em voz alta.</li><li>Cada um toca em “Me pegou!” ou “Não me pegou”. Vale a honestidade.</li><li>Carta com selo “DOSE DE VERDADE” manda beber de verdade.</li></ul>
         <div class="ver"><button type="button" data-ampliar="/como-jogar/dose.jpg">Ver uma dose</button></div>
       </article>
       <article class="jogo" style="--cor: #14b8a6">
@@ -229,7 +230,7 @@
     <h2>Pontos e <span>goles</span></h2>
     <p class="apagado texto">O jogo não manda beber a cada carta. Cada vez que a carta te pega, você ganha <b>1 ponto no cofrinho</b>. O gole só sai quando o cofrinho enche, e o ritmo é você que escolhe.</p>
     <div class="faixas">
-      <div class="faixa destaque"><b>🐢 Devagar (padrão)</b><span>1 gole a cada 3 pontos. Dá para jogar a noite inteira.</span></div>
+      <div class="faixa destaque"><b>🐢 Devagar (padrão)</b><span>1 gole a cada 7 pontos. Dá para jogar a noite inteira.</span></div>
       <div class="faixa"><b>🚶 Normal</b><span>1 gole a cada 2 pontos.</span></div>
       <div class="faixa"><b>🔥 Raiz</b><span>Todo ponto é gole, como nos baralhos de loja.</span></div>
       <div class="faixa"><b>🍺 Dose de verdade</b><span>Carta com esse selo (“bebe 2”) é gole de verdade, fora do cofrinho.</span></div>
@@ -261,6 +262,7 @@
       <div class="faixa"><b>🌡️ Esquenta sozinho</b><span>Começa leve e sobe um nível a cada 8 cartas.</span></div>
       <div class="faixa"><b>🛟 Zona Segura</b><span>Tira as cartas sobre ex, ciúme e traição. Ligada por padrão.</span></div>
       <div class="faixa"><b>👎 Tira essa</b><span>Carta que ninguém quer jogar? Quem criou a sala tira, e ela some da noite.</span></div>
+      <div class="faixa"><b>⏩ Passar a carta sozinho</b><span>Com todo mundo pronto, a carta passa em 3 segundos. Ligado por padrão; dá para desligar.</span></div>
       <div class="faixa"><b>🌙 Noites prontas</b><span>Resenha clássica, Esquenta até o Picante, Noite das brincadeiras, Só zoeira, Noite tranquila e Raiz.</span></div>
     </div>
   </section>
@@ -299,7 +301,7 @@
   // Uma rodada em quatro passos.
   const passos = [
     { img: 'eununca', titulo: 'A carta aparece em todos os celulares', texto: 'Todo mundo vê a mesma carta ao mesmo tempo. Num Eu Nunca, cada um responde em segredo: “Já fiz” ou “Nunca fiz”.' },
-    { img: 'historia', titulo: 'O app revela', texto: 'Quando todo mundo responde, a resposta aparece para a mesa. Aqui só o Caio já fez: ele leva o ponto e conta a história.' },
+    { img: 'historia', titulo: 'O app revela', texto: 'Quando todo mundo responde, a resposta aparece para a mesa. Aqui só o Caio já fez: ele leva o ponto e conta a história. Depois, cada um toca em “Pronto ✓” e a carta passa sozinha em 3 segundos.' },
     { img: 'votacao', titulo: 'Nas votações, suspense', texto: 'Num “Quem é mais provável”, o app toca o tambor e mostra a foto de quem a turma escolheu, com o ponto no cofrinho.' },
     { img: 'premios', titulo: 'No fim, os prêmios', texto: 'Quem criou a sala encerra a noite e todo mundo vê os Prêmios da Noite e o mural de selfies.' },
   ];

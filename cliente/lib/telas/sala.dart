@@ -28,6 +28,9 @@ abstract interface class AcoesDaSala {
   Future<void> resultadoDaMimica(int? vencedor);
   Future<void> iniciarCronometro();
   Future<void> usarCarta(CartaNaManga carta, String? alvo);
+  Future<void> marcarPronto();
+  Future<void> segurar();
+  Future<void> passarSozinho();
   Future<void> alternarBebi();
   Future<void> trocarFoto(Uint8List foto);
   Future<void> definirPar(String? parId);
@@ -182,6 +185,15 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   @override
   Future<void> usarCarta(CartaNaManga carta, String? alvo) =>
       _agir((token) => widget.api.usarCarta(_codigo, token, _rodada, carta, alvo));
+
+  @override
+  Future<void> marcarPronto() => _agir((token) => widget.api.marcarPronto(_codigo, token, _rodada));
+
+  @override
+  Future<void> segurar() => _agir((token) => widget.api.segurar(_codigo, token, _rodada));
+
+  @override
+  Future<void> passarSozinho() => _agir((token) => widget.api.passarSozinho(_codigo, token, _rodada));
 
   @override
   Future<void> tirar() => _agir((token) => widget.api.tirar(_codigo, token, _rodada));

@@ -96,7 +96,7 @@ public sealed record Iscas(IReadOnlyList<string> Perguntas, IReadOnlyList<string
 /// <summary>Quantos pontos (vezes que a carta pegou) valem um gole de verdade.</summary>
 public enum RitmoDaBebida
 {
-    /// <summary>Um gole a cada 3 pontos: dá para jogar a noite inteira.</summary>
+    /// <summary>Um gole a cada 7 pontos: dá para jogar a noite inteira.</summary>
     Devagar,
 
     /// <summary>Um gole a cada 2 pontos.</summary>
@@ -114,7 +114,8 @@ public sealed record ConfiguracaoDoJogo(
     bool ZonaSegura,
     bool Esquentar = false,
     RitmoDaBebida Ritmo = RitmoDaBebida.Devagar,
-    bool CartasNaManga = true)
+    bool CartasNaManga = true,
+    bool PassarSozinho = true)
 {
     public const int CartasPorNivel = 8;
 
@@ -122,7 +123,7 @@ public sealed record ConfiguracaoDoJogo(
     {
         RitmoDaBebida.Raiz => 1,
         RitmoDaBebida.Normal => 2,
-        _ => 3
+        _ => 7
     };
 
     /// <summary>Nível da carta de número <paramref name="indice"/> (a primeira é 0).</summary>

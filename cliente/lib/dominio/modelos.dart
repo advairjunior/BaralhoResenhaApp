@@ -58,6 +58,7 @@ class ConfiguracaoDoJogo {
     this.esquentar = false,
     this.ritmo = RitmoDaBebida.devagar,
     this.cartasNaManga = true,
+    this.passarSozinho = true,
   });
 
   factory ConfiguracaoDoJogo.deJson(Map<String, dynamic> json) => ConfiguracaoDoJogo(
@@ -67,6 +68,7 @@ class ConfiguracaoDoJogo {
         esquentar: json['esquentar'] as bool? ?? false,
         ritmo: json['ritmo'] == null ? RitmoDaBebida.devagar : _enum(RitmoDaBebida.values, json['ritmo']),
         cartasNaManga: json['cartasNaManga'] as bool? ?? true,
+        passarSozinho: json['passarSozinho'] as bool? ?? true,
       );
 
   /// Com [esquentar], é até onde a noite pode chegar.
@@ -83,8 +85,11 @@ class ConfiguracaoDoJogo {
   /// Cartas na manga, estilo Uno.
   final bool cartasNaManga;
 
+  /// Com todo mundo pronto, a carta passa sozinha em 3 segundos.
+  final bool passarSozinho;
+
   int get pontosPorGole => switch (ritmo) {
-        RitmoDaBebida.devagar => 3,
+        RitmoDaBebida.devagar => 7,
         RitmoDaBebida.normal => 2,
         RitmoDaBebida.raiz => 1,
       };
@@ -96,6 +101,7 @@ class ConfiguracaoDoJogo {
     bool? esquentar,
     RitmoDaBebida? ritmo,
     bool? cartasNaManga,
+    bool? passarSozinho,
   }) =>
       ConfiguracaoDoJogo(
         nivel: nivel ?? this.nivel,
@@ -104,6 +110,7 @@ class ConfiguracaoDoJogo {
         esquentar: esquentar ?? this.esquentar,
         ritmo: ritmo ?? this.ritmo,
         cartasNaManga: cartasNaManga ?? this.cartasNaManga,
+        passarSozinho: passarSozinho ?? this.passarSozinho,
       );
 
   Map<String, dynamic> paraJson() => {
@@ -113,6 +120,7 @@ class ConfiguracaoDoJogo {
         'esquentar': esquentar,
         'ritmo': paraServidor(ritmo),
         'cartasNaManga': cartasNaManga,
+        'passarSozinho': passarSozinho,
       };
 }
 
@@ -217,6 +225,7 @@ class Revelacao {
     this.bilhetes = const [],
     this.timeVencedor,
     this.jogadas = const {},
+    this.minoriaLeva = false,
   });
 
   factory Revelacao.deJson(Map<String, dynamic> json) => Revelacao(
@@ -235,6 +244,7 @@ class Revelacao {
         bilhetes: List<String>.from((json['bilhetes'] as List?) ?? const []),
         timeVencedor: json['timeVencedor'] as int?,
         jogadas: Map<String, String>.from((json['jogadas'] as Map?) ?? const {}),
+        minoriaLeva: json['minoriaLeva'] as bool? ?? false,
       );
 
   final List<String> jaFizeram;
@@ -261,6 +271,9 @@ class Revelacao {
 
   /// Pedra, papel e tesoura: o que cada um dos dois jogou.
   final Map<String, String> jogadas;
+
+  /// Eu Nunca: a maioria já fez, então leva quem nunca fez.
+  final bool minoriaLeva;
 }
 
 /// Imagem e Ação: quem faz a mímica e quem adivinha (o mímico está junto).
@@ -305,6 +318,9 @@ class Rodada {
     this.usos = const [],
     this.ganharam = const [],
     this.pegos = const [],
+    this.prontos = const [],
+    this.passaEmMs,
+    this.seguradaPor,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -344,6 +360,9 @@ class Rodada {
         ],
         ganharam: List<String>.from((json['ganharam'] as List?) ?? const []),
         pegos: List<String>.from((json['pegos'] as List?) ?? const []),
+        prontos: List<String>.from((json['prontos'] as List?) ?? const []),
+        passaEmMs: json['passaEmMs'] as int?,
+        seguradaPor: json['seguradaPor'] as String?,
       );
 
   final int numero;
@@ -411,6 +430,15 @@ class Rodada {
 
   /// Quem esta carta pegou (ponto ou dose ainda de pé).
   final List<String> pegos;
+
+  /// Quem já respondeu ou marcou "Pronto".
+  final List<String> prontos;
+
+  /// Milissegundos até a carta passar sozinha; nulo sem contagem.
+  final int? passaEmMs;
+
+  /// Quem tocou em "Segura aí".
+  final String? seguradaPor;
 }
 
 class Momento {
@@ -493,7 +521,7 @@ class DesafioDaRegra {
 }
 
 class RegraAtiva {
-  const RegraAtiva(this.texto, this.rodadasRestantes, {this.alvo, this.desafio});
+  const RegraAtiva(this.texto, this.rodadasRestantes, {this.alvo, this.desafio, this.podemVacilar = const []});
 
   factory RegraAtiva.deJson(Map<String, dynamic> json) => RegraAtiva(
         json['texto'] as String,
@@ -502,6 +530,7 @@ class RegraAtiva {
         desafio: json['desafio'] == null
             ? null
             : DesafioDaRegra.deJson(json['desafio'] as Map<String, dynamic>),
+        podemVacilar: List<String>.from((json['podemVacilar'] as List?) ?? const []),
       );
 
   /// O {jogador} da regra, se ela é sobre alguém.
@@ -509,6 +538,9 @@ class RegraAtiva {
 
   /// A isca desta carta.
   final DesafioDaRegra? desafio;
+
+  /// Quem pode vacilar: na regra de uma pessoa, só ela; na regra da mesa, todo mundo.
+  final List<String> podemVacilar;
 
   final String texto;
   final int rodadasRestantes;

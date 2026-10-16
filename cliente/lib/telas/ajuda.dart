@@ -25,6 +25,7 @@ ComoJoga comoJoga(Rodada rodada) {
         'Todo mundo responde em segredo no celular: "Já fiz" ou "Nunca fiz".',
         'Quando todos responderem, o app revela quem já fez.',
         'Quem já fez leva 1 ponto no cofrinho.',
+        'Virada: se a maioria já fez, quem leva é quem nunca fez! E se todo mundo fez, ninguém leva.',
         'Se só uma pessoa fez, ela conta a história para a turma!',
       ]),
     Rodada(jokenpo: true) => ('jokenpo', 'Pedra, papel e tesoura', [
@@ -55,7 +56,7 @@ ComoJoga comoJoga(Rodada rodada) {
       ]),
     Rodada(modo: ModoDeJogo.bebaSe) => ('bebaSe', ModoDeJogo.bebaSe.titulo, [
         'Alguém lê a carta em voz alta.',
-        'Se a carta te pegou, toque em "Me pegou!" no seu celular. Vale a honestidade!',
+        'Se a carta te pegou, toque em "Me pegou!" no seu celular; se não, em "Não me pegou". Vale a honestidade!',
         'Cada "Me pegou" é 1 ponto no cofrinho.',
       ]),
     Rodada(modo: ModoDeJogo.regraRelampago) => ('regra', ModoDeJogo.regraRelampago.titulo, [
@@ -123,6 +124,12 @@ Future<void> abrirComoJoga(BuildContext context, VisaoDaSala visao, Rodada rodad
       titulo: '👑 Quem passa as cartas',
       texto: 'Só ${visao.anfitriao?.nome ?? 'quem criou a sala'} puxa a próxima carta, pula e revela antes da hora.',
     ),
+    if (visao.configuracao.passarSozinho)
+      const _Secao(
+        titulo: '⏩ A carta passa sozinha',
+        texto: 'Quando todo mundo responde ou toca em "Pronto ✓", a próxima carta vem em 3 segundos. '
+            'Precisa de mais tempo? Toque em "⏸️ Segura aí".',
+      ),
   ]);
 }
 

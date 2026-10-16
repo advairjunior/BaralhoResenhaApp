@@ -42,7 +42,10 @@ Correio da Resenha (bilhetes anônimos de até 20 letras) · Imagem e Ação (1 
 ## Regras de produto já decididas
 
 - **Cofrinho de goles:** cada vez que a carta pega alguém vale 1 ponto; o gole só sai quando o
-  cofrinho enche (Devagar 3, Normal 2, Raiz 1). Padrão: Devagar.
+  cofrinho enche (Devagar 7, Normal 2, Raiz 1). Padrão: Devagar.
+- **Eu Nunca com virada:** todo mundo fez, ninguém leva; a maioria fez, leva quem nunca fez.
+- **Passar sozinho:** todo mundo pronto, a carta passa em 3 s (qualquer celular pede, o servidor passa uma vez); "Segura aí" para.
+- **Vacilo:** em regra de entrevista ou risada, só a pessoa da regra pode vacilar.
 - **Níveis:** 85% das cartas são do nível escolhido; o que vem de baixo são só as cartas `destaque`.
 - **Leve não é infantil:** humor de adulto sem malícia.
 - **Votação nunca é Beba se:** vira votação no celular, duelo ou tribunal.

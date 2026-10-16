@@ -27,7 +27,7 @@ void main() {
       final servidor = ServidorFalso()..respostas['GET /api/salas/ABCD'] = _soAnaFez(cofrinho: 2);
       await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
 
-      expect(find.text('Só Ana fez · +1 ponto · 2/3 🍺'), findsOneWidget);
+      expect(find.text('Só Ana fez · +1 ponto · 2/7 🍺'), findsOneWidget);
       expect(find.byKey(const Key('hora-do-gole')), findsNothing);
       await fecharApp(tester);
     });
@@ -51,7 +51,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('1 gole'), findsOneWidget);
-      expect(find.text('5 pontos · cofrinho 2/3'), findsOneWidget);
+      expect(find.text('5 pontos · cofrinho 2/7'), findsOneWidget);
       await fecharApp(tester);
     });
 
@@ -62,7 +62,7 @@ void main() {
       await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
 
       await rolarAte(tester, find.byKey(const Key('ritmo-normal')));
-      expect(find.text('1 gole a cada 3 pontos'), findsOneWidget);
+      expect(find.text('1 gole a cada 7 pontos'), findsOneWidget);
       await tester.tap(find.byKey(const Key('ritmo-normal')));
       await tester.pumpAndSettle();
 

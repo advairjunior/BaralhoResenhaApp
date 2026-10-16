@@ -15,7 +15,7 @@ extension VisualDoRitmo on RitmoDaBebida {
       };
 
   String get explicacao => switch (this) {
-        RitmoDaBebida.devagar => '1 gole a cada 3 pontos',
+        RitmoDaBebida.devagar => '1 gole a cada 7 pontos',
         RitmoDaBebida.normal => '1 gole a cada 2 pontos',
         RitmoDaBebida.raiz => 'Todo ponto é gole',
       };

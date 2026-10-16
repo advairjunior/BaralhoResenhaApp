@@ -33,23 +33,23 @@ public sealed class BebidaTestes
     public void ARegraPadraoEhDevagar()
     {
         Assert.Equal(RitmoDaBebida.Devagar, ConfiguracaoDoJogo.Padrao.Ritmo);
-        Assert.Equal(3, ConfiguracaoDoJogo.Padrao.PontosPorGole);
+        Assert.Equal(7, ConfiguracaoDoJogo.Padrao.PontosPorGole);
     }
 
     [Fact]
-    public void NoDevagarSoBebeQuandoJuntaTresPontos()
+    public void NoDevagarSoBebeQuandoJuntaSetePontos()
     {
         var (sala, ana, _) = Mesa(RitmoDaBebida.Devagar);
 
-        Pegou(sala, ana, ana, 2);
-        Assert.Equal(2, ana.Pontos);
+        Pegou(sala, ana, ana, 6);
+        Assert.Equal(6, ana.Pontos);
         Assert.Equal(0, ana.Goles);
-        Assert.Equal(2, ana.Cofrinho);
+        Assert.Equal(6, ana.Cofrinho);
         Assert.Empty(sala.Rodada!.BebemAgora);
 
         sala.Proxima(ana.Token, sala.Rodada.Numero);
         Pegou(sala, ana, ana, 1);
-        Assert.Equal(3, ana.Pontos);
+        Assert.Equal(7, ana.Pontos);
         Assert.Equal(1, ana.Goles);
         Assert.Equal(0, ana.Cofrinho);
         Assert.Equal([ana.Id], sala.Visao(ana.Token).Rodada!.BebemAgora);
@@ -71,14 +71,14 @@ public sealed class BebidaTestes
     public void DesmarcarOPontoQueEncheuOCofrinhoDevolveOGole()
     {
         var (sala, ana, _) = Mesa(RitmoDaBebida.Devagar);
-        Pegou(sala, ana, ana, 3);
+        Pegou(sala, ana, ana, 7);
         Assert.Equal(1, ana.Goles);
 
         sala.AlternarBebi(ana.Token, sala.Rodada!.Numero);
 
         Assert.Equal(0, ana.Goles);
-        Assert.Equal(2, ana.Pontos);
-        Assert.Equal(2, ana.Cofrinho);
+        Assert.Equal(6, ana.Pontos);
+        Assert.Equal(6, ana.Cofrinho);
         Assert.Empty(sala.Rodada.BebemAgora);
     }
 

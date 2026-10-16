@@ -26,6 +26,7 @@ class NoitePronta {
       outra.esquentar == configuracao.esquentar &&
       outra.ritmo == configuracao.ritmo &&
       outra.cartasNaManga == configuracao.cartasNaManga &&
+      outra.passarSozinho == configuracao.passarSozinho &&
       outra.modos.length == configuracao.modos.length &&
       outra.modos.containsAll(configuracao.modos);
 }

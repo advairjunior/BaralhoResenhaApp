@@ -25,6 +25,7 @@ void main() {
         'esquentar': false,
         'ritmo': 'Devagar',
         'cartasNaManga': true,
+        'passarSozinho': true,
       });
       await fecharApp(tester);
     });

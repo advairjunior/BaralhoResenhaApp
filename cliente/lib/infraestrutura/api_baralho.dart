@@ -108,6 +108,16 @@ class ApiBaralho {
       _visao('POST', '/api/salas/${_codigo(codigo)}/carta-na-manga', token,
           corpo: {'rodada': rodada, 'carta': paraServidor(carta), 'alvo': alvo});
 
+  /// Passar sozinho: respondi / estou pronto, segura aí e "acabou a contagem".
+  Future<VisaoDaSala> marcarPronto(String codigo, String token, int rodada) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/pronto', token, corpo: {'rodada': rodada});
+
+  Future<VisaoDaSala> segurar(String codigo, String token, int rodada) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/segurar', token, corpo: {'rodada': rodada});
+
+  Future<VisaoDaSala> passarSozinho(String codigo, String token, int rodada) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/passar-sozinho', token, corpo: {'rodada': rodada});
+
   /// "Tira essa": a carta sai do baralho da noite e vem outra.
   Future<VisaoDaSala> tirar(String codigo, String token, int rodada) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/tirar', token, corpo: {'rodada': rodada});
