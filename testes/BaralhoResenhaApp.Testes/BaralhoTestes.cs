@@ -204,4 +204,35 @@ public sealed class BaralhoTestes
         var mimica = cartas.Count(c => c.Modo == ModoDeJogo.ImagemEAcao) / 3000.0;
         Assert.True(mimica >= 0.11, $"imagem e ação: {mimica:P0}");
     }
+
+    [Theory]
+    [InlineData("lugar público")]
+    [InlineData("vídeo íntimo")]
+    [InlineData("swing")]
+    [InlineData("brinquedo erótico")]
+    [InlineData("sex shop")]
+    [InlineData("strip-tease")]
+    [InlineData("no flagra")]
+    [InlineData("banheiro de uma festa")]
+    [InlineData("dor de cabeça")]
+    [InlineData("sofá depois de uma briga")]
+    [InlineData("falando sozinho(a)")]
+    [InlineData("perfil fake")]
+    [InlineData("barrado")]
+    [InlineData("por causa do caminho")]
+    [InlineData("olhar mais sedutor")]
+    [InlineData("sorriso mais bonito")]
+    [InlineData("levanta qualquer festa")]
+    [InlineData("olhares quando passa")]
+    [InlineData("sucesso na balada")]
+    public void OMesmoAssuntoNaoApareceEmDuasCartas(string assunto)
+    {
+        var cartas = CatalogoDeCartas.Carregar().Cartas
+            .Where(c => c.Texto.Contains(assunto, StringComparison.OrdinalIgnoreCase))
+            .Select(c => c.Id)
+            .ToList();
+
+        // Eu Nunca e Beba se com a mesma pergunta saem uma atrás da outra no mesmo nível.
+        Assert.True(cartas.Count <= 1, $"\"{assunto}\" aparece em {string.Join(", ", cartas)}");
+    }
 }
