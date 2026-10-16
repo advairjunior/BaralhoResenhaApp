@@ -49,9 +49,15 @@ public sealed partial class Sala
                 Escolhidos = vencedores.Where(presentes.Contains).ToList(),
                 TimeVencedor = timeVencedor
             };
+            // Revelação antes dos pontos: as cartas na manga olham a conta desta carta.
+            rodada.Revelacao = revelacao;
             foreach (var jogador in _jogadores.Where(j => revelacao.Perderam.Contains(j.Id)))
                 Pegar(jogador);
-            rodada.Revelacao = revelacao;
+            // Time que acertou ganha carta; com uma pessoa só, quem fez a mímica.
+            IReadOnlyList<Guid> premiados = rodada.Times.Count == 1 && timeVencedor is not null
+                ? [rodada.Times[0].Mimico]
+                : revelacao.Escolhidos;
+            foreach (var jogador in _jogadores.Where(j => premiados.Contains(j.Id))) DarCarta(jogador);
             Fase = FaseDaSala.Revelada;
             Tocar();
         }

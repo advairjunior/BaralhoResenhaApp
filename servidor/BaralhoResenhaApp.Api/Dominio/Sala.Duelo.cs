@@ -19,7 +19,11 @@ public sealed partial class Sala
             ? vencedores
             : votos.Select(v => v.JogadorId).Except(vencedores).ToList();
         if (vencedores.Count == 1)
-            _jogadores.First(j => j.Id == vencedores[0]).Estatisticas.DuelosVencidos++;
+        {
+            var vencedor = _jogadores.First(j => j.Id == vencedores[0]);
+            vencedor.Estatisticas.DuelosVencidos++;
+            DarCarta(vencedor);
+        }
         return new Revelacao([], [], votos, perderam, null) { Escolhidos = vencedores };
     }
 }

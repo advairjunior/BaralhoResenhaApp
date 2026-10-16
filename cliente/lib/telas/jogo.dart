@@ -5,6 +5,7 @@ import '../tema/tema_baralho.dart';
 import 'carta_de_baralho.dart';
 import 'aponta_no_tres.dart';
 import 'bebida.dart';
+import 'cartas_na_manga.dart';
 import 'casais.dart';
 import 'controles_do_anfitriao.dart';
 import 'cronometro.dart';
@@ -105,7 +106,9 @@ class Jogo extends StatelessWidget {
                     aoIniciar: acoes.iniciarCronometro,
                   ),
                 HoraDoGole(visao: visao),
+                UsosDasCartas(visao: visao, rodada: rodada),
                 _AreaDeAcao(visao: visao, rodada: rodada, acoes: acoes),
+                MinhaMao(visao: visao, rodada: rodada, acoes: acoes),
               ],
             ),
           ),
@@ -838,6 +841,8 @@ Future<void> abrirPlacar(BuildContext context, VisaoDaSala visao) {
                 children: [
                   if (posicao == 0 && jogador.pontos > 0)
                     const Text('Rei(nha) da noite 👑', style: TextStyle(color: CoresBaralho.ambar)),
+                  if (visao.configuracao.cartasNaManga && jogador.cartasNaManga > 0)
+                    Text('🃏 ${jogador.cartasNaManga} na manga'),
                   if (!jogador.semAlcool && porGole > 1)
                     Text('${jogador.pontos == 1 ? '1 ponto' : '${jogador.pontos} pontos'} · '
                         'cofrinho ${jogador.cofrinho}/$porGole'),

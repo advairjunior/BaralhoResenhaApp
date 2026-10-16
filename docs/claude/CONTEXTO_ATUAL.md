@@ -48,6 +48,7 @@ Correio da Resenha (bilhetes anônimos de até 20 letras) · Imagem e Ação (1 
 - **Votação nunca é Beba se:** vira votação no celular, duelo ou tribunal.
 - **Dose de verdade:** carta com `goles` ("bebe 2") é gole direto, fora do cofrinho (`Punir`/`Perdoar`).
 - **Cronômetro sincronizado:** o servidor guarda o fim; cada celular conta a partir do que falta.
+- **Cartas na manga:** cada carta da mesa anota uma conta por pessoa (`ContaDaCarta`: pontos e goles); Escudo, Passa a bola, Devolve, Batata quente e Dobra mexem nessa conta. Mão secreta, até 3.
 - **Noites prontas:** presets só no app (`noites_prontas.dart`), sem mudança no servidor.
 - **Mural não fica no servidor:** cada um salva as fotos no fim.
 

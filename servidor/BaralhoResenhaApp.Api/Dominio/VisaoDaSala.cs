@@ -4,7 +4,7 @@ namespace BaralhoResenhaApp.Api.Dominio;
 /// <param name="ParId">Par do casal na sala, se marcou.</param>
 public sealed record JogadorVisivel(
     Guid Id, string Nome, bool Anfitriao, bool SemAlcool, int Pontos, int Cofrinho, int Goles, bool Respondeu,
-    string? Foto, Guid? ParId);
+    string? Foto, Guid? ParId, int CartasNaManga);
 
 /// <param name="Palpiteiro">Casais em Jogo: quem tenta adivinhar.</param>
 /// <param name="Alvo">Casais em Jogo: de quem é a pergunta.</param>
@@ -34,7 +34,10 @@ public sealed record RodadaVisivel(
     bool Jokenpo,
     IReadOnlyList<string> Empates,
     int? CronometroSegundos,
-    int? CronometroRestanteMs);
+    int? CronometroRestanteMs,
+    IReadOnlyList<UsoDeCarta> Usos,
+    IReadOnlyList<Guid> Ganharam,
+    IReadOnlyList<Guid> Pegos);
 
 /// <summary>Esquenta sozinho: em que nível a noite está e quando sobe.</summary>
 /// <param name="SobeEm">Cartas até subir; nulo quando já chegou ao limite.</param>
@@ -61,7 +64,8 @@ public sealed record VisaoDaSala(
     IReadOnlyList<Premio>? Premios,
     ResumoDaNoite? Resumo,
     EsquentaVisivel? Esquenta,
-    string? CartaTiradaPor)
+    string? CartaTiradaPor,
+    IReadOnlyList<CartaNaManga> MinhaMao)
 {
     internal static VisaoDaSala Montar(Sala sala, Jogador eu, IReadOnlyList<Jogador> jogadores)
     {
@@ -78,7 +82,8 @@ public sealed record VisaoDaSala(
                 j.Id, j.Nome, j.Anfitriao, j.SemAlcool, j.Pontos, j.Cofrinho, j.Goles,
                 rodada?.Respostas.ContainsKey(j.Id) ?? false,
                 j.Foto is null ? null : Endereco(j.Foto),
-                j.ParId)).ToList(),
+                j.ParId,
+                j.Mao.Count)).ToList(),
             rodada is null || sala.Fase is FaseDaSala.Lobby or FaseDaSala.Fim
                 ? null
                 : new RodadaVisivel(
@@ -107,14 +112,18 @@ public sealed record VisaoDaSala(
                     rodada.Carta.Jokenpo,
                     rodada.Empates.ToList(),
                     rodada.SegundosDoCronometro,
-                    sala.RestanteDoCronometro(rodada)),
+                    sala.RestanteDoCronometro(rodada),
+                    rodada.Usos.ToList(),
+                    rodada.Ganharam.ToList(),
+                    rodada.Contas.Where(c => !c.Value.Vazia).Select(c => c.Key).ToList()),
             sala.Regra,
             sala.Momentos.Select(m => new MomentoVisivel(
                 m.Id, m.JogadorId, m.NomeDoJogador, m.Rodada, m.Texto, Endereco(m.Foto))).ToList(),
             fim ? PremiosDaNoite.Calcular(jogadores, sala.Casais()) : null,
             fim ? PremiosDaNoite.Resumir(sala, jogadores) : null,
             Esquentando(sala),
-            sala.CartaTiradaPor);
+            sala.CartaTiradaPor,
+            eu.Mao.ToList());
     }
 
     private static EsquentaVisivel? Esquentando(Sala sala)

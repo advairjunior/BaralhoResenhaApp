@@ -47,7 +47,11 @@ public sealed partial class Sala
             Escolhidos = [vencedor],
             Jogadas = new Dictionary<Guid, string> { [primeiro] = jogadaDoPrimeiro, [segundo] = jogadaDoSegundo }
         };
-        if (_jogadores.FirstOrDefault(j => j.Id == vencedor) is { } ganhou) ganhou.Estatisticas.DuelosVencidos++;
+        if (_jogadores.FirstOrDefault(j => j.Id == vencedor) is { } ganhou)
+        {
+            ganhou.Estatisticas.DuelosVencidos++;
+            DarCarta(ganhou);
+        }
         if (_jogadores.FirstOrDefault(j => j.Id == perdedor) is { } perdeu) Punir(perdeu);
         Fase = FaseDaSala.Revelada;
     }

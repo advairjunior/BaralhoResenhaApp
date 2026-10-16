@@ -113,7 +113,8 @@ public sealed record ConfiguracaoDoJogo(
     IReadOnlyList<ModoDeJogo> Modos,
     bool ZonaSegura,
     bool Esquentar = false,
-    RitmoDaBebida Ritmo = RitmoDaBebida.Devagar)
+    RitmoDaBebida Ritmo = RitmoDaBebida.Devagar,
+    bool CartasNaManga = true)
 {
     public const int CartasPorNivel = 8;
 

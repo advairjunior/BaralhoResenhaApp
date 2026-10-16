@@ -143,6 +143,12 @@ app.MapPost("/api/salas/{codigo}/cronometro", (
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
     Agir(codigo, http, salas, notificador, (sala, token) => sala.IniciarCronometro(token, requisicao.Rodada)));
 
+app.MapPost("/api/salas/{codigo}/carta-na-manga", (
+    string codigo, UsarCartaNaManga requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador,
+        (sala, token) => sala.UsarCarta(token, requisicao.Rodada, requisicao.Carta, requisicao.Alvo)));
+
 app.MapPost("/api/salas/{codigo}/tirar", (
     string codigo, AcaoNaRodada requisicao, HttpRequest http,
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
@@ -245,5 +251,6 @@ public sealed record JulgarPalpite(int Rodada, bool Acertou);
 public sealed record MarcarApontado(int Rodada, Guid JogadorId);
 public sealed record EscolherFavorito(int Rodada, int Indice);
 public sealed record ResultadoDaMimica(int Rodada, int? Vencedor);
+public sealed record UsarCartaNaManga(int Rodada, CartaNaManga Carta, Guid? Alvo);
 
 public partial class Program;

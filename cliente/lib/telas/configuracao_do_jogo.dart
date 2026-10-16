@@ -133,6 +133,18 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
             ],
           ],
         ),
+        SwitchListTile(
+          key: const Key('cartas-na-manga'),
+          contentPadding: EdgeInsets.zero,
+          value: configuracao.cartasNaManga,
+          onChanged: podeEditar ? (ligado) => aoMudar(configuracao.copiar(cartasNaManga: ligado)) : null,
+          title: const Text('🃏  Cartas na manga'),
+          subtitle: const Text(
+            'Estilo Uno: Escudo, Passa a bola, Batata quente, Dobra e Devolve. '
+            'Cada um começa com uma e ganha mais vencendo.',
+            style: TextStyle(color: CoresBaralho.textoApagado),
+          ),
+        ),
         const SizedBox(height: EspacoBaralho.base),
         Text('Jogos na mistura', style: texto.titleMedium),
         Text(

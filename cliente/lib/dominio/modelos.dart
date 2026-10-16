@@ -7,6 +7,28 @@ enum FaseDaSala { lobby, carta, revelada, fim }
 /// Quantos pontos (vezes que a carta pegou) valem um gole de verdade.
 enum RitmoDaBebida { devagar, normal, raiz }
 
+/// Cartas na manga, estilo Uno.
+enum CartaNaManga { escudo, passaABola, devolve, batataQuente, dobra }
+
+/// Alguém usou uma carta na manga nesta carta da mesa.
+class UsoDeCarta {
+  const UsoDeCarta({required this.quem, required this.carta, this.alvo, this.goles});
+
+  factory UsoDeCarta.deJson(Map<String, dynamic> json) => UsoDeCarta(
+        quem: json['quem'] as String,
+        carta: _enum(CartaNaManga.values, json['carta']),
+        alvo: json['alvo'] as String?,
+        goles: json['goles'] as int?,
+      );
+
+  final String quem;
+  final CartaNaManga carta;
+  final String? alvo;
+
+  /// Batata quente: com quantos goles chegou.
+  final int? goles;
+}
+
 /// O servidor fala em PascalCase ("EuNunca"); o app em camelCase.
 T _enum<T extends Enum>(List<T> valores, Object? texto) {
   final procurado = (texto as String).toLowerCase();
@@ -35,6 +57,7 @@ class ConfiguracaoDoJogo {
     required this.zonaSegura,
     this.esquentar = false,
     this.ritmo = RitmoDaBebida.devagar,
+    this.cartasNaManga = true,
   });
 
   factory ConfiguracaoDoJogo.deJson(Map<String, dynamic> json) => ConfiguracaoDoJogo(
@@ -43,6 +66,7 @@ class ConfiguracaoDoJogo {
         zonaSegura: json['zonaSegura'] as bool,
         esquentar: json['esquentar'] as bool? ?? false,
         ritmo: json['ritmo'] == null ? RitmoDaBebida.devagar : _enum(RitmoDaBebida.values, json['ritmo']),
+        cartasNaManga: json['cartasNaManga'] as bool? ?? true,
       );
 
   /// Com [esquentar], é até onde a noite pode chegar.
@@ -56,6 +80,9 @@ class ConfiguracaoDoJogo {
   /// Cofrinho de goles: quantos pontos valem um gole.
   final RitmoDaBebida ritmo;
 
+  /// Cartas na manga, estilo Uno.
+  final bool cartasNaManga;
+
   int get pontosPorGole => switch (ritmo) {
         RitmoDaBebida.devagar => 3,
         RitmoDaBebida.normal => 2,
@@ -68,6 +95,7 @@ class ConfiguracaoDoJogo {
     bool? zonaSegura,
     bool? esquentar,
     RitmoDaBebida? ritmo,
+    bool? cartasNaManga,
   }) =>
       ConfiguracaoDoJogo(
         nivel: nivel ?? this.nivel,
@@ -75,6 +103,7 @@ class ConfiguracaoDoJogo {
         zonaSegura: zonaSegura ?? this.zonaSegura,
         esquentar: esquentar ?? this.esquentar,
         ritmo: ritmo ?? this.ritmo,
+        cartasNaManga: cartasNaManga ?? this.cartasNaManga,
       );
 
   Map<String, dynamic> paraJson() => {
@@ -83,6 +112,7 @@ class ConfiguracaoDoJogo {
         'zonaSegura': zonaSegura,
         'esquentar': esquentar,
         'ritmo': paraServidor(ritmo),
+        'cartasNaManga': cartasNaManga,
       };
 }
 
@@ -117,6 +147,7 @@ class Jogador {
     required this.respondeu,
     this.pontos = 0,
     this.cofrinho = 0,
+    this.cartasNaManga = 0,
     this.foto,
     this.parId,
   });
@@ -130,6 +161,7 @@ class Jogador {
         goles: json['goles'] as int,
         pontos: json['pontos'] as int? ?? 0,
         cofrinho: json['cofrinho'] as int? ?? 0,
+        cartasNaManga: json['cartasNaManga'] as int? ?? 0,
         respondeu: json['respondeu'] as bool,
         foto: json['foto'] == null ? null : '$enderecoBase${json['foto']}',
         parId: json['parId'] as String?,
@@ -147,6 +179,9 @@ class Jogador {
 
   /// Pontos guardados até virar gole.
   final int cofrinho;
+
+  /// Quantas cartas na manga tem (quais, só o dono sabe).
+  final int cartasNaManga;
   final bool respondeu;
 
   /// Endereço da selfie; nulo para quem entrou sem foto.
@@ -267,6 +302,9 @@ class Rodada {
     this.empates = const [],
     this.cronometroSegundos,
     this.cronometroRestanteMs,
+    this.usos = const [],
+    this.ganharam = const [],
+    this.pegos = const [],
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -301,6 +339,11 @@ class Rodada {
         empates: List<String>.from((json['empates'] as List?) ?? const []),
         cronometroSegundos: json['cronometroSegundos'] as int?,
         cronometroRestanteMs: json['cronometroRestanteMs'] as int?,
+        usos: [
+          for (final uso in (json['usos'] as List?) ?? const []) UsoDeCarta.deJson(uso as Map<String, dynamic>),
+        ],
+        ganharam: List<String>.from((json['ganharam'] as List?) ?? const []),
+        pegos: List<String>.from((json['pegos'] as List?) ?? const []),
       );
 
   final int numero;
@@ -359,6 +402,15 @@ class Rodada {
   /// Cronômetro da carta: quanto dura e quanto falta (nulo antes do valendo).
   final int? cronometroSegundos;
   final int? cronometroRestanteMs;
+
+  /// Cartas na manga usadas nesta carta da mesa.
+  final List<UsoDeCarta> usos;
+
+  /// Quem ganhou carta na manga nesta carta.
+  final List<String> ganharam;
+
+  /// Quem esta carta pegou (ponto ou dose ainda de pé).
+  final List<String> pegos;
 }
 
 class Momento {
@@ -477,6 +529,7 @@ class VisaoDaSala {
     this.resumo,
     this.esquenta,
     this.cartaTiradaPor,
+    this.minhaMao = const [],
   });
 
   factory VisaoDaSala.deJson(Map<String, dynamic> json, {String enderecoBase = ''}) => VisaoDaSala(
@@ -502,6 +555,7 @@ class VisaoDaSala {
         resumo: json['resumo'] == null ? null : ResumoDaNoite.deJson(json['resumo'] as Map<String, dynamic>),
         esquenta: json['esquenta'] == null ? null : Esquenta.deJson(json['esquenta'] as Map<String, dynamic>),
         cartaTiradaPor: json['cartaTiradaPor'] as String?,
+        minhaMao: [for (final carta in (json['minhaMao'] as List?) ?? const []) _enum(CartaNaManga.values, carta)],
       );
 
   final String codigo;
@@ -519,6 +573,9 @@ class VisaoDaSala {
 
   /// Quem tirou a carta anterior com o "Tira essa".
   final String? cartaTiradaPor;
+
+  /// Minhas cartas na manga (as dos outros são segredo).
+  final List<CartaNaManga> minhaMao;
 
   Jogador? jogador(String id) {
     for (final jogador in jogadores) {

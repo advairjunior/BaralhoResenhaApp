@@ -24,6 +24,7 @@ void main() {
         'zonaSegura': true,
         'esquentar': false,
         'ritmo': 'Devagar',
+        'cartasNaManga': true,
       });
       await fecharApp(tester);
     });

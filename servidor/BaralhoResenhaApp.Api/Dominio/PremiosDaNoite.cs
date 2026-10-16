@@ -57,6 +57,8 @@ public static class PremiosDaNoite
             (n, _) => $"O time acertou {Plural(n, "mímica", "mímicas")}", minimo: 2);
         Individual("⚔️", "Rei(nha) dos duelos", j => j.Estatisticas.DuelosVencidos,
             (n, _) => $"Venceu {Plural(n, "duelo", "duelos")}", minimo: 2);
+        Individual("🃏", "Mestre das cartas na manga", j => j.Estatisticas.CartasUsadas,
+            (n, _) => $"Usou {Plural(n, "carta", "cartas")} na manga", minimo: 2);
         Individual("🚨", "Vacilão(ona) da regra", j => j.Estatisticas.Vacilos,
             (n, _) => $"Quebrou as regras {Plural(n, "vez", "vezes")}", minimo: 2);
         Individual("👮", "Fiscal da resenha", j => j.Estatisticas.Tiradas,

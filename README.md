@@ -47,6 +47,20 @@ A tela mostra o resumo: "🎯 Só Eu Nunca" ou "🎲 Misturando: …".
 
 **Quem manda nas cartas:** só quem criou a sala puxa a próxima carta, pula, revela antes da hora e usa o "Tira essa". Os outros veem "Esperando Fulano puxar a próxima carta".
 
+### 🃏 Cartas na manga (estilo Uno)
+
+Cada um começa a noite com uma carta na manga e guarda até 3. Ganha mais quem vence duelo ou pedra, papel e tesoura, o time que acerta a mímica, quem a turma escolhe no elogio e, a cada 10 cartas, quem está há mais tempo sem ganhar. A mão é segredo: a turma só vê quantas cada um tem.
+
+| Carta | O que faz |
+|---|---|
+| 🛡️ Escudo | Cancela o que a carta da mesa fez com você. |
+| 🎯 Passa a bola | O que a carta fez com você vai para quem você escolher. |
+| ↩️ Devolve | No duelo, o ponto volta para quem te venceu. |
+| 🥔 Batata quente | Vira dose com +1 gole em quem você escolher; a pessoa pode passar adiante com a dela. |
+| ✖️2 Dobra | Dobra o que a carta fez com outra pessoa. |
+
+Uma por pessoa a cada carta da mesa; todos os celulares mostram quem usou o quê. Prêmio "🃏 Mestre das cartas na manga". Dá para desligar na configuração.
+
 ### Noites prontas
 
 Na sala de espera, um toque monta a noite: 🍻 Resenha clássica, 🌡️ Esquenta até o Picante, 🎭 Noite das brincadeiras, 😂 Só zoeira, 💛 Noite tranquila e 🔥 Raiz (pede confirmação). A noite escolhida aparece marcada; mexer em qualquer coisa embaixo vira noite personalizada.

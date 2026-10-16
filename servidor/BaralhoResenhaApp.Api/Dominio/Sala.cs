@@ -30,6 +30,12 @@ public sealed class Jogador
     public int Goles { get; set; }
     public FotoDoJogador? Foto { get; set; }
 
+    /// <summary>Cartas na manga, estilo Uno (até 3). Só o dono vê quais são.</summary>
+    public List<CartaNaManga> Mao { get; } = [];
+
+    /// <summary>Rodada em que ganhou a última carta na manga (rodízio do presente).</summary>
+    public int UltimaCartaEm { get; set; }
+
     /// <summary>Par do casal na sala; os dois apontam um para o outro.</summary>
     public Guid? ParId { get; set; }
     public EstatisticasDoJogador Estatisticas { get; } = new();
@@ -59,6 +65,8 @@ public sealed class EstatisticasDoJogador
     public int Mimicas { get; set; }
     public int MimicasAcertadas { get; set; }
 
+    public int CartasUsadas { get; set; }
+
     /// <summary>Vezes que quebrou uma regra-relâmpago.</summary>
     public int Vacilos { get; set; }
 }
@@ -85,8 +93,22 @@ public sealed class Rodada
         ? 60
         : Regex.Match(Texto, @"(\d+) segundos") is { Success: true } achado ? int.Parse(achado.Groups[1].Value) : null;
 
-    /// <summary>Quem encheu o cofrinho nesta carta: bebe agora.</summary>
-    public HashSet<Guid> BebemAgora { get; } = [];
+    /// <summary>O que esta carta fez com cada um; as cartas na manga mexem aqui.</summary>
+    public Dictionary<Guid, ContaDaCarta> Contas { get; } = [];
+
+    /// <summary>Quem encheu o cofrinho nesta carta.</summary>
+    public HashSet<Guid> EncheuCofrinho { get; } = [];
+
+    /// <summary>Quem bebe agora: encheu o cofrinho ou levou dose de verdade.</summary>
+    public IReadOnlyList<Guid> BebemAgora => EncheuCofrinho
+        .Union(Contas.Where(c => c.Value.Goles > 0 && !c.Value.SemAlcool).Select(c => c.Key))
+        .ToList();
+
+    /// <summary>Cartas na manga usadas nesta carta, na ordem.</summary>
+    public List<UsoDeCarta> Usos { get; } = [];
+
+    /// <summary>Quem ganhou carta na manga nesta carta.</summary>
+    public List<Guid> Ganharam { get; } = [];
     public Revelacao? Revelacao { get; set; }
 
     /// <summary>Casais em Jogo: quem chuta a resposta.</summary>
@@ -291,6 +313,7 @@ public sealed partial class Sala
             if (_jogadores.Count < 2)
                 throw new AcaoNaoPermitidaException("Chame pelo menos mais uma pessoa para começar.");
             ComecouEm = _relogio.GetUtcNow();
+            foreach (var jogador in _jogadores) DarCarta(jogador);
             Distribuir();
             Tocar();
         }
@@ -507,6 +530,7 @@ public sealed partial class Sala
             Duelistas = carta.Duelo && sorteados.Count == 2 ? [sorteados[0].Id, sorteados[1].Id] : [],
             Times = carta.Modo == ModoDeJogo.ImagemEAcao ? MontarTimes() : []
         };
+        PresenteDaRodada();
         if (carta.Modo == ModoDeJogo.RegraRelampago)
             ComecarRegra(carta, texto, carta.Texto.Contains("{jogador}") ? sorteados[0] : null);
         else if (Regra is not null)
@@ -567,6 +591,7 @@ public sealed partial class Sala
             {
                 Escolhidos = condenado ? [reu!.Id] : []
             };
+            if (reu is not null && condenado && elogio) DarCarta(reu);
             if (reu is not null)
             {
                 if (elogio) reu.Estatisticas.Elogios += sim.Count;
@@ -602,6 +627,8 @@ public sealed partial class Sala
             {
                 Escolhidos = maisVotados
             };
+            if (elogio)
+                foreach (var escolhido in _jogadores.Where(j => maisVotados.Contains(j.Id))) DarCarta(escolhido);
             foreach (var voto in votos)
             {
                 var estatisticas = _jogadores.First(j => j.Id == voto.JogadorId).Estatisticas;
