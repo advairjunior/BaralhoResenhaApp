@@ -26,13 +26,13 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
     {
         [ModoDeJogo.EuNunca] = 4,
         [ModoDeJogo.MaisProvavel] = 5,
-        [ModoDeJogo.BebaSe] = 3,
+        [ModoDeJogo.BebaSe] = 2,
         [ModoDeJogo.CasaisEmJogo] = 1,
         [ModoDeJogo.Tribunal] = 4,
         [ModoDeJogo.Elogios] = 1,
         // Demora mais que uma carta comum: tempero, não prato principal.
         [ModoDeJogo.Correio] = 1,
-        [ModoDeJogo.ImagemEAcao] = 2,
+        [ModoDeJogo.ImagemEAcao] = 3,
     };
 
     /// <summary>

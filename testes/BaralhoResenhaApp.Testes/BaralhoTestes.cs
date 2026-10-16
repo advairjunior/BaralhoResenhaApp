@@ -153,7 +153,8 @@ public sealed class BaralhoTestes
         Assert.InRange(Parte(ModoDeJogo.RegraRelampago), 0.04, 0.20);
         Assert.True(Parte(ModoDeJogo.EuNunca) > Parte(ModoDeJogo.CasaisEmJogo) * 2);
         Assert.True(Parte(ModoDeJogo.MaisProvavel) > 0.12);
-        Assert.True(Parte(ModoDeJogo.BebaSe) > 0.12);
+        // Beba se cedeu espaço para votação, desafios e mímica, mas segue na mesa.
+        Assert.True(Parte(ModoDeJogo.BebaSe) > 0.06);
     }
 
     [Fact]
@@ -186,7 +187,7 @@ public sealed class BaralhoTestes
     }
 
     [Fact]
-    public void ComTudoLigadoVotacaoTribunalEDesafiosSaemBastante()
+    public void ComTudoLigadoVotacaoTribunalDesafiosEMimicaSaemBastante()
     {
         var baralho = CatalogoDeCartas.Carregar();
         var configuracao = new ConfiguracaoDoJogo(NivelDaCarta.Resenha, Enum.GetValues<ModoDeJogo>(), true);
@@ -200,5 +201,7 @@ public sealed class BaralhoTestes
         var desafios = cartas.Count(c => c.Duelo) / 3000.0;
         Assert.True(deVoto >= 0.35, $"votação e tribunal: {deVoto:P0}");
         Assert.True(desafios >= 0.07, $"duelos: {desafios:P0}");
+        var mimica = cartas.Count(c => c.Modo == ModoDeJogo.ImagemEAcao) / 3000.0;
+        Assert.True(mimica >= 0.11, $"imagem e ação: {mimica:P0}");
     }
 }
