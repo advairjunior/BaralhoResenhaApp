@@ -360,6 +360,10 @@ class _AreaDeAcao extends StatelessWidget {
           ],
         ),
       ModoDeJogo.elogios => ProximaCarta(visao: visao, aoTocar: acoes.proxima, rotulo: 'Pronto! Próxima carta'),
+      ModoDeJogo.musica => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          _RodaDeMusica(visao: visao, rodada: rodada, acoes: acoes),
+          ProximaCarta(visao: visao, aoTocar: acoes.proxima),
+        ]),
       ModoDeJogo.correio => _Respondendo(
           visao: visao,
           rodada: rodada,
@@ -860,6 +864,86 @@ class _RevelacaoDoTribunal extends StatelessWidget {
           key: const Key('placar-do-tribunal'),
           style: Theme.of(context).textTheme.titleLarge),
     ]);
+  }
+}
+
+/// Roda de Música: cada um canta na sua vez, na ordem sorteada, com a foto na tela.
+class _RodaDeMusica extends StatelessWidget {
+  const _RodaDeMusica({required this.visao, required this.rodada, required this.acoes});
+
+  final VisaoDaSala visao;
+  final Rodada rodada;
+  final AcoesDaSala acoes;
+
+  @override
+  Widget build(BuildContext context) {
+    final fila = [for (final id in rodada.fila) ?visao.jogador(id)];
+    final daVezId = rodada.pendentes.where((p) => p.motivo == MotivoPendente.cantar).firstOrNull?.jogadorId;
+    final daVez = daVezId == null ? null : visao.jogador(daVezId);
+    final indice = daVez == null ? fila.length : fila.indexWhere((j) => j.id == daVez.id);
+    final travaram = [for (final id in rodada.travaram) ?visao.jogador(id)];
+    return Container(
+      margin: const EdgeInsets.only(bottom: EspacoBaralho.grande),
+      padding: const EdgeInsets.all(EspacoBaralho.base),
+      decoration: BoxDecoration(
+        color: CoresBaralho.musica.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: CoresBaralho.musica),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        if (daVez == null)
+          Text('A roda fechou! 🎶', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge)
+        else ...[
+          Center(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                AvatarDoJogador(key: ValueKey(daVez.id), jogador: daVez, tamanho: 128, destaque: CoresBaralho.musica),
+                const Positioned(right: -6, bottom: -4, child: Text('🎤', style: TextStyle(fontSize: 40))),
+              ],
+            ),
+          ),
+          const SizedBox(height: EspacoBaralho.medio),
+          Text('🎤 Vez de ${daVez.nome} cantar!',
+              textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
+          Text('${indice + 1} de ${fila.length}',
+              textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.ambar)),
+          const SizedBox(height: EspacoBaralho.medio),
+          if (daVez.id == visao.euId)
+            FilledButton(onPressed: acoes.marcarPronto, child: const Text('🎤 Cantei'))
+          else if (!visao.souAnfitriao)
+            Text('Vez de ${daVez.nome} cantar…',
+                textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoSecundario)),
+          if (visao.souAnfitriao) ...[
+            if (daVez.id != visao.euId)
+              OutlinedButton(onPressed: () => acoes.confirmarHistoria(daVez.id), child: Text('${daVez.nome} cantou ✓')),
+            TextButton(onPressed: () => acoes.marcarTravou(daVez.id), child: const Text('😵 Travou')),
+          ],
+        ],
+        if (travaram.isNotEmpty)
+          Text('😵 Travou: ${travaram.map((j) => j.nome).join(', ')}',
+              textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.coral, fontWeight: FontWeight.w600)),
+        const SizedBox(height: EspacoBaralho.medio),
+        // Quem já cantou fica marcado; quem vem depois, apagado.
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: EspacoBaralho.pequeno,
+          children: [
+            for (final (i, jogador) in fila.indexed)
+              Opacity(
+                opacity: i > indice ? 0.45 : 1,
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  AvatarDoJogador(jogador: jogador, tamanho: 36),
+                  Text(
+                    rodada.travaram.contains(jogador.id) ? '😵' : (i < indice ? '✓' : jogador.nome),
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                ]),
+              ),
+          ],
+        ),
+      ]),
+    );
   }
 }
 

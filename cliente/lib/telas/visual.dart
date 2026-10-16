@@ -15,6 +15,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.correio => 'Correio da Resenha',
         ModoDeJogo.imagemEAcao => 'Imagem e Ação',
         ModoDeJogo.jurados => 'Jurados',
+        ModoDeJogo.musica => 'Roda de Música',
       };
 
   String get emoji => switch (this) {
@@ -28,6 +29,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.correio => '📮',
         ModoDeJogo.imagemEAcao => '🎭',
         ModoDeJogo.jurados => '⭐',
+        ModoDeJogo.musica => '🎵',
       };
 
   String get explicacao => switch (this) {
@@ -47,6 +49,8 @@ extension VisualDoModo on ModoDeJogo {
             'com 9 ou mais, três. Só o mímico vê a palavra. Time que perde leva ponto.',
         ModoDeJogo.jurados => 'O app elege alguém e o resto dá nota de 1 a 5 estrelas, em segredo ("o quanto '
             'fulano se veste bem?"). Média alta distribui goles; média baixa leva ponto.',
+        ModoDeJogo.musica => 'A carta dá o tema ("abertura de novela") e cada um canta na sua vez, na ordem '
+            'sorteada. Travou, leva ponto.',
       };
 
   Color get cor => switch (this) {
@@ -60,6 +64,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.correio => CoresBaralho.correio,
         ModoDeJogo.imagemEAcao => CoresBaralho.mimica,
         ModoDeJogo.jurados => CoresBaralho.jurados,
+        ModoDeJogo.musica => CoresBaralho.musica,
       };
 }
 

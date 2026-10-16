@@ -24,7 +24,10 @@ public enum ModoDeJogo
     ImagemEAcao,
 
     /// <summary>Jurados: o app elege uma pessoa e o resto dá nota de 1 a 5 estrelas, em segredo.</summary>
-    Jurados
+    Jurados,
+
+    /// <summary>Roda de Música: a carta dá o tema e cada um canta na sua vez, na ordem sorteada.</summary>
+    Musica
 }
 
 /// <summary>
@@ -144,6 +147,7 @@ public sealed record ConfiguracaoDoJogo(
         NivelDaCarta.Resenha,
         // Casais em Jogo começa desligado: quem quiser, liga.
         [ModoDeJogo.EuNunca, ModoDeJogo.MaisProvavel, ModoDeJogo.BebaSe, ModoDeJogo.RegraRelampago,
-            ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados],
+            ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados,
+            ModoDeJogo.Musica],
         ZonaSegura: true);
 }

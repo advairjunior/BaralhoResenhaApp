@@ -118,6 +118,10 @@ class ApiBaralho {
   Future<VisaoDaSala> confirmarHistoria(String codigo, String token, int rodada, String jogadorId) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/contou', token, corpo: {'rodada': rodada, 'jogadorId': jogadorId});
 
+  /// Roda de Música: quem criou a sala marca que a pessoa da vez travou.
+  Future<VisaoDaSala> marcarTravou(String codigo, String token, int rodada, String jogadorId) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/travou', token, corpo: {'rodada': rodada, 'jogadorId': jogadorId});
+
   Future<VisaoDaSala> marcarPronto(String codigo, String token, int rodada) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/pronto', token, corpo: {'rodada': rodada});
 

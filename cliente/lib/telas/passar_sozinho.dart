@@ -23,12 +23,14 @@ const _botaoDoMotivo = {
   MotivoPendente.historia: '🎤 Contei ✓',
   MotivoPendente.elogio: '💛 Distribuí ✓',
   MotivoPendente.correio: '📮 Li tudo ✓',
+  MotivoPendente.cantar: '🎤 Cantei ✓',
 };
 const _esperandoPor = {
   MotivoPendente.beber: 'beber 🍺',
   MotivoPendente.historia: 'contar a história 🎤',
   MotivoPendente.elogio: 'distribuir os goles 💛',
   MotivoPendente.correio: 'ler os bilhetes 📮',
+  MotivoPendente.cantar: 'cantar 🎤',
 };
 
 /// Passar a carta sozinho: "Pronto ✓", quem falta, a contagem de 3 segundos e
@@ -109,7 +111,10 @@ class _PassarSozinhoState extends State<PassarSozinho> {
     // No "conta essa", o "Contei" fica na fila de histórias, junto da foto.
     final contaEssa = rodada.revelacao?.contadores.isNotEmpty ?? false;
     final minha = rodada.pendentes
-        .where((p) => p.jogadorId == visao.euId && !(contaEssa && p.motivo == MotivoPendente.historia))
+        .where((p) =>
+            p.jogadorId == visao.euId &&
+            !(contaEssa && p.motivo == MotivoPendente.historia) &&
+            p.motivo != MotivoPendente.cantar)
         .firstOrNull;
     final esperando = [
       for (final pendente in rodada.pendentes)

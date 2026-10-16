@@ -75,6 +75,12 @@ ComoJoga comoJoga(Rodada rodada) {
         'Maioria sim (ou empate) condena: o réu leva 1 ponto. Ninguém fica sabendo quem votou o quê.',
         'Na carta de elogio é ao contrário: maioria sim, o réu distribui goles; maioria não, o réu leva 1 ponto.',
       ]),
+    Rodada(modo: ModoDeJogo.musica) => ('musica', ModoDeJogo.musica.titulo, [
+        'A carta dá o tema. Quem está na foto começa e a roda segue na ordem que aparece embaixo.',
+        'Cantou o seu trecho? Toque em "Cantei" e passa para o próximo. Não vale repetir música.',
+        'Travou, esqueceu a letra ou repetiu? Quem criou a sala marca "Travou" e a pessoa leva 1 ponto.',
+        'Quem criou a sala também passa a vez de quem está cantando sem o celular na mão.',
+      ]),
     Rodada(modo: ModoDeJogo.jurados) => ('jurados', ModoDeJogo.jurados.titulo, [
         'O app elegeu a pessoa da carta: ela só espera a nota.',
         'O resto da turma é jurado: cada um dá de 1 a 5 estrelas, em segredo.',

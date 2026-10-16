@@ -26,6 +26,7 @@ abstract final class CoresBaralho {
   static const mimica = Color(0xFF22A06B);
   static const elogios = Color(0xFFF5B301);
   static const jurados = Color(0xFFC026D3);
+  static const musica = Color(0xFF0EA5E9);
 }
 
 abstract final class EspacoBaralho {

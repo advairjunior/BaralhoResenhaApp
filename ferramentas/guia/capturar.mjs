@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica'];
 
 const pagina = async () => {
   const p = await b.newPage();
@@ -132,6 +132,15 @@ const jurado = Object.keys(s.turma).find((n) => s.ids[n] !== v.rodada.alvo);
 p = await abrir(s, jurado);
 await rolar(p, 450);
 await foto(p, 'tribunal');
+await p.close();
+
+// Roda de Música: cada um canta na sua vez, com a foto na tela.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['Musica'] });
+v = await api('POST', `${s.sala}/pronto`, s.turma[s.nomes[v.rodada.fila[0]]], { rodada: v.rodada.numero });
+p = await abrir(s, 'Advair');
+await rolar(p, 600);
+await foto(p, 'musica');
 await p.close();
 
 // Jurados: a média das estrelas, sem dizer quem deu qual nota.

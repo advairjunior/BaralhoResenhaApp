@@ -13,7 +13,10 @@ public enum MotivoPendente
     Elogio,
 
     /// <summary>Correio: quem está na foto lê os bilhetes (e escolhe o favorito).</summary>
-    Correio
+    Correio,
+
+    /// <summary>Roda de Música: é a vez dela cantar.</summary>
+    Cantar
 }
 
 public sealed record Pendente(Guid JogadorId, MotivoPendente Motivo);
@@ -61,24 +64,56 @@ public sealed partial class Sala
             .Select(id => (Guid?)id)
             .FirstOrDefault();
 
+    /// <summary>Roda de Música: quem está na vez de cantar; nulo quando a roda acabou.</summary>
+    private Guid? DaVezDeCantar(Rodada rodada) =>
+        rodada.Fila
+            .Where(id => !rodada.Confirmaram.Contains(id) && !rodada.Travaram.Contains(id) &&
+                _jogadores.Any(j => j.Id == id))
+            .Select(id => (Guid?)id)
+            .FirstOrDefault();
+
     /// <summary>
-    /// "Conta essa": quem criou a sala confirma que a pessoa da vez contou, para
-    /// ela não precisar largar a história e pegar o celular.
+    /// "Conta essa" e Roda de Música: quem criou a sala confirma que a pessoa da
+    /// vez contou (ou cantou), para ela não precisar largar tudo e pegar o celular.
     /// </summary>
     public void ConfirmarHistoria(string token, int numeroDaRodada, Guid jogadorId)
     {
         lock (_trinco)
         {
-            ExigirAnfitriao(token, "Quem passa a vez é quem criou a sala ou quem contou.");
-            if (!RodadaEmAndamento(numeroDaRodada) || Fase != FaseDaSala.Revelada) return;
+            ExigirAnfitriao(token, "Quem passa a vez é quem criou a sala ou quem está na vez.");
+            if (!RodadaEmAndamento(numeroDaRodada) || Fase is FaseDaSala.Lobby or FaseDaSala.Fim) return;
             var rodada = Rodada!;
-            if (DaVezDeContar(rodada) is not { } daVez) return;
-            if (daVez != jogadorId)
-                throw new AcaoNaoPermitidaException(
-                    $"Agora é a vez de {_jogadores.First(j => j.Id == daVez).Nome} contar.");
+            if (ExigirDaVez(rodada, jogadorId) is null) return;
             rodada.Confirmaram.Add(jogadorId);
             Tocar();
         }
+    }
+
+    /// <summary>Roda de Música: travou na sua vez. Leva o ponto e a roda segue no próximo.</summary>
+    public void MarcarTravou(string token, int numeroDaRodada, Guid jogadorId)
+    {
+        lock (_trinco)
+        {
+            ExigirAnfitriao(token, "Quem marca que travou é quem criou a sala.");
+            if (!RodadaEmAndamento(numeroDaRodada) || Rodada!.Carta.Modo != ModoDeJogo.Musica) return;
+            var rodada = Rodada;
+            if (ExigirDaVez(rodada, jogadorId) is not { } daVez) return;
+            rodada.Travaram.Add(jogadorId);
+            Pegar(_jogadores.First(j => j.Id == daVez));
+            Tocar();
+        }
+    }
+
+    /// <summary>Quem está na vez (de contar ou de cantar); outra pessoa, erro.</summary>
+    private Guid? ExigirDaVez(Rodada rodada, Guid jogadorId)
+    {
+        var (daVez, verbo) = DaVezDeContar(rodada) is { } contar ? (contar, "contar") :
+            DaVezDeCantar(rodada) is { } cantar ? (cantar, "cantar") : (Guid.Empty, "");
+        if (daVez == Guid.Empty) return null;
+        if (daVez != jogadorId)
+            throw new AcaoNaoPermitidaException(
+                $"Agora é a vez de {_jogadores.First(j => j.Id == daVez).Nome} {verbo}.");
+        return daVez;
     }
 
     /// <summary>"Segura aí": para a contagem; a carta só passa pela mão de quem criou a sala.</summary>
@@ -120,7 +155,7 @@ public sealed partial class Sala
     internal IReadOnlyList<Pendente> Pendentes(Rodada rodada)
     {
         var revelada = Fase == FaseDaSala.Revelada;
-        if (!revelada && rodada.Carta.Modo != ModoDeJogo.BebaSe) return [];
+        if (!revelada && rodada.Carta.Modo is not (ModoDeJogo.BebaSe or ModoDeJogo.Musica)) return [];
         var pendentes = new List<Pendente>();
         void Adicionar(Guid? id, MotivoPendente motivo)
         {
@@ -135,6 +170,7 @@ public sealed partial class Sala
             if (revelacao.Elogio) foreach (var id in revelacao.Escolhidos) Adicionar(id, MotivoPendente.Elogio);
             if (rodada.Carta.Modo == ModoDeJogo.Correio) Adicionar(rodada.Alvo, MotivoPendente.Correio);
         }
+        Adicionar(DaVezDeCantar(rodada), MotivoPendente.Cantar);
         foreach (var id in rodada.BebemAgora) Adicionar(id, MotivoPendente.Beber);
         return pendentes;
     }
@@ -162,6 +198,8 @@ public sealed partial class Sala
             ModoDeJogo.BebaSe => todosProntos && Pendentes(rodada).Count == 0,
             ModoDeJogo.RegraRelampago or ModoDeJogo.Elogios => todosProntos,
             ModoDeJogo.MaisProvavel when !rodada.Votacao => todosProntos,
+            // A roda acabou e quem travou já bebeu.
+            ModoDeJogo.Musica => Pendentes(rodada).Count == 0,
             _ => false
         };
     }

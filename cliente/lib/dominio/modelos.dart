@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 
@@ -8,7 +8,7 @@ enum FaseDaSala { lobby, carta, revelada, fim }
 enum RitmoDaBebida { devagar, normal, raiz }
 
 /// O que alguém ainda tem que fazer antes de a carta passar sozinha.
-enum MotivoPendente { beber, historia, elogio, correio }
+enum MotivoPendente { beber, historia, elogio, correio, cantar }
 
 class Pendente {
   const Pendente(this.jogadorId, this.motivo);
@@ -365,6 +365,8 @@ class Rodada {
     this.cartaId,
     this.vezDaRegra = false,
     this.contaEssa = false,
+    this.fila = const [],
+    this.travaram = const [],
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -414,6 +416,8 @@ class Rodada {
         cartaId: json['cartaId'] as String?,
         vezDaRegra: json['vezDaRegra'] as bool? ?? false,
         contaEssa: json['contaEssa'] as bool? ?? false,
+        fila: List<String>.from((json['fila'] as List?) ?? const []),
+        travaram: List<String>.from((json['travaram'] as List?) ?? const []),
       );
 
   final int numero;
@@ -502,6 +506,10 @@ class Rodada {
 
   /// Eu Nunca "conta essa": cada um que já fez conta a sua.
   final bool contaEssa;
+
+  /// Roda de Música: a ordem em que cada um canta e quem travou.
+  final List<String> fila;
+  final List<String> travaram;
 }
 
 class Momento {

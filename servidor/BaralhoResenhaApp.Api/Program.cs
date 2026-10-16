@@ -162,6 +162,12 @@ app.MapPost("/api/salas/{codigo}/contou", (
     Agir(codigo, http, salas, notificador,
         (sala, token) => sala.ConfirmarHistoria(token, requisicao.Rodada, requisicao.JogadorId)));
 
+app.MapPost("/api/salas/{codigo}/travou", (
+    string codigo, HistoriaContada requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador,
+        (sala, token) => sala.MarcarTravou(token, requisicao.Rodada, requisicao.JogadorId)));
+
 app.MapPost("/api/salas/{codigo}/segurar", (
     string codigo, AcaoNaRodada requisicao, HttpRequest http,
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>

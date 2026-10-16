@@ -30,6 +30,7 @@ abstract interface class AcoesDaSala {
   Future<void> usarCarta(CartaNaManga carta, String? alvo);
   Future<void> marcarPronto();
   Future<void> confirmarHistoria(String jogadorId);
+  Future<void> marcarTravou(String jogadorId);
   Future<void> segurar();
   Future<void> passarSozinho();
   Future<void> alternarBebi();
@@ -215,6 +216,10 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   @override
   Future<void> confirmarHistoria(String jogadorId) =>
       _agir((token) => widget.api.confirmarHistoria(_codigo, token, _rodada, jogadorId));
+
+  @override
+  Future<void> marcarTravou(String jogadorId) =>
+      _agir((token) => widget.api.marcarTravou(_codigo, token, _rodada, jogadorId));
 
   @override
   Future<void> segurar() => _agir((token) => widget.api.segurar(_codigo, token, _rodada));

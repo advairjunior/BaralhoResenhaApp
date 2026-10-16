@@ -174,6 +174,12 @@ public sealed class Rodada
     /// <summary>Duelo: os dois da carta. Eles se apresentam e a turma vota.</summary>
     public IReadOnlyList<Guid> Duelistas { get; init; } = [];
 
+    /// <summary>Roda de Música: a ordem em que cada um canta; o primeiro é o {jogador} da carta.</summary>
+    public IReadOnlyList<Guid> Fila { get; init; } = [];
+
+    /// <summary>Roda de Música: quem travou na sua vez (e levou o ponto).</summary>
+    public HashSet<Guid> Travaram { get; } = [];
+
     public bool PedeResposta =>
         Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio
             or ModoDeJogo.Jurados ||
@@ -615,7 +621,10 @@ public sealed partial class Sala
             Votacao = carta.Modo == ModoDeJogo.MaisProvavel &&
                 (carta.Elogio || carta.Duelo || _sorteio.NextDouble() < ChanceDeVotacao),
             Duelistas = carta.Duelo && sorteados.Count == 2 ? [sorteados[0].Id, sorteados[1].Id] : [],
-            Times = carta.Modo == ModoDeJogo.ImagemEAcao ? MontarTimes() : []
+            Times = carta.Modo == ModoDeJogo.ImagemEAcao ? MontarTimes() : [],
+            Fila = carta.Modo == ModoDeJogo.Musica
+                ? [sorteados[0].Id, .. _jogadores.Where(j => j.Id != sorteados[0].Id).OrderBy(_ => _sorteio.Next()).Select(j => j.Id)]
+                : []
         };
         PresenteDaRodada();
         if (carta.Modo == ModoDeJogo.RegraRelampago)

@@ -198,9 +198,9 @@ public sealed class BaralhoTestes
             .ToList();
 
         var deVoto = cartas.Count(c => c.Modo is ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.Jurados) / 3000.0;
-        var desafios = cartas.Count(c => c.Duelo) / 3000.0;
+        var desafios = cartas.Count(c => c.Duelo || c.Modo == ModoDeJogo.Musica) / 3000.0;
         Assert.True(deVoto >= 0.35, $"votação, tribunal e jurados: {deVoto:P0}");
-        Assert.True(desafios >= 0.07, $"duelos: {desafios:P0}");
+        Assert.True(desafios >= 0.07, $"duelos e rodas de música: {desafios:P0}");
         var mimica = cartas.Count(c => c.Modo == ModoDeJogo.ImagemEAcao) / 3000.0;
         Assert.True(mimica >= 0.11, $"imagem e ação: {mimica:P0}");
     }

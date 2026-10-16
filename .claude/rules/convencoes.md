@@ -20,7 +20,7 @@
 
 - Cartas em `servidor/BaralhoResenhaApp.Api/Dados/cartas.json`, uma por linha; iscas das
   regras-relâmpago em `Dados/iscas.json`. Os dois são recursos embutidos na DLL.
-- Ids estáveis por jogo (`en-`, `mp-`, `bs-`, `rr-`, `cs-`, `tr-`, `el-`, `co-`, `ia-`, `ju-`):
+- Ids estáveis por jogo (`en-`, `mp-`, `bs-`, `rr-`, `cs-`, `tr-`, `el-`, `co-`, `ia-`, `ju-`, `mu-`):
   a página de revisão usa o id para guardar as decisões.
 - Cartas são para a turma como amigos: nada centrado em casal, Leve é humor de adulto sem
   malícia (nunca infantil), e o que pede votação nunca fica no Beba se.
