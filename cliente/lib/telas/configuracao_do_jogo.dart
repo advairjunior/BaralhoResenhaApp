@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
 import 'bebida.dart';
+import 'noites_prontas.dart';
 import 'visual.dart';
 
 /// Nível, modos e Zona Segura. Quem criou a sala mexe; os outros só veem.
@@ -19,29 +20,36 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
   final ValueChanged<ConfiguracaoDoJogo> aoMudar;
 
   Future<void> _escolherNivel(BuildContext context, NivelDaCarta nivel) async {
-    if (nivel == NivelDaCarta.original) {
-      final topou = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('🔥 Baralho Original'),
-          content: const Text(
-            'Aqui as cartas são pesadas como as dos baralhos de loja: '
-            'sexo sem rodeio e perguntas bem indiscretas.\n\n'
-            'A turma toda topou?',
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Melhor não')),
-            FilledButton(
-              style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Bora ver!'),
-            ),
-          ],
-        ),
-      );
-      if (topou != true) return;
-    }
+    if (nivel == NivelDaCarta.original && !await _turmaTopouOOriginal(context)) return;
     aoMudar(configuracao.copiar(nivel: nivel));
+  }
+
+  Future<void> _escolherNoite(BuildContext context, NoitePronta noite) async {
+    if (noite.configuracao.nivel == NivelDaCarta.original && !await _turmaTopouOOriginal(context)) return;
+    aoMudar(noite.configuracao);
+  }
+
+  Future<bool> _turmaTopouOOriginal(BuildContext context) async {
+    final topou = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('🔥 Baralho Original'),
+        content: const Text(
+          'Aqui as cartas são pesadas como as dos baralhos de loja: '
+          'sexo sem rodeio e perguntas bem indiscretas.\n\n'
+          'A turma toda topou?',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Melhor não')),
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Bora ver!'),
+          ),
+        ],
+      ),
+    );
+    return topou == true;
   }
 
   void _alternarModo(BuildContext context, ModoDeJogo modo, bool ligado) {
@@ -60,6 +68,17 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Text('Noites prontas', style: texto.titleMedium),
+        Text(
+          'Um toque e a noite está montada. Dá para ajustar tudo embaixo depois.',
+          style: texto.bodyMedium?.copyWith(color: CoresBaralho.textoApagado),
+        ),
+        const SizedBox(height: EspacoBaralho.pequeno),
+        NoitesProntas(
+          configuracao: configuracao,
+          aoEscolher: podeEditar ? (noite) => _escolherNoite(context, noite) : null,
+        ),
+        const SizedBox(height: EspacoBaralho.base),
         Text(configuracao.esquentar ? 'Até onde pode esquentar' : 'Nível das cartas', style: texto.titleMedium),
         const SizedBox(height: EspacoBaralho.pequeno),
         GridView.count(
@@ -88,7 +107,7 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
             configuracao.nivel == NivelDaCarta.leve
                 ? 'Escolha um nível acima do Leve para a noite ter para onde esquentar.'
                 : 'Começa no Leve e sobe um nível a cada $cartasPorNivel cartas, '
-                    'até ${configuracao.nivel.emoji} ${configuracao.nivel.titulo}.',
+                      'até ${configuracao.nivel.emoji} ${configuracao.nivel.titulo}.',
             style: const TextStyle(color: CoresBaralho.textoApagado),
           ),
         ),
@@ -99,18 +118,21 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
           style: texto.bodyMedium?.copyWith(color: CoresBaralho.textoApagado),
         ),
         const SizedBox(height: EspacoBaralho.pequeno),
-        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          for (final ritmo in RitmoDaBebida.values) ...[
-            if (ritmo != RitmoDaBebida.values.first) const SizedBox(width: EspacoBaralho.pequeno),
-            Expanded(
-              child: _CartaoDeRitmo(
-                ritmo: ritmo,
-                escolhido: configuracao.ritmo == ritmo,
-                aoTocar: podeEditar ? () => aoMudar(configuracao.copiar(ritmo: ritmo)) : null,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final ritmo in RitmoDaBebida.values) ...[
+              if (ritmo != RitmoDaBebida.values.first) const SizedBox(width: EspacoBaralho.pequeno),
+              Expanded(
+                child: _CartaoDeRitmo(
+                  ritmo: ritmo,
+                  escolhido: configuracao.ritmo == ritmo,
+                  aoTocar: podeEditar ? () => aoMudar(configuracao.copiar(ritmo: ritmo)) : null,
+                ),
               ),
-            ),
+            ],
           ],
-        ]),
+        ),
         const SizedBox(height: EspacoBaralho.base),
         Text('Jogos na mistura', style: texto.titleMedium),
         Text(
@@ -144,8 +166,10 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
         if (!podeEditar)
           Padding(
             padding: const EdgeInsets.only(top: EspacoBaralho.pequeno),
-            child: Text('Só quem criou a sala muda as configurações.',
-                style: texto.bodyMedium?.copyWith(color: CoresBaralho.textoApagado)),
+            child: Text(
+              'Só quem criou a sala muda as configurações.',
+              style: texto.bodyMedium?.copyWith(color: CoresBaralho.textoApagado),
+            ),
           ),
       ],
     );
@@ -160,7 +184,10 @@ class _ResumoDaMistura extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ligados = [for (final modo in ModoDeJogo.values) if (modos.contains(modo)) modo];
+    final ligados = [
+      for (final modo in ModoDeJogo.values)
+        if (modos.contains(modo)) modo,
+    ];
     final nomes = ligados.map((modo) => modo.titulo).toList();
     final texto = ligados.length == 1
         ? '🎯 Só ${nomes.single}'
@@ -168,11 +195,11 @@ class _ResumoDaMistura extends StatelessWidget {
     return Container(
       key: const Key('resumo-da-mistura'),
       padding: const EdgeInsets.symmetric(horizontal: EspacoBaralho.medio, vertical: EspacoBaralho.pequeno),
-      decoration: BoxDecoration(
-        color: CoresBaralho.ambarEscuro,
-        borderRadius: BorderRadius.circular(12),
+      decoration: BoxDecoration(color: CoresBaralho.ambarEscuro, borderRadius: BorderRadius.circular(12)),
+      child: Text(
+        texto,
+        style: const TextStyle(color: CoresBaralho.ambar, fontWeight: FontWeight.w600),
       ),
-      child: Text(texto, style: const TextStyle(color: CoresBaralho.ambar, fontWeight: FontWeight.w600)),
     );
   }
 }
@@ -198,13 +225,17 @@ class _CartaoDeRitmo extends StatelessWidget {
         onTap: aoTocar,
         child: Padding(
           padding: const EdgeInsets.all(EspacoBaralho.medio),
-          child: Column(children: [
-            Text(ritmo.titulo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-            const SizedBox(height: EspacoBaralho.mini),
-            Text(ritmo.explicacao,
+          child: Column(
+            children: [
+              Text(ritmo.titulo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              const SizedBox(height: EspacoBaralho.mini),
+              Text(
+                ritmo.explicacao,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, height: 1.3, color: CoresBaralho.textoSecundario)),
-          ]),
+                style: const TextStyle(fontSize: 12, height: 1.3, color: CoresBaralho.textoSecundario),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -235,12 +266,13 @@ class _CartaoDeNivel extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${nivel.emoji} ${nivel.titulo}',
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+              Text('${nivel.emoji} ${nivel.titulo}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
               const SizedBox(height: EspacoBaralho.mini),
               Expanded(
-                child: Text(nivel.explicacao,
-                    style: const TextStyle(fontSize: 12, height: 1.3, color: CoresBaralho.textoSecundario)),
+                child: Text(
+                  nivel.explicacao,
+                  style: const TextStyle(fontSize: 12, height: 1.3, color: CoresBaralho.textoSecundario),
+                ),
               ),
             ],
           ),
@@ -268,8 +300,7 @@ Future<void> abrirConfiguracao(
           maxChildSize: 0.95,
           builder: (context, rolagem) => ListView(
             controller: rolagem,
-            padding: const EdgeInsets.fromLTRB(
-                EspacoBaralho.grande, 0, EspacoBaralho.grande, EspacoBaralho.grande),
+            padding: const EdgeInsets.fromLTRB(EspacoBaralho.grande, 0, EspacoBaralho.grande, EspacoBaralho.grande),
             children: [
               ConfiguracaoDoJogoEditor(
                 configuracao: atual,
@@ -280,9 +311,11 @@ Future<void> abrirConfiguracao(
                 },
               ),
               const SizedBox(height: EspacoBaralho.base),
-              Text('As mudanças valem a partir da próxima carta.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: CoresBaralho.textoApagado)),
+              Text(
+                'As mudanças valem a partir da próxima carta.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: CoresBaralho.textoApagado),
+              ),
             ],
           ),
         ),
