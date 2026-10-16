@@ -175,7 +175,8 @@ public sealed class Rodada
     public IReadOnlyList<Guid> Duelistas { get; init; } = [];
 
     public bool PedeResposta =>
-        Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio ||
+        Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio
+            or ModoDeJogo.Jurados ||
         (Carta.Modo == ModoDeJogo.MaisProvavel && Votacao);
 }
 
@@ -210,6 +211,12 @@ public sealed record Revelacao(
 
     /// <summary>Correio: os bilhetes, embaralhados e sem autor.</summary>
     public IReadOnlyList<string> Bilhetes { get; init; } = [];
+
+    /// <summary>Jurados: a média das estrelas, com uma casa.</summary>
+    public double? Media { get; init; }
+
+    /// <summary>Jurados: as notas, em ordem e sem dizer quem deu qual.</summary>
+    public IReadOnlyList<int> Notas { get; init; } = [];
 }
 
 /// <param name="Quem">Quem faz: entrevista, missão, pergunta ou piada.</param>
@@ -379,6 +386,14 @@ public sealed partial class Sala
                     throw new AcaoNaoPermitidaException("Essa é sobre você: espera o veredito da turma.");
                 if (resposta is not (RespostaSim or RespostaNao))
                     throw new AcaoNaoPermitidaException("Vote sim ou não.");
+            }
+
+            if (rodada.Carta.Modo == ModoDeJogo.Jurados)
+            {
+                if (jogador.Id == rodada.Alvo)
+                    throw new AcaoNaoPermitidaException("Essa é sobre você: espera a nota dos jurados.");
+                if (resposta is not ("1" or "2" or "3" or "4" or "5"))
+                    throw new AcaoNaoPermitidaException("Dê uma nota de 1 a 5 estrelas.");
             }
 
             if (rodada.Carta.Modo == ModoDeJogo.Correio) resposta = ValidarBilhete(rodada, jogador, resposta);
@@ -575,7 +590,7 @@ public sealed partial class Sala
             Texto = texto,
             Palpiteiro = palpiteiro?.Id,
             // No tribunal, o réu é o {jogador} da carta; no correio, quem está na foto.
-            Alvo = carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio ? sorteados[0].Id : alvo?.Id,
+            Alvo = carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados ? sorteados[0].Id : alvo?.Id,
             // Elogio e duelo são sempre no celular: a graça é a foto de quem a turma escolheu.
             Votacao = carta.Modo == ModoDeJogo.MaisProvavel &&
                 (carta.Elogio || carta.Duelo || _sorteio.NextDouble() < ChanceDeVotacao),
@@ -602,7 +617,7 @@ public sealed partial class Sala
         var todosResponderam = rodada.Carta.Modo switch
         {
             ModoDeJogo.CasaisEmJogo => CasalRespondeu(rodada),
-            ModoDeJogo.Tribunal or ModoDeJogo.Correio => rodada.Respostas.Count > 0 &&
+            ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados => rodada.Respostas.Count > 0 &&
                 _jogadores.Where(j => j.Id != rodada.Alvo).All(j => rodada.Respostas.ContainsKey(j.Id)),
             ModoDeJogo.MaisProvavel when rodada.Duelistas.Count > 0 => rodada.Respostas.Count > 0 &&
                 _jogadores.Where(j => !rodada.Duelistas.Contains(j.Id)).All(j => rodada.Respostas.ContainsKey(j.Id)),
@@ -631,6 +646,10 @@ public sealed partial class Sala
         else if (rodada.Carta.Modo == ModoDeJogo.Correio)
         {
             revelacao = RevelarBilhetes(rodada, respostas);
+        }
+        else if (rodada.Carta.Modo == ModoDeJogo.Jurados)
+        {
+            revelacao = RevelarJurados(rodada, respostas);
         }
         else if (rodada.Carta.Modo == ModoDeJogo.Tribunal)
         {

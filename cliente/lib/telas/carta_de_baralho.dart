@@ -43,6 +43,8 @@ _TemaDaCarta _temaDo(ModoDeJogo modo) => switch (modo) {
         const _TemaDaCarta(moldura: Color(0xFFD9452A), papel: Color(0xFFFFF3EC), titulo: Color(0xFFA8321C)),
       ModoDeJogo.imagemEAcao =>
         const _TemaDaCarta(moldura: Color(0xFF1B8A5A), papel: Color(0xFFEEFBF4), titulo: Color(0xFF13693F)),
+      ModoDeJogo.jurados =>
+        const _TemaDaCarta(moldura: Color(0xFFA21CAF), papel: Color(0xFFFDF2FF), titulo: Color(0xFF86198F)),
     };
 
 /// O que vai em cima do título: o jeito de jogar esta carta.
@@ -59,6 +61,7 @@ String? _jeitoDaCarta(Rodada rodada) => switch (rodada) {
       Rodada(modo: ModoDeJogo.tribunal) => '👍 SIM OU 👎 NÃO, EM SEGREDO',
       Rodada(modo: ModoDeJogo.elogios) => 'NINGUÉM BEBE, TODO MUNDO SE ACHA',
       Rodada(modo: ModoDeJogo.correio) => '📮 BILHETE ANÔNIMO',
+      Rodada(modo: ModoDeJogo.jurados) => '⭐ NOTA DE 1 A 5, EM SEGREDO',
       _ => null,
     };
 

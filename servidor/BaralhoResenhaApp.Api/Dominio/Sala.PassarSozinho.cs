@@ -181,7 +181,8 @@ public sealed partial class Sala
         }
         if (rodada.PassaEm is not null) return;
         var suspense = Fase == FaseDaSala.Revelada &&
-            (rodada.Carta.Modo == ModoDeJogo.Tribunal || rodada.Carta.Modo == ModoDeJogo.MaisProvavel && rodada.Votacao);
+            (rodada.Carta.Modo == ModoDeJogo.Tribunal ||
+             rodada.Carta.Modo == ModoDeJogo.MaisProvavel && rodada.Votacao);
         rodada.PassaEm = _relogio.GetUtcNow() + TempoParaPassar + (suspense ? TempoDoSuspense : TimeSpan.Zero);
     }
 

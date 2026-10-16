@@ -20,7 +20,7 @@ void main() {
       expect(servidor.recebidas.last.rota, 'PUT /api/salas/ABCD/configuracao');
       expect(servidor.recebidas.last.corpo, {
         'nivel': 'Resenha',
-        'modos': ['MaisProvavel', 'RegraRelampago', 'Elogios', 'Correio', 'ImagemEAcao'],
+        'modos': ['MaisProvavel', 'RegraRelampago', 'Elogios', 'Correio', 'ImagemEAcao', 'Jurados'],
         'zonaSegura': true,
         'esquentar': false,
         'ritmo': 'Devagar',

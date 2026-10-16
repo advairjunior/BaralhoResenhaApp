@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 
@@ -254,6 +254,8 @@ class Revelacao {
     this.jogadas = const {},
     this.minoriaLeva = false,
     this.contadores = const [],
+    this.media,
+    this.notas = const [],
   });
 
   factory Revelacao.deJson(Map<String, dynamic> json) => Revelacao(
@@ -274,7 +276,13 @@ class Revelacao {
         jogadas: Map<String, String>.from((json['jogadas'] as Map?) ?? const {}),
         minoriaLeva: json['minoriaLeva'] as bool? ?? false,
         contadores: List<String>.from((json['contadores'] as List?) ?? const []),
+        media: (json['media'] as num?)?.toDouble(),
+        notas: List<int>.from((json['notas'] as List?) ?? const []),
       );
+
+  /// Jurados: a média das estrelas e as notas, sem dizer quem deu qual.
+  final double? media;
+  final List<int> notas;
 
   /// "Conta essa": quem já fez, na ordem em que cada um conta a sua.
   final List<String> contadores;

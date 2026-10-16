@@ -75,6 +75,13 @@ ComoJoga comoJoga(Rodada rodada) {
         'Maioria sim (ou empate) condena: o réu leva 1 ponto. Ninguém fica sabendo quem votou o quê.',
         'Na carta de elogio é ao contrário: maioria sim, o réu distribui goles; maioria não, o réu leva 1 ponto.',
       ]),
+    Rodada(modo: ModoDeJogo.jurados) => ('jurados', ModoDeJogo.jurados.titulo, [
+        'O app elegeu a pessoa da carta: ela só espera a nota.',
+        'O resto da turma é jurado: cada um dá de 1 a 5 estrelas, em segredo.',
+        'Média 4 ou mais: aprovado(a)! A pessoa distribui goles e ganha uma carta na manga.',
+        'Média 2 ou menos: reprovado(a), leva 1 ponto. No meio, fica por isso mesmo.',
+        'As notas aparecem sem dizer quem deu qual.',
+      ]),
     Rodada(modo: ModoDeJogo.elogios) => ('elogios', ModoDeJogo.elogios.titulo, [
         'Façam o que a carta pede para a pessoa da vez.',
         'Ninguém bebe nesta carta: todo mundo sai se achando.',

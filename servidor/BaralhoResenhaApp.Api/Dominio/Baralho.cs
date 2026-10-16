@@ -29,6 +29,7 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
         [ModoDeJogo.BebaSe] = 2,
         [ModoDeJogo.CasaisEmJogo] = 1,
         [ModoDeJogo.Tribunal] = 4,
+        [ModoDeJogo.Jurados] = 2,
         [ModoDeJogo.Elogios] = 1,
         // Demora mais que uma carta comum: tempero, não prato principal.
         [ModoDeJogo.Correio] = 1,
@@ -39,7 +40,7 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
     /// Parte das cartas de Quem é mais provável que é duelo (inclui pedra, papel e
     /// tesoura). São poucas cartas no meio de muitas: sem isso, quase não saem.
     /// </summary>
-    internal const double ChanceDeDuelo = 0.35;
+    internal const double ChanceDeDuelo = 0.4;
 
     /// <summary>Ritmo: o mesmo jogo não vem mais que isso seguido.</summary>
     internal const int MaximoSeguidas = 2;
@@ -61,7 +62,8 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
         var modos = configuracao.Modos
             .Distinct()
             // Votação e tribunal precisam de gente para votar.
-            .Where(modo => modo is not (ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.ImagemEAcao) ||
+            .Where(modo => modo is not (ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.ImagemEAcao
+                    or ModoDeJogo.Jurados) ||
                 quantidadeDeJogadores >= 3)
             // Com menos de três escrevendo, todo mundo adivinha quem escreveu.
             .Where(modo => modo != ModoDeJogo.Correio || quantidadeDeJogadores >= 4)

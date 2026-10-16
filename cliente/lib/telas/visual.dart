@@ -14,6 +14,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.elogios => 'Rodada de Elogios',
         ModoDeJogo.correio => 'Correio da Resenha',
         ModoDeJogo.imagemEAcao => 'Imagem e Ação',
+        ModoDeJogo.jurados => 'Jurados',
       };
 
   String get emoji => switch (this) {
@@ -26,6 +27,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.elogios => '💛',
         ModoDeJogo.correio => '📮',
         ModoDeJogo.imagemEAcao => '🎭',
+        ModoDeJogo.jurados => '⭐',
       };
 
   String get explicacao => switch (this) {
@@ -43,6 +45,8 @@ extension VisualDoModo on ModoDeJogo {
             'No fim, todo mundo lê. Precisa de 4 pessoas.',
         ModoDeJogo.imagemEAcao => 'Mímica! Até 5 pessoas, uma faz para todos; de 6 a 8, dois times; '
             'com 9 ou mais, três. Só o mímico vê a palavra. Time que perde leva ponto.',
+        ModoDeJogo.jurados => 'O app elege alguém e o resto dá nota de 1 a 5 estrelas, em segredo ("o quanto '
+            'fulano se veste bem?"). Média alta distribui goles; média baixa leva ponto.',
       };
 
   Color get cor => switch (this) {
@@ -55,6 +59,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.elogios => CoresBaralho.elogios,
         ModoDeJogo.correio => CoresBaralho.correio,
         ModoDeJogo.imagemEAcao => CoresBaralho.mimica,
+        ModoDeJogo.jurados => CoresBaralho.jurados,
       };
 }
 

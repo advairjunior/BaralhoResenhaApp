@@ -21,7 +21,10 @@ public enum ModoDeJogo
     Correio,
 
     /// <summary>Imagem e Ação: mímica da palavra da carta; só o mímico vê a palavra.</summary>
-    ImagemEAcao
+    ImagemEAcao,
+
+    /// <summary>Jurados: o app elege uma pessoa e o resto dá nota de 1 a 5 estrelas, em segredo.</summary>
+    Jurados
 }
 
 /// <summary>
@@ -141,6 +144,6 @@ public sealed record ConfiguracaoDoJogo(
         NivelDaCarta.Resenha,
         // Casais em Jogo começa desligado: quem quiser, liga.
         [ModoDeJogo.EuNunca, ModoDeJogo.MaisProvavel, ModoDeJogo.BebaSe, ModoDeJogo.RegraRelampago,
-            ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao],
+            ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados],
         ZonaSegura: true);
 }

@@ -263,6 +263,7 @@ class _AreaDeAcao extends StatelessWidget {
               ]),
             ModoDeJogo.casaisEmJogo => RevelacaoDoCasal(visao: visao, rodada: rodada, acoes: acoes),
             ModoDeJogo.tribunal => _RevelacaoDoTribunal(visao: visao, rodada: rodada, revelacao: revelacao),
+            ModoDeJogo.jurados => _RevelacaoDosJurados(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.maisProvavel when rodada.jokenpo =>
               RevelacaoDoJokenpo(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.maisProvavel when rodada.duelo =>
@@ -369,6 +370,14 @@ class _AreaDeAcao extends StatelessWidget {
         ),
       ModoDeJogo.imagemEAcao => PainelDaMimica(visao: visao, rodada: rodada, acoes: acoes),
       ModoDeJogo.casaisEmJogo => RespostaDoCasal(visao: visao, rodada: rodada, acoes: acoes),
+      ModoDeJogo.jurados => _Respondendo(
+          visao: visao,
+          rodada: rodada,
+          acoes: acoes,
+          opcoes: visao.euId == rodada.alvo
+              ? const Text('⭐', key: Key('avaliado-esperando'), textAlign: TextAlign.center, style: TextStyle(fontSize: 56))
+              : _Estrelas(nota: int.tryParse(rodada.minhaResposta ?? ''), aoDar: (nota) => acoes.responder('$nota')),
+        ),
       ModoDeJogo.tribunal => _Respondendo(
           visao: visao,
           rodada: rodada,
@@ -419,11 +428,17 @@ class _Respondendo extends StatelessWidget {
                   ? 'A turma está escrevendo sobre você…'
                   : rodada.duelo
                       ? 'A turma vai votar em quem mandou melhor.'
-                      : 'A turma está te julgando…')
+                      : rodada.modo == ModoDeJogo.jurados
+                          ? 'Os jurados estão te avaliando…'
+                          : 'A turma está te julgando…')
               : correio
                   ? (rodada.minhaResposta == null ? 'Escreva em segredo:' : 'Bilhete guardado. Dá para trocar até revelar.')
                   : rodada.minhaResposta == null
-                  ? (rodada.modo == ModoDeJogo.euNunca ? 'Responda em segredo:' : 'Vote em segredo:')
+                  ? switch (rodada.modo) {
+                      ModoDeJogo.euNunca => 'Responda em segredo:',
+                      ModoDeJogo.jurados => 'Dê sua nota em segredo:',
+                      _ => 'Vote em segredo:',
+                    }
                   : 'Resposta guardada. Dá para trocar até revelar.',
           textAlign: TextAlign.center,
           style: const TextStyle(color: CoresBaralho.textoSecundario),
@@ -464,7 +479,8 @@ class _Respondendo extends StatelessWidget {
 }
 
 /// Tribunal e correio: a carta é sobre alguém, que não vota nem escreve.
-bool _ficaDeFora(Rodada rodada) => rodada.modo == ModoDeJogo.tribunal || rodada.modo == ModoDeJogo.correio;
+bool _ficaDeFora(Rodada rodada) =>
+    rodada.modo == ModoDeJogo.tribunal || rodada.modo == ModoDeJogo.correio || rodada.modo == ModoDeJogo.jurados;
 
 class _BotaoDeResposta extends StatelessWidget {
   const _BotaoDeResposta({required this.rotulo, required this.escolhido, required this.aoTocar});
@@ -843,6 +859,73 @@ class _RevelacaoDoTribunal extends StatelessWidget {
       Text('👍 $sim   ·   👎 $nao',
           key: const Key('placar-do-tribunal'),
           style: Theme.of(context).textTheme.titleLarge),
+    ]);
+  }
+}
+
+/// Jurados: 1 a 5 estrelas, em segredo. Tocar em outra estrela troca a nota.
+class _Estrelas extends StatelessWidget {
+  const _Estrelas({required this.nota, required this.aoDar});
+
+  final int? nota;
+  final ValueChanged<int> aoDar;
+
+  @override
+  Widget build(BuildContext context) {
+    final escolhida = nota;
+    return Column(children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          for (var estrela = 1; estrela <= 5; estrela++)
+            IconButton(
+              key: Key('estrela-$estrela'),
+              iconSize: 44,
+              onPressed: () => aoDar(estrela),
+              icon: Icon(
+                escolhida != null && estrela <= escolhida ? Icons.star_rounded : Icons.star_border_rounded,
+                color: CoresBaralho.ambar,
+              ),
+            ),
+        ],
+      ),
+      if (escolhida != null)
+        Text('Sua nota: ${'⭐' * escolhida}', style: const TextStyle(color: CoresBaralho.textoSecundario)),
+    ]);
+  }
+}
+
+class _RevelacaoDosJurados extends StatelessWidget {
+  const _RevelacaoDosJurados({required this.visao, required this.rodada, required this.revelacao});
+
+  final VisaoDaSala visao;
+  final Rodada rodada;
+  final Revelacao revelacao;
+
+  @override
+  Widget build(BuildContext context) {
+    final avaliado = visao.jogador(rodada.alvo ?? '');
+    if (avaliado == null) return const Text('Quem estava sendo avaliado saiu da sala. 🏃', textAlign: TextAlign.center);
+    final media = revelacao.media ?? 0;
+    final aprovado = revelacao.escolhidos.contains(avaliado.id);
+    final reprovado = revelacao.perderam.contains(avaliado.id);
+    final (titulo, detalhe) = aprovado
+        ? ('Aprovado(a) pelos jurados! 🏆', '${avaliado.nome} ${destinoDoEscolhido(visao, avaliado, elogio: true, goles: 2)}')
+        : reprovado
+            ? ('Reprovado(a) pelos jurados! 😬', '${avaliado.nome} ${destinoDoPego(visao, avaliado)}')
+            : ('Na média 🤷', 'Nem aprovado(a), nem reprovado(a). Fica por isso mesmo.');
+    return Column(children: [
+      AvatarDoJogador(jogador: avaliado, tamanho: 128, destaque: aprovado ? CoresBaralho.ambar : CoresBaralho.jurados),
+      const SizedBox(height: EspacoBaralho.medio),
+      Text('⭐ ${media.toStringAsFixed(1).replaceAll('.', ',')}',
+          key: const Key('media-dos-jurados'), style: Theme.of(context).textTheme.displaySmall),
+      Text(titulo, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
+      Text(detalhe, textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.ambar, fontSize: 16)),
+      if (revelacao.notas.isNotEmpty) ...[
+        const SizedBox(height: EspacoBaralho.pequeno),
+        Text('Notas: ${revelacao.notas.join(' · ')}',
+            textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoSecundario)),
+      ],
     ]);
   }
 }

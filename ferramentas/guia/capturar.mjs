@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados'];
 
 const pagina = async () => {
   const p = await b.newPage();
@@ -132,6 +132,16 @@ const jurado = Object.keys(s.turma).find((n) => s.ids[n] !== v.rodada.alvo);
 p = await abrir(s, jurado);
 await rolar(p, 450);
 await foto(p, 'tribunal');
+await p.close();
+
+// Jurados: a média das estrelas, sem dizer quem deu qual nota.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['Jurados'] });
+const jurados = Object.keys(s.turma).filter((n) => s.ids[n] !== v.rodada.alvo);
+for (const [i, n] of jurados.entries()) await api('POST', `${s.sala}/respostas`, s.turma[n], { rodada: v.rodada.numero, resposta: ['5', '4', '5'][i] });
+p = await abrir(s, jurados[0]);
+await rolar(p, 600);
+await foto(p, 'jurados');
 await p.close();
 
 // Correio: escrever e ler os bilhetes.
