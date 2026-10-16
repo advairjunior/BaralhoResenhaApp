@@ -110,6 +110,9 @@ public sealed class Rodada
     /// <summary>Quem já respondeu ou marcou "Pronto" (passar a carta sozinho).</summary>
     public HashSet<Guid> Prontos { get; } = [];
 
+    /// <summary>Quem confirmou a pendência (bebi, contei, distribuí, li).</summary>
+    public HashSet<Guid> Confirmaram { get; } = [];
+
     /// <summary>Quando a carta passa sozinha; nulo sem contagem.</summary>
     public DateTimeOffset? PassaEm { get; set; }
 
@@ -296,7 +299,6 @@ public sealed partial class Sala
             if (jogador.Anfitriao && _jogadores.Count > 0)
                 _jogadores[0].Anfitriao = true;
             RevelarSeTodosResponderam();
-            ConferirProntos();
             Tocar();
         }
     }
@@ -427,7 +429,6 @@ public sealed partial class Sala
             }
             // Respondeu (pegou ou desmarcou): conta para passar sozinho.
             Rodada.Prontos.Add(jogador.Id);
-            ConferirProntos();
             Tocar();
         }
     }
@@ -667,5 +668,9 @@ public sealed partial class Sala
         Fase = FaseDaSala.Revelada;
     }
 
-    private void Tocar() => UltimaAtividade = _relogio.GetUtcNow();
+    private void Tocar()
+    {
+        ConferirProntos();
+        UltimaAtividade = _relogio.GetUtcNow();
+    }
 }

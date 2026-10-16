@@ -22,8 +22,8 @@ Map<String, dynamic> _bebaSe({List<String> prontos = const [], int? passaEmMs, S
       },
     );
 
-Map<String, dynamic> _revelada({List<String> prontos = const []}) => visaoJson(
-      euId: 'bia',
+Map<String, dynamic> _revelada({String euId = 'bia', List<Map<String, String>> pendentes = const []}) => visaoJson(
+      euId: euId,
       souAnfitriao: false,
       fase: 'Revelada',
       jogadores: _mesa,
@@ -35,7 +35,7 @@ Map<String, dynamic> _revelada({List<String> prontos = const []}) => visaoJson(
           'perderam': ['ana'],
           'contaAHistoria': null,
         }),
-        'prontos': prontos,
+        'pendentes': pendentes,
       },
     );
 
@@ -57,18 +57,35 @@ void main() {
       await fecharApp(tester);
     });
 
-    testWidgets('depois da revelação cada um marca Pronto', (tester) async {
+    testWidgets('depois da revelação só quem tem pendência confirma', (tester) async {
+      final pendentes = [
+        {'jogadorId': 'bia', 'motivo': 'Beber'},
+        {'jogadorId': 'ana', 'motivo': 'Historia'},
+      ];
       final servidor = ServidorFalso()
-        ..respostas['GET /api/salas/ABCD'] = _revelada()
-        ..respostas['POST /api/salas/ABCD/pronto'] = _revelada(prontos: ['bia']);
+        ..respostas['GET /api/salas/ABCD'] = _revelada(pendentes: pendentes)
+        ..respostas['POST /api/salas/ABCD/pronto'] = _revelada(pendentes: [pendentes[1]]);
       await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
 
-      await rolarAte(tester, find.text('Pronto ✓'));
-      await tester.tap(find.text('Pronto ✓'));
+      expect(find.text('Pronto ✓'), findsNothing);
+      await rolarAte(tester, find.text('🍺 Bebi ✓'));
+      await tester.tap(find.text('🍺 Bebi ✓'));
       await tester.pumpAndSettle();
 
       expect(servidor.recebidas.last.rota, 'POST /api/salas/ABCD/pronto');
-      expect(find.text('Prontos: 1 de 2 · falta Ana'), findsOneWidget);
+      expect(find.text('Esperando: Ana contar a história 🎤'), findsOneWidget);
+      await fecharApp(tester);
+    });
+
+    testWidgets('quem não tem pendência só vê quem a mesa está esperando', (tester) async {
+      final servidor = ServidorFalso()
+        ..respostas['GET /api/salas/ABCD'] = _revelada(pendentes: [
+          {'jogadorId': 'ana', 'motivo': 'Beber'},
+        ]);
+      await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+      await rolarAte(tester, find.text('Esperando: Ana beber 🍺'));
+      expect(find.text('🍺 Bebi ✓'), findsNothing);
       await fecharApp(tester);
     });
 

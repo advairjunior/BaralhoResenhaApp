@@ -20,13 +20,13 @@ public sealed class PassarSozinhoTestes
         public int Rodada => Sala.Rodada!.Numero;
     }
 
-    private static Mesa Montar(Carta carta, bool passarSozinho = true)
+    private static Mesa Montar(Carta carta, bool passarSozinho = true, RitmoDaBebida ritmo = RitmoDaBebida.Devagar)
     {
         var relogio = new FakeTimeProvider(DateTimeOffset.UtcNow);
         var sala = new Sala("ABCD", new Baralho([carta]), new Random(1), relogio);
         var todos = new[] { "Ana", "Beto", "Caio" }.Select(n => sala.Entrar(n, false)).ToArray();
         sala.Configurar(todos[0].Token, new ConfiguracaoDoJogo(NivelDaCarta.Leve, [carta.Modo], true,
-            CartasNaManga: false, PassarSozinho: passarSozinho));
+            Ritmo: ritmo, CartasNaManga: false, PassarSozinho: passarSozinho));
         sala.Comecar(todos[0].Token);
         return new Mesa(sala, todos, relogio);
     }
@@ -59,16 +59,63 @@ public sealed class PassarSozinhoTestes
     }
 
     [Fact]
-    public void NosJogosComRevelacaoOProntoSoValeDepoisDela()
+    public void RevelacaoSemNadaPendenteJaComecaAContagem()
     {
         var mesa = Montar(EuNunca);
         var erro = Assert.Throws<AcaoNaoPermitidaException>(() => mesa.Sala.MarcarPronto(mesa.Ana.Token, mesa.Rodada));
         Assert.Equal("Responda a carta primeiro.", erro.Message);
 
         foreach (var jogador in mesa.Todos) mesa.Sala.Responder(jogador.Token, mesa.Rodada, Sala.RespostaNunca);
-        foreach (var jogador in mesa.Todos) mesa.Sala.MarcarPronto(jogador.Token, mesa.Rodada);
+
+        var visao = mesa.Sala.Visao(mesa.Ana.Token).Rodada!;
+        Assert.Empty(visao.Pendentes);
+        Assert.Equal(3000, visao.PassaEmMs);
+    }
+
+    [Fact]
+    public void QuemTemQueContarAHistoriaConfirmaAntesDePassar()
+    {
+        var mesa = Montar(EuNunca);
+        mesa.Sala.Responder(mesa.Ana.Token, mesa.Rodada, Sala.RespostaJa);
+        mesa.Sala.Responder(mesa.Todos[1].Token, mesa.Rodada, Sala.RespostaNunca);
+        mesa.Sala.Responder(mesa.Todos[2].Token, mesa.Rodada, Sala.RespostaNunca);
+
+        var pendente = Assert.Single(mesa.Sala.Visao(mesa.Ana.Token).Rodada!.Pendentes);
+        Assert.Equal((mesa.Ana.Id, MotivoPendente.Historia), (pendente.JogadorId, pendente.Motivo));
+        Assert.Null(mesa.Sala.Visao(mesa.Ana.Token).Rodada!.PassaEmMs);
+        Assert.Throws<AcaoNaoPermitidaException>(() => mesa.Sala.MarcarPronto(mesa.Todos[1].Token, mesa.Rodada));
+
+        mesa.Sala.MarcarPronto(mesa.Ana.Token, mesa.Rodada);
 
         Assert.Equal(3000, mesa.Sala.Visao(mesa.Ana.Token).Rodada!.PassaEmMs);
+    }
+
+    [Fact]
+    public void QuemTemQueBeberConfirmaQueBebeu()
+    {
+        var mesa = Montar(BebaSe, ritmo: RitmoDaBebida.Raiz);
+        mesa.Sala.AlternarBebi(mesa.Ana.Token, mesa.Rodada);
+        mesa.Sala.MarcarPronto(mesa.Todos[1].Token, mesa.Rodada);
+        mesa.Sala.MarcarPronto(mesa.Todos[2].Token, mesa.Rodada);
+
+        var pendente = Assert.Single(mesa.Sala.Visao(mesa.Ana.Token).Rodada!.Pendentes);
+        Assert.Equal(MotivoPendente.Beber, pendente.Motivo);
+        Assert.Null(mesa.Sala.Visao(mesa.Ana.Token).Rodada!.PassaEmMs);
+
+        mesa.Sala.MarcarPronto(mesa.Ana.Token, mesa.Rodada);
+
+        Assert.Equal(3000, mesa.Sala.Visao(mesa.Ana.Token).Rodada!.PassaEmMs);
+    }
+
+    [Fact]
+    public void NaVotacaoAContagemEsperaOSuspense()
+    {
+        var mesa = Montar(new Carta("mp-1", ModoDeJogo.MaisProvavel, NivelDaCarta.Leve, "Quem ronca mais?"));
+        mesa.Sala.ChanceDeVotacao = 1;
+        mesa.Sala.Proxima(mesa.Ana.Token, mesa.Rodada);
+        foreach (var jogador in mesa.Todos) mesa.Sala.Responder(jogador.Token, mesa.Rodada, mesa.Todos[1].Id.ToString());
+
+        Assert.Equal(9000, mesa.Sala.Visao(mesa.Ana.Token).Rodada!.PassaEmMs);
     }
 
     [Fact]

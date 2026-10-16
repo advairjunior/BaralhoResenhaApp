@@ -7,6 +7,19 @@ enum FaseDaSala { lobby, carta, revelada, fim }
 /// Quantos pontos (vezes que a carta pegou) valem um gole de verdade.
 enum RitmoDaBebida { devagar, normal, raiz }
 
+/// O que alguém ainda tem que fazer antes de a carta passar sozinha.
+enum MotivoPendente { beber, historia, elogio, correio }
+
+class Pendente {
+  const Pendente(this.jogadorId, this.motivo);
+
+  factory Pendente.deJson(Map<String, dynamic> json) =>
+      Pendente(json['jogadorId'] as String, _enum(MotivoPendente.values, json['motivo']));
+
+  final String jogadorId;
+  final MotivoPendente motivo;
+}
+
 /// Cartas na manga, estilo Uno.
 enum CartaNaManga { escudo, passaABola, devolve, batataQuente, dobra }
 
@@ -321,6 +334,7 @@ class Rodada {
     this.prontos = const [],
     this.passaEmMs,
     this.seguradaPor,
+    this.pendentes = const [],
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -363,6 +377,10 @@ class Rodada {
         prontos: List<String>.from((json['prontos'] as List?) ?? const []),
         passaEmMs: json['passaEmMs'] as int?,
         seguradaPor: json['seguradaPor'] as String?,
+        pendentes: [
+          for (final pendente in (json['pendentes'] as List?) ?? const [])
+            Pendente.deJson(pendente as Map<String, dynamic>),
+        ],
       );
 
   final int numero;
@@ -439,6 +457,9 @@ class Rodada {
 
   /// Quem tocou em "Segura aí".
   final String? seguradaPor;
+
+  /// Quem ainda tem que beber, contar a história… antes de a carta passar sozinha.
+  final List<Pendente> pendentes;
 }
 
 class Momento {

@@ -40,7 +40,8 @@ public sealed record RodadaVisivel(
     IReadOnlyList<Guid> Pegos,
     IReadOnlyList<Guid> Prontos,
     int? PassaEmMs,
-    string? SeguradaPor);
+    string? SeguradaPor,
+    IReadOnlyList<Pendente> Pendentes);
 
 /// <summary>Esquenta sozinho: em que nível a noite está e quando sobe.</summary>
 /// <param name="SobeEm">Cartas até subir; nulo quando já chegou ao limite.</param>
@@ -121,7 +122,8 @@ public sealed record VisaoDaSala(
                     rodada.Contas.Where(c => !c.Value.Vazia).Select(c => c.Key).ToList(),
                     rodada.Prontos.ToList(),
                     sala.RestanteParaPassar(rodada),
-                    rodada.SeguradaPor),
+                    rodada.SeguradaPor,
+                    sala.Pendentes(rodada)),
             sala.Regra is { } regra ? regra with { PodemVacilar = sala.QuemPodeVacilar(regra) } : null,
             sala.Momentos.Select(m => new MomentoVisivel(
                 m.Id, m.JogadorId, m.NomeDoJogador, m.Rodada, m.Texto, Endereco(m.Foto))).ToList(),

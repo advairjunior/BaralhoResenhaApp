@@ -127,8 +127,8 @@ Future<void> abrirComoJoga(BuildContext context, VisaoDaSala visao, Rodada rodad
     if (visao.configuracao.passarSozinho)
       const _Secao(
         titulo: '⏩ A carta passa sozinha',
-        texto: 'Quando todo mundo responde ou toca em "Pronto ✓", a próxima carta vem em 3 segundos. '
-            'Precisa de mais tempo? Toque em "⏸️ Segura aí".',
+        texto: 'Quando todo mundo responde e quem tem que beber (ou contar a história) confirma, '
+            'a próxima carta vem em 3 segundos. Precisa de mais tempo? Toque em "⏸️ Segura aí".',
       ),
   ]);
 }

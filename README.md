@@ -45,7 +45,7 @@ A tela mostra o resumo: "🎯 Só Eu Nunca" ou "🎲 Misturando: …".
 
 **Ritmo da bebida (cofrinho de goles):** cada vez que a carta pega alguém vale 1 ponto; o gole só sai quando o cofrinho enche: 🐢 Devagar (1 gole a cada 7 pontos, o padrão), 🚶 Normal (a cada 2) ou 🔥 Raiz (todo ponto é gole). A tela avisa "🍺 Cofrinho cheio! Fulano bebe agora." e o placar mostra goles e cofrinho. No elogio, o número de goles distribuídos também cai.
 
-**⏩ Passar a carta sozinho** (ligado por padrão): quando todo mundo responde (no Beba se, "Me pegou" ou "Não me pegou") ou toca em "Pronto ✓" depois da revelação, a próxima carta vem em 3 segundos, sem depender de quem criou a sala. Qualquer um toca em "⏸️ Segura aí" para segurar; aí só quem criou a sala passa.
+**⏩ Passar a carta sozinho** (ligado por padrão): quando todo mundo responde (no Beba se, "Me pegou" ou "Não me pegou") e quem tem alguma coisa pendente confirma ("🍺 Bebi", "🎤 Contei", "💛 Distribuí", "📮 Li tudo"), a próxima carta vem em 3 segundos, sem depender de quem criou a sala. Sem pendência, a contagem começa na revelação (nas votações e no Tribunal, depois do suspense). Regra-relâmpago, rodada de elogios e aponta no 3 pedem "Pronto ✓" de todo mundo. Qualquer um toca em "⏸️ Segura aí" para segurar; aí só quem criou a sala passa.
 
 **Quem manda nas cartas:** só quem criou a sala puxa a próxima carta, pula, revela antes da hora e usa o "Tira essa". Os outros veem "Esperando Fulano puxar a próxima carta".
 
