@@ -38,8 +38,19 @@ public sealed class RegraComIscaTestes
         return new Mesa(sala, todos);
     }
 
+    /// <summary>Passa da carta da regra para a primeira "vez da regra" (carta comum no meio).</summary>
+    private static DesafioDaRegra PrimeiraVez(Mesa mesa)
+    {
+        mesa.Proxima();
+        Assert.False(mesa.Sala.Rodada!.VezDaRegra);
+        Assert.Null(mesa.Sala.Regra!.Desafio);
+        mesa.Proxima();
+        Assert.True(mesa.Sala.Rodada!.VezDaRegra);
+        return mesa.Sala.Regra!.Desafio!;
+    }
+
     [Fact]
-    public void QuemSoPodeFalarCantandoGanhaUmaEntrevistaEUmaPerguntaPorCarta()
+    public void EntrevistaIntercalada_ACartaDaRegraApresentaEAsPerguntasVemUmaCartaSimOutraNao()
     {
         var mesa = Montar(new("rr-1", ModoDeJogo.RegraRelampago, NivelDaCarta.Leve,
             "{jogador} só pode falar cantando.", Isca: IscaDaRegra.Entrevista));
@@ -47,17 +58,55 @@ public sealed class RegraComIscaTestes
         var cantor = mesa.Quem(regra.Alvo);
 
         Assert.Equal($"{cantor.Nome} só pode falar cantando.", regra.Texto);
-        var entrevista = regra.Desafio!;
-        Assert.Equal(IscaDaRegra.Entrevista, entrevista.Tipo);
-        Assert.Equal(cantor.Id, entrevista.Para);
-        Assert.NotEqual(cantor.Id, entrevista.Quem);
-        Assert.Equal(3, entrevista.Textos.Count);
+        var apresentacao = regra.Desafio!;
+        Assert.Equal(IscaDaRegra.Entrevista, apresentacao.Tipo);
+        Assert.Equal(cantor.Id, apresentacao.Para);
+        Assert.NotEqual(cantor.Id, apresentacao.Quem);
+        Assert.Empty(apresentacao.Textos);
 
-        mesa.Proxima();
-        var pergunta = mesa.Sala.Visao(mesa.Ana.Token).Regra!.Desafio!;
+        var pergunta = PrimeiraVez(mesa);
+        Assert.Equal(ModoDeJogo.RegraRelampago, mesa.Sala.Rodada!.Carta.Modo);
+        Assert.Equal(regra.Texto, mesa.Sala.Rodada.Texto);
+        Assert.Equal(apresentacao.Quem, pergunta.Quem);
         Assert.Equal(cantor.Id, pergunta.Para);
         Assert.Single(pergunta.Textos);
-        Assert.DoesNotContain(pergunta.Textos[0], entrevista.Textos);
+        Assert.True(mesa.Sala.Visao(mesa.Ana.Token).Rodada!.VezDaRegra);
+
+        var segunda = PrimeiraVez(mesa);
+        Assert.Equal(apresentacao.Quem, segunda.Quem);
+        Assert.NotEqual(pergunta.Textos[0], segunda.Textos[0]);
+    }
+
+    [Fact]
+    public void ARegraComIscaValeTresVezesDaRegra()
+    {
+        var mesa = Montar(new("rr-1", ModoDeJogo.RegraRelampago, NivelDaCarta.Leve,
+            "{jogador} só pode falar cantando.", Isca: IscaDaRegra.Entrevista));
+        mesa.Sala.Configurar(mesa.Ana.Token, new ConfiguracaoDoJogo(NivelDaCarta.Leve, [ModoDeJogo.BebaSe], true));
+
+        var vezes = 0;
+        for (var i = 0; i < 20 && mesa.Sala.Regra is not null; i++)
+        {
+            mesa.Proxima();
+            if (mesa.Sala.Rodada!.VezDaRegra) vezes++;
+        }
+
+        Assert.Equal(Sala.RodadasDaRegra, vezes);
+        Assert.Null(mesa.Sala.Regra);
+    }
+
+    [Fact]
+    public void TirarAVezDaRegraPulaSoAPergunta()
+    {
+        var mesa = Montar(new("rr-1", ModoDeJogo.RegraRelampago, NivelDaCarta.Leve,
+            "{jogador} só pode falar cantando.", Isca: IscaDaRegra.Entrevista));
+        PrimeiraVez(mesa);
+
+        mesa.Sala.Tirar(mesa.Ana.Token, mesa.Sala.Rodada!.Numero);
+
+        Assert.NotNull(mesa.Sala.Regra);
+        Assert.False(mesa.Sala.Rodada!.VezDaRegra);
+        Assert.Equal(Sala.RodadasDaRegra - 1, mesa.Sala.Regra!.RodadasRestantes);
     }
 
     [Fact]
@@ -67,7 +116,7 @@ public sealed class RegraComIscaTestes
             "Proibido falar de trabalho.", Isca: IscaDaRegra.Conversa,
             Iscas: ["Como anda o trabalho?", "Seu chefe é gente boa?"]));
 
-        var desafio = mesa.Sala.Regra!.Desafio!;
+        var desafio = PrimeiraVez(mesa);
         Assert.Null(desafio.Quem);
         Assert.NotNull(desafio.Para);
         Assert.Contains(desafio.Textos.Single(), new[] { "Como anda o trabalho?", "Seu chefe é gente boa?" });
@@ -78,36 +127,37 @@ public sealed class RegraComIscaTestes
     {
         var mestre = Montar(new("rr-3", ModoDeJogo.RegraRelampago, NivelDaCarta.Leve,
             "{jogador} é Mestre das Perguntas.", Isca: IscaDaRegra.Mestre));
-        var desafio = mestre.Sala.Regra!.Desafio!;
-        Assert.Equal(mestre.Sala.Regra.Alvo, desafio.Quem);
+        var desafio = PrimeiraVez(mestre);
+        Assert.Equal(mestre.Sala.Regra!.Alvo, desafio.Quem);
         Assert.NotEqual(desafio.Quem, desafio.Para);
 
         var piadista = Montar(new("rr-4", ModoDeJogo.RegraRelampago, NivelDaCarta.Leve,
             "Quem rir de piada ruim do {jogador} bebe.", Isca: IscaDaRegra.Piada));
-        var piada = piadista.Sala.Regra!.Desafio!;
-        Assert.Equal(piadista.Sala.Regra.Alvo, piada.Quem);
+        var piada = PrimeiraVez(piadista);
+        Assert.Equal(piadista.Sala.Regra!.Alvo, piada.Quem);
         Assert.StartsWith("Piada", piada.Textos.Single());
 
         var risada = Montar(new("rr-5", ModoDeJogo.RegraRelampago, NivelDaCarta.Leve,
             "Toda vez que {jogador} rir, todo mundo bebe.", Isca: IscaDaRegra.Risada));
-        var missao = risada.Sala.Regra!.Desafio!;
-        Assert.Equal(risada.Sala.Regra.Alvo, missao.Para);
+        var missao = PrimeiraVez(risada);
+        Assert.Equal(risada.Sala.Regra!.Alvo, missao.Para);
         Assert.NotEqual(missao.Para, missao.Quem);
         Assert.StartsWith("R", missao.Textos.Single());
     }
 
     [Fact]
-    public void QuandoARegraAcabaAIscaVaiJunto()
+    public void RegraSemIscaContinuaGastandoACadaCarta()
     {
-        var mesa = Montar(new("rr-1", ModoDeJogo.RegraRelampago, NivelDaCarta.Leve,
-            "{jogador} só pode falar cantando.", Isca: IscaDaRegra.Entrevista));
+        var mesa = Montar(new("rr-6", ModoDeJogo.RegraRelampago, NivelDaCarta.Leve, "Proibido apontar."));
+        mesa.Sala.Configurar(mesa.Ana.Token, new ConfiguracaoDoJogo(NivelDaCarta.Leve, [ModoDeJogo.BebaSe], true));
+
         for (var i = 0; i < Sala.RodadasDaRegra; i++)
         {
             mesa.Proxima();
-            Assert.NotNull(mesa.Sala.Regra?.Desafio);
+            Assert.False(mesa.Sala.Rodada!.VezDaRegra);
+            Assert.NotNull(mesa.Sala.Regra);
         }
 
-        mesa.Sala.Configurar(mesa.Ana.Token, new ConfiguracaoDoJogo(NivelDaCarta.Leve, [ModoDeJogo.BebaSe], true));
         mesa.Proxima();
         Assert.Null(mesa.Sala.Regra);
     }

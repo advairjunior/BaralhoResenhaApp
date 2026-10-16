@@ -18,7 +18,8 @@ public sealed partial class Sala
             _tiradas.Add(carta.Id);
             jogador.Estatisticas.Tiradas++;
             // Regra-relâmpago tirada não vale mais.
-            if (carta.Modo == ModoDeJogo.RegraRelampago) Regra = null;
+            // Tirar a vez da regra pula só a pergunta.
+            if (carta.Modo == ModoDeJogo.RegraRelampago && !Rodada.VezDaRegra) Regra = null;
             else GastarUmaCartaDaRegra();
             Distribuir();
             CartaTiradaPor = jogador.Nome;

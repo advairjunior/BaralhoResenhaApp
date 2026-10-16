@@ -50,13 +50,19 @@ class _RegraEmJogoState extends State<RegraEmJogo> {
                 Expanded(child: Text(regra.texto, style: const TextStyle(fontSize: 13, height: 1.35))),
                 const SizedBox(width: EspacoBaralho.pequeno),
                 Text(
-                  regra.rodadasRestantes == 1 ? 'última\ncarta' : 'mais ${regra.rodadasRestantes}\ncartas',
+                  switch ((regra.isca == IscaDaRegra.nenhuma, regra.rodadasRestantes)) {
+                    (true, 1) => 'última\ncarta',
+                    (true, final n) => 'mais $n\ncartas',
+                    (false, 1) => 'falta 1\nvez',
+                    (false, final n) => 'faltam $n\nvezes',
+                  },
                   textAlign: TextAlign.right,
                   style: const TextStyle(fontSize: 11, color: CoresBaralho.textoSecundario),
                 ),
               ],
             ),
-          if (regra.desafio case final desafio?) _Desafio(visao: visao, desafio: desafio, espaco: widget.mostrarTexto),
+          if (regra.desafio case final desafio?)
+            _Desafio(visao: visao, desafio: desafio, espaco: widget.mostrarTexto, vezDaRegra: rodada.vezDaRegra),
           if (vacilaram.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: EspacoBaralho.pequeno),
@@ -111,11 +117,12 @@ class _RegraEmJogoState extends State<RegraEmJogo> {
 }
 
 class _Desafio extends StatelessWidget {
-  const _Desafio({required this.visao, required this.desafio, required this.espaco});
+  const _Desafio({required this.visao, required this.desafio, required this.espaco, required this.vezDaRegra});
 
   final VisaoDaSala visao;
   final DesafioDaRegra desafio;
   final bool espaco;
+  final bool vezDaRegra;
 
   @override
   Widget build(BuildContext context) {
@@ -130,6 +137,11 @@ class _Desafio extends StatelessWidget {
       IscaDaRegra.nenhuma => ('', null),
     };
     final varias = desafio.textos.length > 1;
+    // Na carta da regra, só a apresentação: as perguntas vêm depois, intercaladas.
+    final apresentacao = desafio.textos.isEmpty;
+    final aviso = desafio.tipo == IscaDaRegra.entrevista
+        ? 'As perguntas vêm intercaladas: uma carta sim, outra não.'
+        : 'Vem intercalado: uma carta sim, outra não.';
     return Container(
       margin: EdgeInsets.only(top: espaco ? EspacoBaralho.medio : 0),
       padding: const EdgeInsets.all(EspacoBaralho.medio),
@@ -137,6 +149,20 @@ class _Desafio extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (vezDaRegra)
+            const Padding(
+              padding: EdgeInsets.only(bottom: EspacoBaralho.mini),
+              child: Text(
+                '⚡ VEZ DA REGRA',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                  color: CoresBaralho.relampago,
+                ),
+              ),
+            ),
           Text(
             titulo,
             textAlign: TextAlign.center,
@@ -153,9 +179,9 @@ class _Desafio extends StatelessWidget {
                 style: const TextStyle(fontSize: 17, height: 1.35),
               ),
             ),
-          if (rodape != null)
+          if (apresentacao || rodape != null)
             Text(
-              rodape,
+              apresentacao ? aviso : rodape!,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 12, color: CoresBaralho.textoSecundario),
             ),

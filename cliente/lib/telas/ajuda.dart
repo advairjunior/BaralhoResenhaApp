@@ -59,8 +59,8 @@ ComoJoga comoJoga(Rodada rodada) {
         'Cada "Me pegou" é 1 ponto no cofrinho.',
       ]),
     Rodada(modo: ModoDeJogo.regraRelampago) => ('regra', ModoDeJogo.regraRelampago.titulo, [
-        'A regra vale nesta carta e nas próximas 3.',
-        'Siga o que a caixa da regra pedir: entrevista, pergunta, missão ou piada. É isso que faz a regra acontecer.',
+        'A regra vale nesta carta e nas próximas. Sem isca, por 3 cartas.',
+        'Com entrevista, pergunta, missão ou piada: vem uma carta comum e depois a ⚡ vez da regra com a pergunta, 3 vezes. Siga o que ela pedir: é isso que faz a regra acontecer.',
         'Quebrou a regra? Quem criou a sala marca em "🚨 Alguém vacilou?" e a pessoa leva 1 ponto.',
       ]),
     Rodada(modo: ModoDeJogo.casaisEmJogo) => ('casais', ModoDeJogo.casaisEmJogo.titulo, [

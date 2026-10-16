@@ -168,6 +168,9 @@ s = await novaSala();
 v = await comecar(s, { nivel: 'Resenha', modos: ['RegraRelampago'] }, (r) => true);
 let tentativas = 0;
 while (v.regra?.desafio?.tipo !== 'Entrevista' && tentativas++ < 80) v = await api('POST', `${s.sala}/tirar`, s.turma.Advair, { rodada: v.rodada.numero });
+// A pergunta vem na "vez da regra", depois de uma carta comum.
+await api('PUT', `${s.sala}/configuracao`, s.turma.Advair, { nivel: 'Resenha', modos: ['BebaSe', 'RegraRelampago'], zonaSegura: true });
+for (let i = 0; i < 2; i++) v = await api('POST', `${s.sala}/proxima`, s.turma.Advair, { rodada: v.rodada.numero });
 p = await abrir(s, 'Advair');
 await rolar(p, 550);
 await foto(p, 'regra');

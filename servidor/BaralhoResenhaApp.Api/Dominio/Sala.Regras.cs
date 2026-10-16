@@ -7,8 +7,6 @@ namespace BaralhoResenhaApp.Api.Dominio;
 /// </summary>
 public sealed partial class Sala
 {
-    internal const int PerguntasDaEntrevista = 3;
-
     private readonly HashSet<string> _iscasUsadas = [];
     private IReadOnlyList<string> _iscasDaRegra = [];
 
@@ -52,24 +50,61 @@ public sealed partial class Sala
     private void ComecarRegra(Carta carta, string texto, Jogador? alvo)
     {
         _iscasDaRegra = carta.Iscas ?? [];
-        var regra = new RegraAtiva(texto, RodadasDaRegra) { Alvo = alvo?.Id, Isca = carta.Isca };
-        Regra = regra with { Desafio = NovoDesafio(regra, primeiraCarta: true) };
+        var regra = new RegraAtiva(texto, RodadasDaRegra)
+        {
+            Alvo = alvo?.Id,
+            Isca = carta.Isca,
+            Entrevistador = carta.Isca == IscaDaRegra.Entrevista ? OutroQue(alvo) : null,
+        };
+        // A carta da regra só apresenta ("Ana entrevista Beto"); as perguntas vêm
+        // nas vezes da regra, uma carta sim, outra não.
+        Regra = regra with { Desafio = NovoDesafio(regra) is { } desafio ? desafio with { Textos = [] } : null };
     }
 
-    private DesafioDaRegra? NovoDesafio(RegraAtiva regra, bool primeiraCarta)
+    /// <summary>A regra tem isca para intercalar com as cartas comuns?</summary>
+    internal bool TemVez(RegraAtiva regra) =>
+        regra.Isca == IscaDaRegra.Conversa ||
+        regra.Isca != IscaDaRegra.Nenhuma && _jogadores.Any(j => j.Id == regra.Alvo);
+
+    /// <summary>
+    /// Depois de uma carta comum, com regra de isca valendo, vem a vez da regra:
+    /// uma carta só com a pergunta (ou missão, piada…), para ninguém esquecer.
+    /// </summary>
+    private bool DistribuirVezDaRegra()
+    {
+        if (Regra is not { } regra || !TemVez(regra) || Rodada is not { } anterior ||
+            anterior.VezDaRegra || anterior.Carta.Modo == ModoDeJogo.RegraRelampago ||
+            NovoDesafio(regra) is not { } desafio)
+            return false;
+        CartaTiradaPor = null;
+        Rodada = new Rodada
+        {
+            Numero = anterior.Numero + 1,
+            Carta = new Carta("vez-da-regra", ModoDeJogo.RegraRelampago, anterior.Carta.Nivel, regra.Texto),
+            Texto = regra.Texto,
+            VezDaRegra = true,
+        };
+        Regra = regra with { Desafio = desafio };
+        Fase = FaseDaSala.Carta;
+        return true;
+    }
+
+    private Guid? OutroQue(Jogador? quem) =>
+        _jogadores.Where(j => j.Id != quem?.Id).OrderBy(_ => _sorteio.Next()).FirstOrDefault()?.Id;
+
+    private DesafioDaRegra? NovoDesafio(RegraAtiva regra)
     {
         var alvo = _jogadores.FirstOrDefault(j => j.Id == regra.Alvo);
         var iscas = _baralho.Iscas;
-        Guid? OutroQue(Jogador? quem) =>
-            _jogadores.Where(j => j.Id != quem?.Id).OrderBy(_ => _sorteio.Next()).FirstOrDefault()?.Id;
 
         // Regra sobre alguém que saiu da sala fica sem isca.
         if (regra.Isca is not (IscaDaRegra.Nenhuma or IscaDaRegra.Conversa) && alvo is null) return null;
         return regra.Isca switch
         {
-            // Na carta da regra, entrevista completa; depois, uma pergunta por carta.
-            IscaDaRegra.Entrevista => new(regra.Isca, OutroQue(alvo), alvo!.Id,
-                Sortear(iscas.Perguntas, primeiraCarta ? PerguntasDaEntrevista : 1)),
+            // Quem entrevista é o mesmo a regra inteira; se saiu da sala, entra outro.
+            IscaDaRegra.Entrevista => new(regra.Isca,
+                _jogadores.Any(j => j.Id == regra.Entrevistador) ? regra.Entrevistador : OutroQue(alvo),
+                alvo!.Id, Sortear(iscas.Perguntas, 1)),
             IscaDaRegra.Conversa => new(regra.Isca, null, OutroQue(null),
                 Sortear(_iscasDaRegra.Count > 0 ? _iscasDaRegra : iscas.Perguntas, 1)),
             IscaDaRegra.Risada => new(regra.Isca, OutroQue(alvo), alvo!.Id, Sortear(iscas.Risadas, 1)),

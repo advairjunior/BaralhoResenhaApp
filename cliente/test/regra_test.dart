@@ -13,7 +13,9 @@ final _mesa = [
 
 Map<String, dynamic> _comRegra({
   required String modo,
-  required Map<String, dynamic> desafio,
+  required Map<String, dynamic>? desafio,
+  String isca = 'Entrevista',
+  bool vezDaRegra = false,
   String euId = 'ana',
   List<String> vacilaram = const [],
 }) =>
@@ -25,15 +27,16 @@ Map<String, dynamic> _comRegra({
       rodada: {
         ...rodadaJson(modo: modo, texto: modo == 'RegraRelampago' ? 'Caio só pode falar cantando.' : 'Beba se usa óculos.'),
         'vacilaram': vacilaram,
+        'vezDaRegra': vezDaRegra,
       },
       regra: {
         'texto': 'Caio só pode falar cantando.',
         'rodadasRestantes': 3,
         'alvo': 'caio',
-        'isca': desafio['tipo'],
+        'isca': desafio?['tipo'] ?? isca,
         'desafio': desafio,
         // Entrevista: só quem está na regra vacila; regra da mesa: todo mundo.
-        'podemVacilar': desafio['tipo'] == 'Entrevista' ? ['caio'] : ['ana', 'bia', 'caio'],
+        'podemVacilar': (desafio?['tipo'] ?? isca) == 'Entrevista' ? ['caio'] : ['ana', 'bia', 'caio'],
       },
     );
 
@@ -53,14 +56,38 @@ const _pergunta = {
 
 void main() {
   group('Regra com isca', () {
-    testWidgets('na carta da regra, o app sorteia quem entrevista e as perguntas', (tester) async {
+    testWidgets('a carta da regra só apresenta quem entrevista quem', (tester) async {
       final servidor = ServidorFalso()
-        ..respostas['GET /api/salas/ABCD'] = _comRegra(modo: 'RegraRelampago', desafio: _entrevista);
+        ..respostas['GET /api/salas/ABCD'] =
+            _comRegra(modo: 'RegraRelampago', desafio: {..._entrevista, 'textos': <String>[]});
       await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
 
-      await rolarAte(tester, find.text('Qual seu maior medo bobo?'));
+      await rolarAte(tester, find.text('🎤 Bia entrevista Caio'));
+      expect(find.text('As perguntas vêm intercaladas: uma carta sim, outra não.'), findsOneWidget);
+      await fecharApp(tester);
+    });
+
+    testWidgets('na carta comum a regra só lembra quantas vezes faltam', (tester) async {
+      final servidor = ServidorFalso()..respostas['GET /api/salas/ABCD'] = _comRegra(modo: 'BebaSe', desafio: null);
+      await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+      expect(find.text('Caio só pode falar cantando.'), findsOneWidget);
+      expect(find.text('faltam 3\nvezes'), findsOneWidget);
+      await fecharApp(tester);
+    });
+
+    testWidgets('na vez da regra vem a pergunta da entrevista', (tester) async {
+      final servidor = ServidorFalso()
+        ..respostas['GET /api/salas/ABCD'] = _comRegra(
+          modo: 'RegraRelampago',
+          vezDaRegra: true,
+          desafio: {..._entrevista, 'textos': ['Qual seu talento escondido?']},
+        );
+      await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+      await rolarAte(tester, find.text('Qual seu talento escondido?'));
+      expect(find.text('⚡ VEZ DA REGRA'), findsOneWidget);
       expect(find.text('🎤 Bia entrevista Caio'), findsOneWidget);
-      expect(find.text('Qual foi a pior viagem da sua vida?'), findsOneWidget);
       expect(find.text('Caio responde seguindo a regra!'), findsOneWidget);
       await fecharApp(tester);
     });

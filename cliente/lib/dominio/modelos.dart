@@ -350,6 +350,7 @@ class Rodada {
     this.seguradaPor,
     this.pendentes = const [],
     this.cartaId,
+    this.vezDaRegra = false,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -397,6 +398,7 @@ class Rodada {
             Pendente.deJson(pendente as Map<String, dynamic>),
         ],
         cartaId: json['cartaId'] as String?,
+        vezDaRegra: json['vezDaRegra'] as bool? ?? false,
       );
 
   final int numero;
@@ -479,6 +481,9 @@ class Rodada {
 
   /// Id da carta no baralho: o celular lembra as que já saíram.
   final String? cartaId;
+
+  /// Carta só com a pergunta (ou missão, piada…) da regra-relâmpago valendo.
+  final bool vezDaRegra;
 }
 
 class Momento {
@@ -561,7 +566,14 @@ class DesafioDaRegra {
 }
 
 class RegraAtiva {
-  const RegraAtiva(this.texto, this.rodadasRestantes, {this.alvo, this.desafio, this.podemVacilar = const []});
+  const RegraAtiva(
+    this.texto,
+    this.rodadasRestantes, {
+    this.alvo,
+    this.desafio,
+    this.podemVacilar = const [],
+    this.isca = IscaDaRegra.nenhuma,
+  });
 
   factory RegraAtiva.deJson(Map<String, dynamic> json) => RegraAtiva(
         json['texto'] as String,
@@ -571,7 +583,11 @@ class RegraAtiva {
             ? null
             : DesafioDaRegra.deJson(json['desafio'] as Map<String, dynamic>),
         podemVacilar: List<String>.from((json['podemVacilar'] as List?) ?? const []),
+        isca: json['isca'] == null ? IscaDaRegra.nenhuma : _enum(IscaDaRegra.values, json['isca']),
       );
+
+  /// Com isca, a regra conta as vezes da regra (pergunta, missão…), não as cartas.
+  final IscaDaRegra isca;
 
   /// O {jogador} da regra, se ela é sobre alguém.
   final String? alvo;

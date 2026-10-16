@@ -76,6 +76,13 @@ public sealed class Rodada
     public required int Numero { get; init; }
     public required Carta Carta { get; init; }
     public required string Texto { get; init; }
+
+    /// <summary>
+    /// A "vez da regra": carta que só traz a pergunta da entrevista (ou a missão,
+    /// a piada…) da regra-relâmpago valendo, intercalada com as cartas comuns.
+    /// </summary>
+    public bool VezDaRegra { get; init; }
+
     public Dictionary<Guid, string> Respostas { get; } = [];
     public HashSet<Guid> Beberam { get; } = [];
 
@@ -210,6 +217,9 @@ public sealed record RegraAtiva(string Texto, int RodadasRestantes)
 {
     /// <summary>O {jogador} da regra, se ela é sobre alguém.</summary>
     public Guid? Alvo { get; init; }
+
+    /// <summary>Entrevista: quem faz as perguntas, o mesmo do começo ao fim.</summary>
+    public Guid? Entrevistador { get; init; }
     public IscaDaRegra Isca { get; init; }
 
     /// <summary>A isca desta carta; muda a cada carta enquanto a regra vale.</summary>
@@ -519,16 +529,24 @@ public sealed partial class Sala
     /// <summary>Passar carta é com quem criou a sala: com todo mundo podendo, vira bagunça.</summary>
     internal const string SoQuemCriouPuxaCarta = "Só quem criou a sala puxa a próxima carta.";
 
-    /// <summary>A regra-relâmpago vale por algumas cartas; cada carta que passa gasta uma.</summary>
-    private void GastarUmaCartaDaRegra() =>
-        Regra = Regra is null || Regra.RodadasRestantes <= 1
-            ? null
-            : Regra with { RodadasRestantes = Regra.RodadasRestantes - 1 };
+    /// <summary>
+    /// A regra-relâmpago vale por algumas cartas. Com isca, conta as vezes da
+    /// regra (pergunta, missão…); sem isca, cada carta comum que passa gasta uma.
+    /// Chamada ao sair da carta atual.
+    /// </summary>
+    private void GastarUmaCartaDaRegra()
+    {
+        if (Regra is null || Rodada is null) return;
+        var gasta = TemVez(Regra) ? Rodada.VezDaRegra : Rodada.Carta.Modo != ModoDeJogo.RegraRelampago;
+        if (!gasta) return;
+        Regra = Regra.RodadasRestantes <= 1 ? null : Regra with { RodadasRestantes = Regra.RodadasRestantes - 1 };
+    }
 
     private bool RodadaEmAndamento(int numero) => Rodada is not null && Rodada.Numero == numero;
 
     private void Distribuir()
     {
+        if (DistribuirVezDaRegra()) return;
         // Esquenta sozinho: o nível desta carta depende de quantas já saíram.
         var indice = Rodada?.Numero ?? 0;
         var configuracao = Configuracao with { Nivel = Configuracao.NivelNaCarta(indice) };
@@ -564,8 +582,9 @@ public sealed partial class Sala
         PresenteDaRodada();
         if (carta.Modo == ModoDeJogo.RegraRelampago)
             ComecarRegra(carta, texto, carta.Texto.Contains("{jogador}") ? sorteados[0] : null);
+        // Nas cartas comuns a regra só lembra; a pergunta vem na vez da regra.
         else if (Regra is not null)
-            Regra = Regra with { Desafio = NovoDesafio(Regra, primeiraCarta: false) };
+            Regra = Regra with { Desafio = null };
         Fase = FaseDaSala.Carta;
     }
 

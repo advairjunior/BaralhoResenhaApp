@@ -159,7 +159,7 @@ public sealed partial class Sala
 
     private void AvancarCarta()
     {
-        if (Rodada!.Carta.Modo != ModoDeJogo.RegraRelampago) GastarUmaCartaDaRegra();
+        GastarUmaCartaDaRegra();
         Distribuir();
     }
 }

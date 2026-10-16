@@ -230,10 +230,11 @@ class FrenteDaCarta extends StatelessWidget {
                       ),
                     ),
                     if (rodada.modo == ModoDeJogo.regraRelampago)
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: EspacoBaralho.pequeno),
-                        child: Text('Vale pelas próximas 3 cartas',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _tinta)),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: EspacoBaralho.pequeno),
+                        // Quantas vezes faltam aparece na caixa da regra, embaixo.
+                        child: Text(rodada.vezDaRegra ? 'A regra continua valendo' : 'Vale pelas próximas cartas',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _tinta)),
                       ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
