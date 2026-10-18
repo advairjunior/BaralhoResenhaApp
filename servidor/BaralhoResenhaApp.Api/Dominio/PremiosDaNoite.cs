@@ -48,7 +48,7 @@ public static class PremiosDaNoite
             (n, _) => $"{Plural(n, "voto", "votos")} nas cartas de elogio");
         Individual("🎤", "Contador(a) de histórias", j => j.Estatisticas.Historias,
             (n, _) => $"Foi a única pessoa que já tinha feito {Plural(n, "vez", "vezes")}");
-        Individual("😈", "Já fez de tudo", j => j.Estatisticas.JaFiz,
+        Individual("🧭", "Aventureiro(a) da turma", j => j.Estatisticas.JaFiz,
             (n, _) => $"Respondeu \"já fiz\" {Plural(n, "vez", "vezes")}", minimo: 2);
         Individual("😇", "Santo(a) da turma", j => j.Estatisticas.NuncaFiz - j.Estatisticas.JaFiz,
             (_, j) => $"Só {j.Estatisticas.JaFiz} \"já fiz\" em {j.Estatisticas.JaFiz + j.Estatisticas.NuncaFiz} cartas",
