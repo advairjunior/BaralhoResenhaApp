@@ -65,5 +65,14 @@ que ele escrever. Quando ele avisar que terminou, ler as marcações e aplicar e
 
 - Testes: servidor (xUnit) e cliente (flutter test) passando.
 - Ainda não testado com a turma em celulares reais (só Chrome com tela de celular).
-- Ideias em aberto: Esquenta começando no Resenha, peso por jogo,
-  velocidade do esquenta, cartas da turma permanentes (exigiriam banco).
+
+## Banco de ideias
+
+- **🕵️ Impostor (o proprietário quer criar):** todos recebem a mesma palavra no celular, menos um,
+  que recebe só "você é o impostor". Cada um fala uma pista em voz alta e a turma vota em quem
+  é o impostor. Pegaram: o impostor leva o ponto; erraram: quem errou leva. Aproveita o envio
+  secreto do Imagem e Ação (palavra só para quem pode ver) e a votação com suspense.
+- Esquenta começando no Resenha e velocidade do esquenta (deixados para depois em 2026-10-19).
+- Peso por jogo: "mais Tribunal, menos Beba se" (deixado para depois em 2026-10-19).
+- Cartas da turma permanentes (exigiriam banco).
+- Guardar a sala para sobreviver a um deploy no meio da noite (esbarra em "nada vai para disco").
