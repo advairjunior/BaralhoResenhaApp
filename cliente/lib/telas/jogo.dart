@@ -94,6 +94,7 @@ class Jogo extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(
                   EspacoBaralho.base, EspacoBaralho.pequeno, EspacoBaralho.base, EspacoBaralho.grande),
               children: [
+                _PlacarAoVivo(visao: visao),
                 if (visao.regra != null && rodada.modo != ModoDeJogo.regraRelampago)
                   RegraEmJogo(visao: visao, acoes: acoes),
                 if (visao.esquenta case Esquenta(subiuAgora: true, :final agora))
@@ -141,6 +142,37 @@ class Jogo extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Faixa discreta com os três mais pegos até agora; tocar abre o placar inteiro.
+class _PlacarAoVivo extends StatelessWidget {
+  const _PlacarAoVivo({required this.visao});
+
+  final VisaoDaSala visao;
+
+  @override
+  Widget build(BuildContext context) {
+    final lideres = (visao.jogadores.where((j) => j.pontos > 0).toList()
+          ..sort((a, b) => b.pontos.compareTo(a.pontos)))
+        .take(3)
+        .toList();
+    if (lideres.isEmpty) return const SizedBox.shrink();
+    return InkWell(
+      key: const Key('placar-ao-vivo'),
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => abrirPlacar(context, visao),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: EspacoBaralho.mini),
+        child: Text(
+          '🏆 ${lideres.map((j) => '${j.nome} ${j.pontos}').join(' · ')}',
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 13, color: CoresBaralho.textoSecundario),
+        ),
       ),
     );
   }
