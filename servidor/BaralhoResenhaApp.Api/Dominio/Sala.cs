@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
@@ -16,10 +17,14 @@ public enum FaseDaSala
 public sealed class Jogador
 {
     public required Guid Id { get; init; }
-    public required string Token { get; init; }
+    /// <summary>Troca quando a pessoa cai da sala e volta com o mesmo nome.</summary>
+    public required string Token { get; set; }
     public required string Nome { get; init; }
     public bool SemAlcool { get; init; }
     public bool Anfitriao { get; set; }
+
+    /// <summary>Última vez que o celular falou com a sala (consulta ou ação).</summary>
+    public DateTimeOffset UltimoSinal { get; set; }
     /// <summary>Vezes que a carta pegou a pessoa (o placar da noite).</summary>
     public int Pontos { get; set; }
 
@@ -258,6 +263,15 @@ public sealed partial class Sala
     internal const int RodadasDaRegra = 3;
     internal const int TamanhoMaximoDoNome = 20;
 
+    /// <summary>
+    /// Sem notícia do celular por esse tempo, quem entra com o mesmo nome volta a ser aquela
+    /// pessoa. O celular consulta a sala a cada 6 s, então quem está jogando nunca passa disso.
+    /// </summary>
+    public static readonly TimeSpan TempoParaVoltar = TimeSpan.FromSeconds(20);
+
+    public const string MensagemDeNomeEmUso =
+        "Já tem alguém com esse nome jogando agora. Se for você em outro celular, feche lá e tente de novo em 20 segundos.";
+
     /// <summary>Parte das cartas de Quem é mais provável jogadas com votação no celular.</summary>
     internal double ChanceDeVotacao { get; set; } = 0.6;
 
@@ -301,16 +315,26 @@ public sealed partial class Sala
 
         lock (_trinco)
         {
-            if (_jogadores.Any(j => string.Equals(j.Nome, nomeLimpo, StringComparison.OrdinalIgnoreCase)))
-                throw new AcaoNaoPermitidaException("Já tem alguém com esse nome na sala.");
+            var agora = _relogio.GetUtcNow();
+            var mesmoNome = _jogadores.FirstOrDefault(j => MesmoNome(j.Nome, nomeLimpo));
+            if (mesmoNome is not null)
+            {
+                if (agora - mesmoNome.UltimoSinal < TempoParaVoltar)
+                    throw new AcaoNaoPermitidaException(MensagemDeNomeEmUso);
+                // Caiu da sala e voltou: segue a mesma pessoa, e o celular antigo deixa de valer.
+                mesmoNome.Token = NovoToken();
+                mesmoNome.UltimoSinal = agora;
+                Tocar();
+                return mesmoNome;
+            }
             var jogador = new Jogador
             {
                 Id = Guid.NewGuid(),
-                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(24))
-                    .Replace('+', '-').Replace('/', '_'),
+                Token = NovoToken(),
                 Nome = nomeLimpo,
                 SemAlcool = semAlcool,
-                Anfitriao = _jogadores.Count == 0
+                Anfitriao = _jogadores.Count == 0,
+                UltimoSinal = agora
             };
             _jogadores.Add(jogador);
             Tocar();
@@ -559,9 +583,21 @@ public sealed partial class Sala
     internal Jogador Reconhecer(string token)
     {
         lock (_trinco)
-            return _jogadores.FirstOrDefault(j => j.Token == token)
+        {
+            var jogador = _jogadores.FirstOrDefault(j => j.Token == token)
                 ?? throw new JogadorNaoReconhecidoException();
+            jogador.UltimoSinal = _relogio.GetUtcNow();
+            return jogador;
+        }
     }
+
+    private static string NovoToken() =>
+        Convert.ToBase64String(RandomNumberGenerator.GetBytes(24)).Replace('+', '-').Replace('/', '_');
+
+    /// <summary>"Fabrício" e "fabricio" são a mesma pessoa: o corretor do celular não cria outra.</summary>
+    private static bool MesmoNome(string um, string outro) =>
+        string.Compare(um, outro, CultureInfo.InvariantCulture,
+            CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) == 0;
 
     private Jogador ExigirAnfitriao(string token, string mensagem = "Só quem criou a sala pode fazer isso.")
     {
