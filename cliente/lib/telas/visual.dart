@@ -115,27 +115,31 @@ class AvatarDoJogador extends StatelessWidget {
       ),
     );
     final foto = jogador.foto;
-    return Container(
-      width: tamanho,
-      height: tamanho,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: cor.withValues(alpha: 0.22),
-        border: Border.all(color: destaque ?? cor, width: destaque == null ? 1.5 : 3),
-      ),
-      child: foto == null
-          ? inicial
-          : ClipOval(
-              child: Image.network(
-                foto,
-                key: ValueKey(foto),
-                fit: BoxFit.cover,
-                width: tamanho,
-                height: tamanho,
-                gaplessPlayback: true,
-                errorBuilder: (_, _, _) => inicial,
+    // Quem caiu da sala aparece apagado em toda a sala.
+    return Opacity(
+      opacity: jogador.conectado ? 1 : 0.4,
+      child: Container(
+        width: tamanho,
+        height: tamanho,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: cor.withValues(alpha: 0.22),
+          border: Border.all(color: destaque ?? cor, width: destaque == null ? 1.5 : 3),
+        ),
+        child: foto == null
+            ? inicial
+            : ClipOval(
+                child: Image.network(
+                  foto,
+                  key: ValueKey(foto),
+                  fit: BoxFit.cover,
+                  width: tamanho,
+                  height: tamanho,
+                  gaplessPlayback: true,
+                  errorBuilder: (_, _, _) => inicial,
+                ),
               ),
-            ),
+      ),
     );
   }
 }

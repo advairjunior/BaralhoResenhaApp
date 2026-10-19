@@ -106,6 +106,18 @@ void main() {
       await fecharApp(tester);
     });
 
+    testWidgets('o resumo do jogo explica o que fazer quando alguém cai da sala', (tester) async {
+      final servidor = ServidorFalso()..respostas['GET /api/salas/ABCD'] = visaoJson();
+      await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+      await tester.tap(find.byTooltip('Como funciona o jogo'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('📵 Caiu da sala?'), 200, scrollable: find.byType(Scrollable).last);
+
+      expect(find.textContaining('entre de novo com o mesmo nome'), findsOneWidget);
+      await fecharApp(tester);
+    });
+
     testWidgets('quando a carta passa de mão, o "Pegou" mostra para onde foi', (tester) async {
       final servidor = ServidorFalso()
         ..respostas['GET /api/salas/ABCD'] = _comMao(pegos: ['bia'], usos: [

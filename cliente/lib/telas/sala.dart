@@ -22,6 +22,7 @@ abstract interface class AcoesDaSala {
   Future<void> revelar();
   Future<void> proxima();
   Future<void> tirar();
+  Future<void> tirarDaSala(String jogadorId);
   Future<void> marcarApontado(String jogadorId);
   Future<void> escolherFavorito(int indice);
   Future<void> marcarVacilo(String jogadorId);
@@ -69,6 +70,7 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   VisaoDaSala? _visao;
   bool _carregando = true;
   bool _ocupado = false;
+  bool _semConexao = false;
   AssinaturaTempoReal? _tempoReal;
   Timer? _reserva;
 
@@ -110,8 +112,14 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
     if (token == null) return;
     try {
       _mostrar(await widget.api.visao(_codigo, token));
+      if (_semConexao && mounted) setState(() => _semConexao = false);
     } on FalhaNaApi catch (falha) {
-      if (falha.perdeuASala) await _perderASala();
+      if (falha.perdeuASala) {
+        await _perderASala();
+      } else if ((falha.status == null || falha.status! >= 500) && mounted) {
+        // Sem internet ou servidor acordando: continua na sala e tenta de novo na próxima consulta.
+        setState(() => _semConexao = true);
+      }
     } finally {
       if (mounted && _carregando) setState(() => _carregando = false);
     }
@@ -231,6 +239,10 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   Future<void> tirar() => _agir((token) => widget.api.tirar(_codigo, token, _rodada));
 
   @override
+  Future<void> tirarDaSala(String jogadorId) =>
+      _agir((token) => widget.api.tirarDaSala(_codigo, token, jogadorId));
+
+  @override
   Future<void> alternarBebi() => _agir((token) => widget.api.alternarBebi(_codigo, token, _rodada));
 
   @override
@@ -280,15 +292,47 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
     if (_token == null || visao == null) {
       return Inicio(api: widget.api, sessoes: widget.sessoes, codigoInicial: _codigo);
     }
-    return AbsorbPointer(
-      absorbing: _ocupado,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: switch (visao.fase) {
-          FaseDaSala.lobby => Lobby(key: const ValueKey('lobby'), visao: visao, acoes: this),
-          FaseDaSala.fim => FimDaNoite(key: const ValueKey('fim'), visao: visao, acoes: this),
-          _ => Jogo(key: const ValueKey('jogo'), visao: visao, acoes: this),
-        },
+    return Column(children: [
+      if (_semConexao) const _FaixaSemConexao(),
+      Expanded(
+        child: AbsorbPointer(
+          absorbing: _ocupado,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: switch (visao.fase) {
+              FaseDaSala.lobby => Lobby(key: const ValueKey('lobby'), visao: visao, acoes: this),
+              FaseDaSala.fim => FimDaNoite(key: const ValueKey('fim'), visao: visao, acoes: this),
+              _ => Jogo(key: const ValueKey('jogo'), visao: visao, acoes: this),
+            },
+          ),
+        ),
+      ),
+    ]);
+  }
+}
+
+/// A internet caiu: o celular continua na sala e tenta de novo sozinho.
+class _FaixaSemConexao extends StatelessWidget {
+  const _FaixaSemConexao();
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: CoresBaralho.coral,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: EspacoBaralho.base, vertical: EspacoBaralho.pequeno),
+          child: Row(children: [
+            const SizedBox.square(
+                dimension: 14, child: CircularProgressIndicator(strokeWidth: 2, color: CoresBaralho.texto)),
+            const SizedBox(width: EspacoBaralho.pequeno),
+            Expanded(
+              child: Text('Sem conexão, tentando voltar…',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: CoresBaralho.texto)),
+            ),
+          ]),
+        ),
       ),
     );
   }

@@ -66,8 +66,23 @@ app.MapPost("/api/salas/{codigo}/jogadores", (
     return Results.Ok(new EntradaNaSala(sala.Codigo, jogador.Token));
 });
 
-app.MapGet("/api/salas/{codigo}", (string codigo, HttpRequest http, SalasEmMemoria salas) =>
-    Results.Ok(salas.Obter(codigo).Visao(Token(http))));
+// Cada celular consulta a cada 6 s: aproveita para ver se alguém caiu (ou voltou) e
+// avisar a turma, porque a carta pode revelar ou passar sem quem caiu.
+app.MapGet("/api/salas/{codigo}", (
+    string codigo, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+{
+    var sala = salas.Obter(codigo);
+    var token = Token(http);
+    var visao = sala.Visao(token);
+    if (!sala.ConferirQuemCaiu()) return Results.Ok(visao);
+    notificador.Publicar(sala.Codigo);
+    return Results.Ok(sala.Visao(token));
+});
+
+// Quem criou a sala tira quem caiu e foi embora de vez.
+app.MapDelete("/api/salas/{codigo}/jogadores/{jogadorId:guid}", (
+    string codigo, Guid jogadorId, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.TirarDaSala(token, jogadorId)));
 
 app.MapDelete("/api/salas/{codigo}/jogadores/eu", (
     string codigo, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>

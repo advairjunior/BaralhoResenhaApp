@@ -48,7 +48,7 @@ class Jogo extends StatelessWidget {
         actions: [
           IconButton(
             tooltip: 'Placar',
-            onPressed: () => abrirPlacar(context, visao),
+            onPressed: () => abrirPlacar(context, visao, acoes),
             icon: const Text('🏆', style: TextStyle(fontSize: 22)),
           ),
           PopupMenuButton<String>(
@@ -1173,7 +1173,7 @@ class _Recado extends StatelessWidget {
   }
 }
 
-Future<void> abrirPlacar(BuildContext context, VisaoDaSala visao) {
+Future<void> abrirPlacar(BuildContext context, VisaoDaSala visao, AcoesDaSala acoes) {
   final ordenados = [...visao.jogadores]..sort((a, b) => b.pontos.compareTo(a.pontos));
   final porGole = visao.configuracao.pontosPorGole;
   return showModalBottomSheet<void>(
@@ -1200,6 +1200,18 @@ Future<void> abrirPlacar(BuildContext context, VisaoDaSala visao) {
                   if (!jogador.semAlcool && porGole > 1)
                     Text('${jogador.pontos == 1 ? '1 ponto' : '${jogador.pontos} pontos'} · '
                         'cofrinho ${jogador.cofrinho}/$porGole'),
+                  if (!jogador.conectado) ...[
+                    const Text('📵 Sem conexão', style: TextStyle(color: CoresBaralho.coral)),
+                    if (visao.souAnfitriao && jogador.id != visao.euId)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                          onPressed: () => _confirmarTirarDaSala(context, jogador, acoes),
+                          child: const Text('Tirar da sala'),
+                        ),
+                      ),
+                  ],
                 ],
               ),
               trailing: Text(jogador.placar,
@@ -1209,4 +1221,25 @@ Future<void> abrirPlacar(BuildContext context, VisaoDaSala visao) {
       ),
     ),
   );
+}
+
+/// Quem caiu e foi embora de vez sai do placar; se voltar, entra como pessoa nova.
+Future<void> _confirmarTirarDaSala(BuildContext context, Jogador jogador, AcoesDaSala acoes) async {
+  final tirar = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Tirar ${jogador.nome} da sala?'),
+      content: const Text('Os pontos saem do placar. Se voltar, entra como pessoa nova.'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Deixar')),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Tirar', style: TextStyle(color: CoresBaralho.coral)),
+        ),
+      ],
+    ),
+  );
+  if (tirar != true || !context.mounted) return;
+  Navigator.pop(context);
+  await acoes.tirarDaSala(jogador.id);
 }

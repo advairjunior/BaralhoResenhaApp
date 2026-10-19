@@ -269,6 +269,12 @@ public sealed partial class Sala
     /// </summary>
     public static readonly TimeSpan TempoParaVoltar = TimeSpan.FromSeconds(20);
 
+    /// <summary>
+    /// Sem notícia do celular por esse tempo, a pessoa caiu: a mesa para de esperar por ela.
+    /// É mais que o <see cref="TempoParaVoltar"/> porque tela bloqueada por um minutinho é normal.
+    /// </summary>
+    public static readonly TimeSpan TempoParaCair = TimeSpan.FromSeconds(60);
+
     public const string MensagemDeNomeEmUso =
         "Já tem alguém com esse nome jogando agora. Se for você em outro celular, feche lá e tente de novo em 20 segundos.";
 
@@ -344,16 +350,58 @@ public sealed partial class Sala
 
     public void Sair(string token)
     {
+        lock (_trinco) Remover(Reconhecer(token));
+    }
+
+    /// <summary>Quem foi embora de vez: só quem criou a sala tira, e só quem já caiu.</summary>
+    public void TirarDaSala(string token, Guid jogadorId)
+    {
         lock (_trinco)
         {
-            var jogador = Reconhecer(token);
-            _jogadores.Remove(jogador);
-            Rodada?.Respostas.Remove(jogador.Id);
-            DesfazerCasal(jogador);
-            if (jogador.Anfitriao && _jogadores.Count > 0)
-                _jogadores[0].Anfitriao = true;
+            ExigirAnfitriao(token, "Só quem criou a sala tira alguém da sala.");
+            var jogador = _jogadores.FirstOrDefault(j => j.Id == jogadorId)
+                ?? throw new AcaoNaoPermitidaException("Essa pessoa já saiu da sala.");
+            if (Conectado(jogador))
+                throw new AcaoNaoPermitidaException($"{jogador.Nome} ainda está conectado(a).");
+            Remover(jogador);
+        }
+    }
+
+    private void Remover(Jogador jogador)
+    {
+        _jogadores.Remove(jogador);
+        Rodada?.Respostas.Remove(jogador.Id);
+        DesfazerCasal(jogador);
+        if (jogador.Anfitriao && _jogadores.Count > 0)
+            _jogadores[0].Anfitriao = true;
+        RevelarSeTodosResponderam();
+        Tocar();
+    }
+
+    /// <summary>Quem a mesa não espera mais: está sem sinal há <see cref="TempoParaCair"/>.</summary>
+    private readonly HashSet<Guid> _caidos = [];
+
+    internal bool Conectado(Jogador jogador) => _relogio.GetUtcNow() - jogador.UltimoSinal < TempoParaCair;
+
+    /// <summary>Quem a carta espera: quem está conectado.</summary>
+    private IEnumerable<Jogador> NaMesa => _jogadores.Where(Conectado);
+
+    /// <summary>
+    /// Chamado a cada consulta dos celulares: se alguém caiu ou voltou, a carta é
+    /// conferida de novo (pode revelar ou passar sem essa pessoa). Verdadeiro quando
+    /// mudou alguma coisa e a sala precisa avisar a turma.
+    /// </summary>
+    public bool ConferirQuemCaiu()
+    {
+        lock (_trinco)
+        {
+            var caidos = _jogadores.Where(j => !Conectado(j)).Select(j => j.Id).ToHashSet();
+            if (caidos.SetEquals(_caidos)) return false;
+            _caidos.Clear();
+            _caidos.UnionWith(caidos);
             RevelarSeTodosResponderam();
             Tocar();
+            return true;
         }
     }
 
@@ -683,10 +731,10 @@ public sealed partial class Sala
         {
             ModoDeJogo.CasaisEmJogo => CasalRespondeu(rodada),
             ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados => rodada.Respostas.Count > 0 &&
-                _jogadores.Where(j => j.Id != rodada.Alvo).All(j => rodada.Respostas.ContainsKey(j.Id)),
+                NaMesa.Where(j => j.Id != rodada.Alvo).All(j => rodada.Respostas.ContainsKey(j.Id)),
             ModoDeJogo.MaisProvavel when rodada.Duelistas.Count > 0 => rodada.Respostas.Count > 0 &&
-                _jogadores.Where(j => !rodada.Duelistas.Contains(j.Id)).All(j => rodada.Respostas.ContainsKey(j.Id)),
-            _ => rodada.Respostas.Count > 0 && _jogadores.All(j => rodada.Respostas.ContainsKey(j.Id))
+                NaMesa.Where(j => !rodada.Duelistas.Contains(j.Id)).All(j => rodada.Respostas.ContainsKey(j.Id)),
+            _ => rodada.Respostas.Count > 0 && NaMesa.All(j => rodada.Respostas.ContainsKey(j.Id))
         };
         if (todosResponderam) AplicarRevelacao();
     }

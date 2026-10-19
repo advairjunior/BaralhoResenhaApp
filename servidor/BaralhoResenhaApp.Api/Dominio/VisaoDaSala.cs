@@ -4,7 +4,7 @@ namespace BaralhoResenhaApp.Api.Dominio;
 /// <param name="ParId">Par do casal na sala, se marcou.</param>
 public sealed record JogadorVisivel(
     Guid Id, string Nome, bool Anfitriao, bool SemAlcool, int Pontos, int Cofrinho, int Goles, bool Respondeu,
-    string? Foto, Guid? ParId, int CartasNaManga);
+    string? Foto, Guid? ParId, int CartasNaManga, bool Conectado);
 
 /// <param name="Palpiteiro">Casais em Jogo: quem tenta adivinhar.</param>
 /// <param name="Alvo">Casais em Jogo: de quem é a pergunta.</param>
@@ -92,7 +92,8 @@ public sealed record VisaoDaSala(
                 rodada?.Respostas.ContainsKey(j.Id) ?? false,
                 j.Foto is null ? null : Endereco(j.Foto),
                 j.ParId,
-                j.Mao.Count)).ToList(),
+                j.Mao.Count,
+                sala.Conectado(j))).ToList(),
             rodada is null || sala.Fase is FaseDaSala.Lobby or FaseDaSala.Fim
                 ? null
                 : new RodadaVisivel(
