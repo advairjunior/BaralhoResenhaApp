@@ -1,6 +1,6 @@
 # Baralho da Resenha — Contexto atual
 
-> Atualizado em: 2026-10-16
+> Atualizado em: 2026-10-19
 
 ## O que é
 
@@ -54,6 +54,14 @@ Correio da Resenha (bilhetes anônimos de até 20 letras) · Imagem e Ação (1 
 - **Cartas na manga:** cada carta da mesa anota uma conta por pessoa (`ContaDaCarta`: pontos e goles); Escudo, Passa a bola, Devolve, Batata quente e Dobra mexem nessa conta. Mão secreta, até 3.
 - **Noites prontas:** presets só no app (`noites_prontas.dart`), sem mudança no servidor.
 - **Mural não fica no servidor:** cada um salva as fotos no fim.
+- **Comando da sala:** quem está no comando passa para outro (menu ou sala de espera). Celular sem
+  consultar a sala por 90 s (`Sala.TempoSemSinal`) perde o comando para o próximo da mesa que está aí;
+  a presença é marcada a cada `Reconhecer` (consulta de 6 s ou ação).
+- **Reações:** 😂 🔥 💀 😱, uma por pessoa por carta, contagem anônima; a carta com mais reações
+  (mínimo 2) vira a Carta da noite no resumo.
+- **Celular na mesa:** a tela não apaga dentro da sala (Wake Lock); som e vibração na revelação,
+  no vacilo e no fim do tempo (Web Audio, sem arquivo), desligáveis por celular.
+- **Servidor dormindo:** o app cutuca `/api/saude` ao abrir e avisa "Acordando o baralho…" depois de 3 s.
 
 ## Revisão das cartas
 
