@@ -115,6 +115,7 @@ void main() {
       await tester.scrollUntilVisible(find.text('📵 Caiu da sala?'), 200, scrollable: find.byType(Scrollable).last);
 
       expect(find.textContaining('entre de novo com o mesmo nome'), findsOneWidget);
+      expect(find.textContaining('o comando passa para alguém da mesa'), findsOneWidget);
       await fecharApp(tester);
     });
 

@@ -343,6 +343,7 @@ public sealed partial class Sala
                 UltimoSinal = agora
             };
             _jogadores.Add(jogador);
+            if (jogador.Anfitriao) _donoDoComando = jogador.Id;
             Tocar();
             return jogador;
         }
@@ -374,12 +375,32 @@ public sealed partial class Sala
         DesfazerCasal(jogador);
         if (jogador.Anfitriao && _jogadores.Count > 0)
             _jogadores[0].Anfitriao = true;
+        // Quem criou a sala saiu de vez: o comando fica com quem está mandando agora.
+        if (jogador.Id == _donoDoComando)
+            _donoDoComando = _jogadores.FirstOrDefault(j => j.Anfitriao)?.Id;
         RevelarSeTodosResponderam();
         Tocar();
     }
 
     /// <summary>Quem a mesa não espera mais: está sem sinal há <see cref="TempoParaCair"/>.</summary>
     private readonly HashSet<Guid> _caidos = [];
+
+    /// <summary>
+    /// Quem criou a sala. Se cair, o comando vai para alguém da mesa e volta quando a
+    /// pessoa voltar, para a noite não travar esperando quem passa as cartas.
+    /// </summary>
+    private Guid? _donoDoComando;
+
+    private void ConferirQuemManda()
+    {
+        var dono = _jogadores.FirstOrDefault(j => j.Id == _donoDoComando);
+        var atual = _jogadores.FirstOrDefault(j => j.Anfitriao);
+        var quemManda = dono is not null && Conectado(dono) ? dono
+            : atual is not null && Conectado(atual) ? atual
+            : NaMesa.FirstOrDefault();
+        if (quemManda is null || quemManda.Anfitriao) return;
+        foreach (var jogador in _jogadores) jogador.Anfitriao = jogador == quemManda;
+    }
 
     internal bool Conectado(Jogador jogador) => _relogio.GetUtcNow() - jogador.UltimoSinal < TempoParaCair;
 
@@ -399,6 +420,7 @@ public sealed partial class Sala
             if (caidos.SetEquals(_caidos)) return false;
             _caidos.Clear();
             _caidos.UnionWith(caidos);
+            ConferirQuemManda();
             RevelarSeTodosResponderam();
             Tocar();
             return true;

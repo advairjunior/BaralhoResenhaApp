@@ -146,4 +146,58 @@ public sealed class QuemCaiuDaSalaTestes
         Assert.Equal("Caio ainda está conectado(a).", erro.Message);
         Assert.Equal(3, mesa.Sala.Jogadores.Count);
     }
+
+    private static Jogador QuemManda(Mesa mesa) => mesa.Sala.Jogadores.Single(j => j.Anfitriao);
+
+    [Fact]
+    public void QuandoQuemCriouASalaCaiOComandoPassaParaQuemEstaNaMesa()
+    {
+        var mesa = Montar(EuNunca);
+        mesa.Passar(Sala.TempoParaCair, mesa.Beto, mesa.Caio);
+
+        Assert.True(mesa.Sala.ConferirQuemCaiu());
+
+        Assert.Equal(mesa.Beto.Id, QuemManda(mesa).Id);
+        mesa.Sala.Responder(mesa.Beto.Token, mesa.Rodada, Sala.RespostaNunca);
+        mesa.Sala.Revelar(mesa.Beto.Token, mesa.Rodada);
+        Assert.Equal(FaseDaSala.Revelada, mesa.Sala.Fase);
+    }
+
+    [Fact]
+    public void OComandoNaoVaiParaQuemTambemCaiu()
+    {
+        var mesa = Montar(EuNunca);
+        mesa.Passar(Sala.TempoParaCair, mesa.Caio);
+
+        mesa.Sala.ConferirQuemCaiu();
+
+        Assert.Equal(mesa.Caio.Id, QuemManda(mesa).Id);
+    }
+
+    [Fact]
+    public void QuemCriouASalaVoltaERetomaOComando()
+    {
+        var mesa = Montar(EuNunca);
+        mesa.Passar(Sala.TempoParaCair, mesa.Beto, mesa.Caio);
+        mesa.Sala.ConferirQuemCaiu();
+
+        mesa.Sala.Visao(mesa.Ana.Token);
+        mesa.Sala.ConferirQuemCaiu();
+
+        Assert.Equal(mesa.Ana.Id, QuemManda(mesa).Id);
+    }
+
+    [Fact]
+    public void SeQuemCriouASalaFoiTiradaOComandoFicaComQuemAssumiu()
+    {
+        var mesa = Montar(EuNunca);
+        mesa.Passar(Sala.TempoParaCair, mesa.Beto, mesa.Caio);
+        mesa.Sala.ConferirQuemCaiu();
+
+        mesa.Sala.TirarDaSala(mesa.Beto.Token, mesa.Ana.Id);
+        mesa.Passar(Sala.TempoParaCair, mesa.Beto, mesa.Caio);
+        mesa.Sala.ConferirQuemCaiu();
+
+        Assert.Equal(mesa.Beto.Id, QuemManda(mesa).Id);
+    }
 }

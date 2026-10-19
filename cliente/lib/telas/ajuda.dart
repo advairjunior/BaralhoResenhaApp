@@ -179,7 +179,8 @@ Future<void> abrirComoFunciona(BuildContext context, VisaoDaSala visao) {
       titulo: '📵 Caiu da sala?',
       texto: 'Abra o link e entre de novo com o mesmo nome: você volta com seus pontos e cartas. '
           'A mesa não espera por quem caiu, e quem foi embora de vez sai pelo placar, '
-          'pela mão de quem criou a sala.',
+          'pela mão de quem criou a sala. Se quem criou a sala cair, o comando passa para alguém da mesa '
+          'e volta quando essa pessoa voltar.',
     ),
   ]);
 }
