@@ -106,7 +106,12 @@ class _PassarSozinhoState extends State<PassarSozinho> {
     final aparece = visao.fase == FaseDaSala.revelada ? !casaisSemJulgar : bebaSe || prontoDeTodos;
     if (!visao.configuracao.passarSozinho || !aparece) return const SizedBox.shrink();
     final anfitriao = visao.anfitriao?.nome ?? 'Quem criou a sala';
-    final faltam = [for (final jogador in visao.jogadores) if (!rodada.prontos.contains(jogador.id)) jogador.nome];
+    // A mesa não espera quem caiu: só conta quem está conectado (ou já ficou pronto).
+    final naMesa = [
+      for (final jogador in visao.jogadores)
+        if (jogador.conectado || rodada.prontos.contains(jogador.id)) jogador,
+    ];
+    final faltam = [for (final jogador in naMesa) if (!rodada.prontos.contains(jogador.id)) jogador.nome];
     final faltando = faltam.isEmpty ? '' : ' · falta ${faltam.join(', ')}';
     // No "conta essa", o "Contei" fica na fila de histórias, junto da foto.
     final contaEssa = rodada.revelacao?.contadores.isNotEmpty ?? false;
@@ -138,7 +143,7 @@ class _PassarSozinhoState extends State<PassarSozinho> {
         if (!rodada.prontos.contains(visao.euId))
           OutlinedButton(onPressed: widget.acoes.marcarPronto, child: const Text('Pronto ✓')),
         const SizedBox(height: EspacoBaralho.mini),
-        Text('Prontos: ${rodada.prontos.length} de ${visao.jogadores.length}$faltando',
+        Text('Prontos: ${rodada.prontos.length} de ${naMesa.length}$faltando',
             textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: CoresBaralho.textoApagado)),
         const Text('Com todo mundo pronto, a carta passa sozinha.',
             textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: CoresBaralho.textoApagado)),
@@ -149,7 +154,7 @@ class _PassarSozinhoState extends State<PassarSozinho> {
         if (minha != null)
           FilledButton(onPressed: widget.acoes.marcarPronto, child: Text(_botaoDoMotivo[minha.motivo]!)),
         if (bebaSe && faltam.isNotEmpty)
-          Text('Responderam: ${rodada.prontos.length} de ${visao.jogadores.length}$faltando',
+          Text('Responderam: ${rodada.prontos.length} de ${naMesa.length}$faltando',
               textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: CoresBaralho.textoApagado)),
         if (esperando.isNotEmpty)
           Padding(

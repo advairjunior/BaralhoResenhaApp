@@ -16,6 +16,44 @@ Map<String, dynamic> _comCaioSemConexao({bool souAnfitriao = true}) => visaoJson
 );
 
 void main() {
+  testWidgets('quem caiu não aparece como faltando responder', (tester) async {
+    final servidor = ServidorFalso()
+      ..respostas['GET /api/salas/ABCD'] = visaoJson(
+        fase: 'Carta',
+        rodada: rodadaJson(respostas: 1),
+        jogadores: [
+          jogadorJson('ana', 'Ana', anfitriao: true, respondeu: true),
+          jogadorJson('bia', 'Bia'),
+          jogadorJson('caio', 'Caio', conectado: false),
+        ],
+      );
+    await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+    await rolarAte(tester, find.text('1 de 2 responderam'));
+    expect(find.text('Falta: Bia'), findsOneWidget);
+    await fecharApp(tester);
+  });
+
+  testWidgets('quem caiu não aparece como faltando ficar pronto', (tester) async {
+    final servidor = ServidorFalso()
+      ..respostas['GET /api/salas/ABCD'] = visaoJson(
+        fase: 'Carta',
+        rodada: {
+          ...rodadaJson(modo: 'Elogios', texto: 'Elogie quem está à sua direita.'),
+          'prontos': ['ana'],
+        },
+        jogadores: [
+          jogadorJson('ana', 'Ana', anfitriao: true),
+          jogadorJson('bia', 'Bia'),
+          jogadorJson('caio', 'Caio', conectado: false),
+        ],
+      );
+    await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
+
+    await rolarAte(tester, find.text('Prontos: 1 de 2 · falta Bia'));
+    await fecharApp(tester);
+  });
+
   testWidgets('o placar mostra quem ficou sem conexão', (tester) async {
     final servidor = ServidorFalso()..respostas['GET /api/salas/ABCD'] = _comCaioSemConexao();
     await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);

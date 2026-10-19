@@ -419,7 +419,11 @@ class _Respondendo extends StatelessWidget {
   Widget build(BuildContext context) {
     final votantes = [
       for (final jogador in visao.jogadores)
-        if ((!_ficaDeFora(rodada) || jogador.id != rodada.alvo) && !rodada.duelistas.contains(jogador.id)) jogador,
+        if ((!_ficaDeFora(rodada) || jogador.id != rodada.alvo) &&
+            !rodada.duelistas.contains(jogador.id) &&
+            // A mesa não espera quem caiu, a não ser que já tenha respondido.
+            (jogador.conectado || jogador.respondeu))
+          jogador,
     ];
     final faltam = votantes.where((j) => !j.respondeu).toList();
     final souReu = (_ficaDeFora(rodada) && visao.euId == rodada.alvo) || rodada.duelistas.contains(visao.euId);
