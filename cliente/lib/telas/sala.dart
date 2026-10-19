@@ -7,6 +7,7 @@ import '../dominio/modelos.dart';
 import '../infraestrutura/api_baralho.dart';
 import '../infraestrutura/assinatura_tempo_real.dart';
 import '../infraestrutura/sessoes_locais.dart';
+import '../infraestrutura/tela_acordada.dart';
 import '../tema/tema_baralho.dart';
 import 'fim_da_noite.dart';
 import 'inicio.dart';
@@ -78,12 +79,15 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   @override
   void initState() {
     super.initState();
+    // Celular parado na mesa apaga a tela, a aba congela e a pessoa perde a vez.
+    manterTelaAcordada(true);
     _abrir();
   }
 
   @override
   void dispose() {
     _pararDeOuvir();
+    manterTelaAcordada(false);
     super.dispose();
   }
 
