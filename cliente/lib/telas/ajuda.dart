@@ -81,6 +81,13 @@ ComoJoga comoJoga(Rodada rodada) {
         'Travou, esqueceu a letra ou repetiu? Qualquer um da turma toca em "Travou" e a pessoa leva 1 ponto.',
         'Aparece de vez em quando, como surpresa: não tira o lugar das outras brincadeiras.',
       ]),
+    Rodada(modo: ModoDeJogo.impostor) => ('impostor', ModoDeJogo.impostor.titulo, [
+        'Todo mundo recebeu a mesma palavra no celular, menos um: o impostor, que só sabe o tema.',
+        'Na ordem da tela, cada um fala uma pista em voz alta. Uma palavra só, sem entregar demais!',
+        'O impostor finge que sabe: ouve as pistas e inventa a dele.',
+        'Depois, todo mundo vota em segredo em quem acha que é o impostor.',
+        'Pegaram (ele sozinho no topo)? O impostor leva 1 ponto. Empatou ou erraram? Ele escapa, ganha uma carta na manga, e quem votou errado leva 1 ponto.',
+      ]),
     Rodada(modo: ModoDeJogo.jurados) => ('jurados', ModoDeJogo.jurados.titulo, [
         'O app elegeu a pessoa da carta: ela só espera a nota.',
         'O resto da turma é jurado: cada um dá de 1 a 5 estrelas, em segredo.',
@@ -157,6 +164,11 @@ Future<void> abrirComoFunciona(BuildContext context, VisaoDaSala visao) {
       texto: 'Só ${visao.anfitriao?.nome ?? 'quem criou a sala'} passa as cartas. '
           'O resto responde, vota ou marca "Me pegou!" quando a carta pedir.',
     ),
+    const _Secao(
+      titulo: '👑 O comando',
+      texto: 'Quem passa as cartas pode passar o comando para outra pessoa pelo menu. '
+          'Se o celular dela apagar ou ficar sem bateria, o comando passa sozinho para o próximo da mesa.',
+    ),
     const _Passo(numero: 3, texto: 'Embaixo de toda carta tem "ⓘ Como joga" explicando aquele jogo.'),
     const _Passo(numero: 4, texto: 'No fim da noite saem os prêmios e o mural com as fotos de reação.'),
     const SizedBox(height: EspacoBaralho.base),
@@ -172,6 +184,15 @@ Future<void> abrirComoFunciona(BuildContext context, VisaoDaSala visao) {
             'Toque nelas para ver o que fazem.',
       ),
     const _Secao(
+      titulo: '😂 Reações',
+      texto: 'Embaixo de toda carta dá para reagir com um toque. Ninguém vê quem reagiu, '
+          'e a carta que mais rendeu vira a Carta da noite nos prêmios.',
+    ),
+    const _Secao(
+      titulo: '🔊 Som e vibração',
+      texto: 'A revelação, o vacilo e o fim do tempo tocam no celular. Quer silêncio? Desligue no menu ⋮.',
+    ),
+    const _Secao(
       titulo: '👎 Tira essa',
       texto: 'Carta que ninguém quer jogar? Quem criou a sala tira, e ela sai do baralho da noite.',
     ),
@@ -179,8 +200,7 @@ Future<void> abrirComoFunciona(BuildContext context, VisaoDaSala visao) {
       titulo: '📵 Caiu da sala?',
       texto: 'Abra o link e entre de novo com o mesmo nome: você volta com seus pontos e cartas. '
           'A mesa não espera por quem caiu, e quem foi embora de vez sai pelo placar, '
-          'pela mão de quem criou a sala. Se quem criou a sala cair, o comando passa para alguém da mesa '
-          'e volta quando essa pessoa voltar.',
+          'pela mão de quem está no comando.',
     ),
   ]);
 }

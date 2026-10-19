@@ -66,20 +66,26 @@ app.MapPost("/api/salas/{codigo}/jogadores", (
     return Results.Ok(new EntradaNaSala(sala.Codigo, jogador.Token));
 });
 
-// Cada celular consulta a cada 6 s: aproveita para ver se alguém caiu (ou voltou) e
-// avisar a turma, porque a carta pode revelar ou passar sem quem caiu.
+// A consulta a cada 6 s também diz que o celular está aí: se quem está no
+// comando sumiu, o comando passa sozinho; se alguém caiu (ou voltou), a carta
+// pode revelar ou passar sem essa pessoa. Nos dois casos, a turma fica sabendo.
 app.MapGet("/api/salas/{codigo}", (
     string codigo, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
 {
     var sala = salas.Obter(codigo);
     var token = Token(http);
-    var visao = sala.Visao(token);
-    if (!sala.ConferirQuemCaiu()) return Results.Ok(visao);
-    notificador.Publicar(sala.Codigo);
+    var comandoMudou = sala.MarcarPresenca(token);
+    var mesaMudou = sala.ConferirQuemCaiu();
+    if (comandoMudou || mesaMudou) notificador.Publicar(sala.Codigo);
     return Results.Ok(sala.Visao(token));
 });
 
-// Quem criou a sala tira quem caiu e foi embora de vez.
+app.MapPost("/api/salas/{codigo}/comando", (
+    string codigo, PassarOComando requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.PassarComando(token, requisicao.JogadorId)));
+
+// Quem está no comando tira quem caiu e foi embora de vez.
 app.MapDelete("/api/salas/{codigo}/jogadores/{jogadorId:guid}", (
     string codigo, Guid jogadorId, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
     Agir(codigo, http, salas, notificador, (sala, token) => sala.TirarDaSala(token, jogadorId)));
@@ -197,6 +203,12 @@ app.MapPost("/api/salas/{codigo}/tirar", (
     string codigo, AcaoNaRodada requisicao, HttpRequest http,
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
     Agir(codigo, http, salas, notificador, (sala, token) => sala.Tirar(token, requisicao.Rodada)));
+
+app.MapPost("/api/salas/{codigo}/reacao", (
+    string codigo, ReagirNaCarta requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador,
+        (sala, token) => sala.Reagir(token, requisicao.Rodada, requisicao.Emoji)));
 
 app.MapPost("/api/salas/{codigo}/encerrar", (
     string codigo, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
@@ -322,6 +334,8 @@ public sealed record ComecarNoite(IReadOnlyList<string>? Vistas);
 public sealed record DefinirPar(Guid? ParId);
 public sealed record JulgarPalpite(int Rodada, bool Acertou);
 public sealed record MarcarApontado(int Rodada, Guid JogadorId);
+public sealed record PassarOComando(Guid JogadorId);
+public sealed record ReagirNaCarta(int Rodada, string Emoji);
 public sealed record EscolherFavorito(int Rodada, int Indice);
 public sealed record ResultadoDaMimica(int Rodada, int? Vencedor);
 public sealed record UsarCartaNaManga(int Rodada, CartaNaManga Carta, Guid? Alvo);

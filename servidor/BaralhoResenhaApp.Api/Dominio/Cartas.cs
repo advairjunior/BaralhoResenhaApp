@@ -27,7 +27,13 @@ public enum ModoDeJogo
     Jurados,
 
     /// <summary>Roda de Música: a carta dá o tema e cada um canta na sua vez, na ordem sorteada.</summary>
-    Musica
+    Musica,
+
+    /// <summary>
+    /// Impostor: todo mundo recebe a mesma palavra, menos um, que só sabe o tema.
+    /// Cada um fala uma pista e a turma vota em quem é o impostor.
+    /// </summary>
+    Impostor
 }
 
 /// <summary>
@@ -66,7 +72,10 @@ public enum NivelDaCarta
 /// <param name="Jokenpo">Duelo de pedra, papel e tesoura: os dois escolhem no celular, sem votação.</param>
 /// <param name="Goles">"Bebe 2": quem a carta pega bebe isso de verdade, fora do cofrinho.</param>
 /// <param name="Destaque">Das melhores do nível: só elas aparecem quando a noite está num nível acima.</param>
-/// <param name="Categoria">Imagem e Ação: a dica que o mímico pode dizer (Ação, Objeto, Filme…).</param>
+/// <param name="Categoria">
+/// Imagem e Ação: a dica que o mímico pode dizer (Ação, Objeto, Filme…).
+/// Impostor: o tema da palavra, a única coisa que o impostor sabe.
+/// </param>
 /// <param name="Duelo">Quem é mais provável: {jogador} contra {jogador2}, a turma vota em quem mandou melhor.</param>
 /// <param name="Isca">Regra-relâmpago: o que o jogo gera a cada carta para a regra acontecer.</param>
 /// <param name="Iscas">Perguntas feitas para esta regra (ex.: sobre trabalho, na regra que proíbe falar de trabalho).</param>
@@ -148,6 +157,6 @@ public sealed record ConfiguracaoDoJogo(
         // Casais em Jogo começa desligado: quem quiser, liga.
         [ModoDeJogo.EuNunca, ModoDeJogo.MaisProvavel, ModoDeJogo.BebaSe, ModoDeJogo.RegraRelampago,
             ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados,
-            ModoDeJogo.Musica],
+            ModoDeJogo.Musica, ModoDeJogo.Impostor],
         ZonaSegura: true);
 }

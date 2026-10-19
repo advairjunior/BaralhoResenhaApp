@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor'];
 
 const pagina = async () => {
   const p = await b.newPage();
@@ -141,6 +141,16 @@ v = await api('POST', `${s.sala}/pronto`, s.turma[s.nomes[v.rodada.fila[0]]], { 
 p = await abrir(s, 'Advair');
 await rolar(p, 600);
 await foto(p, 'musica');
+await p.close();
+
+// Impostor: o celular do impostor, só com o tema e a ordem das pistas.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['Impostor'] });
+let doImpostor = 'Advair';
+for (const n of Object.keys(s.turma)) if ((await api('GET', s.sala, s.turma[n])).rodada.souImpostor) doImpostor = n;
+p = await abrir(s, doImpostor);
+await rolar(p, 300);
+await foto(p, 'impostor');
 await p.close();
 
 // Jurados: a média das estrelas, sem dizer quem deu qual nota.

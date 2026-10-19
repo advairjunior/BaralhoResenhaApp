@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 
@@ -261,6 +261,8 @@ class Revelacao {
     this.contadores = const [],
     this.media,
     this.notas = const [],
+    this.impostor,
+    this.pegaram = false,
   });
 
   factory Revelacao.deJson(Map<String, dynamic> json) => Revelacao(
@@ -283,11 +285,17 @@ class Revelacao {
         contadores: List<String>.from((json['contadores'] as List?) ?? const []),
         media: (json['media'] as num?)?.toDouble(),
         notas: List<int>.from((json['notas'] as List?) ?? const []),
+        impostor: json['impostor'] as String?,
+        pegaram: json['pegaram'] as bool? ?? false,
       );
 
   /// Jurados: a média das estrelas e as notas, sem dizer quem deu qual.
   final double? media;
   final List<int> notas;
+
+  /// Impostor: quem era, e se a turma pegou.
+  final String? impostor;
+  final bool pegaram;
 
   /// "Conta essa": quem já fez, na ordem em que cada um conta a sua.
   final List<String> contadores;
@@ -372,6 +380,9 @@ class Rodada {
     this.contaEssa = false,
     this.fila = const [],
     this.travaram = const [],
+    this.reacoes = const {},
+    this.minhaReacao,
+    this.souImpostor = false,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -423,6 +434,9 @@ class Rodada {
         contaEssa: json['contaEssa'] as bool? ?? false,
         fila: List<String>.from((json['fila'] as List?) ?? const []),
         travaram: List<String>.from((json['travaram'] as List?) ?? const []),
+        reacoes: Map<String, int>.from((json['reacoes'] as Map?) ?? const {}),
+        minhaReacao: json['minhaReacao'] as String?,
+        souImpostor: json['souImpostor'] as bool? ?? false,
       );
 
   final int numero;
@@ -515,6 +529,13 @@ class Rodada {
   /// Roda de Música: a ordem em que cada um canta e quem travou.
   final List<String> fila;
   final List<String> travaram;
+
+  /// Quantas reações de cada (😂 🔥 💀 😱) a carta já rendeu.
+  final Map<String, int> reacoes;
+  final String? minhaReacao;
+
+  /// Impostor: este celular não recebeu a palavra.
+  final bool souImpostor;
 }
 
 class Momento {
@@ -561,19 +582,38 @@ class Premio {
 }
 
 class ResumoDaNoite {
-  const ResumoDaNoite({required this.cartas, required this.minutos, required this.goles, required this.pontos});
+  const ResumoDaNoite(
+      {required this.cartas, required this.minutos, required this.goles, required this.pontos, this.cartaDaNoite});
 
   factory ResumoDaNoite.deJson(Map<String, dynamic> json) => ResumoDaNoite(
         cartas: json['cartas'] as int,
         minutos: json['minutos'] as int,
         goles: json['goles'] as int,
         pontos: json['pontos'] as int,
+        cartaDaNoite: json['cartaDaNoite'] == null
+            ? null
+            : CartaDaNoite.deJson(json['cartaDaNoite'] as Map<String, dynamic>),
       );
 
   final int cartas;
   final int minutos;
   final int goles;
   final int pontos;
+
+  /// A carta que mais rendeu reação; nula sem reações.
+  final CartaDaNoite? cartaDaNoite;
+}
+
+class CartaDaNoite {
+  const CartaDaNoite({required this.texto, required this.reacoes});
+
+  factory CartaDaNoite.deJson(Map<String, dynamic> json) => CartaDaNoite(
+        texto: json['texto'] as String,
+        reacoes: Map<String, int>.from(json['reacoes'] as Map),
+      );
+
+  final String texto;
+  final Map<String, int> reacoes;
 }
 
 /// Como o jogo faz a regra-relâmpago acontecer a cada carta.

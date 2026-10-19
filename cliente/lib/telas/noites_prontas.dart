@@ -74,7 +74,7 @@ const noitesProntas = [
     chave: 'brincadeiras',
     emoji: '🎭',
     titulo: 'Noite das brincadeiras',
-    descricao: 'Mímica, roda de música, duelos, jurados e Correio. Mais rir que beber.',
+    descricao: 'Mímica, impostor, roda de música, duelos, jurados e Correio. Mais rir que beber.',
     configuracao: ConfiguracaoDoJogo(
       nivel: NivelDaCarta.resenha,
       modos: {
@@ -85,6 +85,7 @@ const noitesProntas = [
         ModoDeJogo.imagemEAcao,
         ModoDeJogo.jurados,
         ModoDeJogo.musica,
+        ModoDeJogo.impostor,
       },
       zonaSegura: true,
     ),

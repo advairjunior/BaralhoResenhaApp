@@ -21,9 +21,29 @@
   <!-- Fundo do tema já no carregamento: sem ele a tela fica branca até o Flutter abrir. -->
   <style>
     html, body { margin: 0; background-color: #120C0A; }
+    #embaralhando {
+      position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 12px; padding: 24px; text-align: center;
+      font-family: system-ui, sans-serif; color: #CDBFB5;
+    }
+    #embaralhando b { font-size: 22px; color: #FFF8F2; font-weight: 600; }
+    #embaralhando .carta { font-size: 48px; animation: vira 1.4s ease-in-out infinite; }
+    @keyframes vira { 50% { transform: rotateY(180deg); } }
   </style>
 </head>
 <body>
+  <!-- Enquanto o Flutter carrega (e o servidor acorda, se estava dormindo). -->
+  <div id="embaralhando">
+    <div class="carta">🃏</div>
+    <b>Embaralhando as cartas…</b>
+    <span>Na primeira vez da noite pode levar até 1 minuto.</span>
+  </div>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var aviso = document.getElementById('embaralhando');
+      if (aviso) aviso.remove();
+    });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

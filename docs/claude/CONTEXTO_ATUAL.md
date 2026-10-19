@@ -1,6 +1,6 @@
 # Baralho da Resenha — Contexto atual
 
-> Atualizado em: 2026-10-16
+> Atualizado em: 2026-10-19
 
 ## O que é
 
@@ -37,7 +37,8 @@ Eu Nunca · Quem é mais provável (votação no celular ou aponta no 3; elogio;
 Beba se · Regra-relâmpago (com iscas: entrevista, pergunta, missão, Mestre, piada; 🚨 vacilo) ·
 Casais em Jogo (opcional, desligado por padrão) · Tribunal da Turma · Rodada de Elogios ·
 Correio da Resenha (bilhetes anônimos de até 20 letras) · Imagem e Ação (1 mímico até 5 pessoas,
-2 times de 6 a 8, 3 times com 9+).
+2 times de 6 a 8, 3 times com 9+) · Jurados · Roda de Música · Impostor (palavra para todos menos
+um, que só sabe o tema; pistas em voz alta na ordem do app; voto secreto; 4+ pessoas).
 
 ## Regras de produto já decididas
 
@@ -54,6 +55,17 @@ Correio da Resenha (bilhetes anônimos de até 20 letras) · Imagem e Ação (1 
 - **Cartas na manga:** cada carta da mesa anota uma conta por pessoa (`ContaDaCarta`: pontos e goles); Escudo, Passa a bola, Devolve, Batata quente e Dobra mexem nessa conta. Mão secreta, até 3.
 - **Noites prontas:** presets só no app (`noites_prontas.dart`), sem mudança no servidor.
 - **Mural não fica no servidor:** cada um salva as fotos no fim.
+- **Comando da sala:** quem está no comando passa para outro (menu ou sala de espera). Celular sem
+  consultar a sala por 90 s (`Sala.TempoSemSinal`) perde o comando para o próximo da mesa que está aí;
+  a presença é marcada a cada `Reconhecer` (consulta de 6 s ou ação).
+- **Reações:** 😂 🔥 💀 😱, uma por pessoa por carta, contagem anônima; a carta com mais reações
+  (mínimo 2) vira a Carta da noite no resumo.
+- **Celular na mesa:** a tela não apaga dentro da sala (Wake Lock); som e vibração na revelação,
+  no vacilo e no fim do tempo (Web Audio, sem arquivo), desligáveis por celular.
+- **Impostor:** quem é o impostor fica em `Rodada.Impostor` e só sai na revelação (o `Alvo` fica
+  nulo); cada celular só sabe de si (`SouImpostor`). Pegaram = impostor sozinho no topo dos votos
+  (empate, ele escapa). Escapou: carta na manga para ele, ponto para quem votou errado. Peso 1.
+- **Servidor dormindo:** o app cutuca `/api/saude` ao abrir e mostra "Carregando o aplicativo Baralho da Resenha, aguarde…" com um carregando depois de 3 s.
 
 ## Revisão das cartas
 
@@ -65,5 +77,10 @@ que ele escrever. Quando ele avisar que terminou, ler as marcações e aplicar e
 
 - Testes: servidor (xUnit) e cliente (flutter test) passando.
 - Ainda não testado com a turma em celulares reais (só Chrome com tela de celular).
-- Ideias em aberto: Esquenta começando no Resenha, peso por jogo,
-  velocidade do esquenta, cartas da turma permanentes (exigiriam banco).
+
+## Banco de ideias
+
+- Esquenta começando no Resenha e velocidade do esquenta (deixados para depois em 2026-10-19).
+- Peso por jogo: "mais Tribunal, menos Beba se" (deixado para depois em 2026-10-19).
+- Cartas da turma permanentes (exigiriam banco).
+- Guardar a sala para sobreviver a um deploy no meio da noite (esbarra em "nada vai para disco").

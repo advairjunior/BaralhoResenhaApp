@@ -38,6 +38,16 @@ class ApiBaralho {
 
   String enderecoTempoReal(String codigo) => '$_enderecoBase/api/tempo-real/${_codigo(codigo)}';
 
+  /// No plano gratuito o servidor dorme sem uso: cutucar logo ao abrir o app
+  /// adianta o despertar enquanto a pessoa digita o nome e tira a selfie.
+  Future<void> acordar() async {
+    try {
+      await _enviar('GET', '/api/saude');
+    } on FalhaNaApi {
+      // Só um cutucão: quem precisa da resposta é criar ou entrar na sala.
+    }
+  }
+
   Future<Entrada> criarSala(String nome, {required bool semAlcool}) async {
     final resposta = await _enviar('POST', '/api/salas', corpo: {'nome': nome, 'semAlcool': semAlcool});
     return Entrada.deJson(resposta as Map<String, dynamic>);
@@ -134,6 +144,14 @@ class ApiBaralho {
   /// "Tira essa": a carta sai do baralho da noite e vem outra.
   Future<VisaoDaSala> tirar(String codigo, String token, int rodada) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/tirar', token, corpo: {'rodada': rodada});
+
+  /// Reação rápida na carta; a mesma de novo desfaz.
+  Future<VisaoDaSala> reagir(String codigo, String token, int rodada, String emoji) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/reacao', token, corpo: {'rodada': rodada, 'emoji': emoji});
+
+  /// Quem está no comando (puxa, pula, revela) passa para outra pessoa.
+  Future<VisaoDaSala> passarComando(String codigo, String token, String jogadorId) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/comando', token, corpo: {'jogadorId': jogadorId});
 
   Future<VisaoDaSala> encerrar(String codigo, String token) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/encerrar', token);

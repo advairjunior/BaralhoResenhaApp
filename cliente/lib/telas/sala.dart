@@ -7,6 +7,9 @@ import '../dominio/modelos.dart';
 import '../infraestrutura/api_baralho.dart';
 import '../infraestrutura/assinatura_tempo_real.dart';
 import '../infraestrutura/sessoes_locais.dart';
+import '../infraestrutura/som.dart' as som;
+import '../infraestrutura/tela_acordada.dart';
+import '../infraestrutura/tocador_de_som.dart' show prepararSom;
 import '../tema/tema_baralho.dart';
 import 'fim_da_noite.dart';
 import 'inicio.dart';
@@ -39,6 +42,12 @@ abstract interface class AcoesDaSala {
   Future<void> definirPar(String? parId);
   Future<void> julgar({required bool acertou});
   Future<void> registrarMomento(Uint8List foto);
+  Future<void> passarComando(String jogadorId);
+  Future<void> reagir(String emoji);
+
+  /// Som e vibração deste celular (não passa pelo servidor).
+  bool get somLigado;
+  Future<void> alternarSom();
   Future<void> encerrar();
   Future<void> retomar();
   Future<Uint8List> baixarFoto(String endereco);
@@ -79,17 +88,22 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   @override
   void initState() {
     super.initState();
+    // Celular parado na mesa apaga a tela, a aba congela e a pessoa perde a vez.
+    manterTelaAcordada(true);
+    prepararSom();
     _abrir();
   }
 
   @override
   void dispose() {
     _pararDeOuvir();
+    manterTelaAcordada(false);
     super.dispose();
   }
 
   Future<void> _abrir() async {
     _token = await widget.sessoes.token(_codigo);
+    som.somLigado = await widget.sessoes.somLigado();
     if (_token == null) {
       if (mounted) setState(() => _carregando = false);
       return;
@@ -157,7 +171,28 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
     final carta = visao.rodada?.cartaId;
     if (carta != null && carta != _visao?.rodada?.cartaId) widget.sessoes.marcarVista(carta);
     if (visao.fase == FaseDaSala.lobby && !_vistasEnviadas) _enviarVistas();
+    _avisarDoComando(_visao, visao);
+    _tocarOQueMudou(_visao?.rodada, visao.rodada);
     if (mounted) setState(() => _visao = visao);
+  }
+
+  /// A mesa toda ouve junto: a revelação e o vacilo chegam pelo tempo real.
+  void _tocarOQueMudou(Rodada? antes, Rodada? agora) {
+    if (antes == null || agora == null || antes.numero != agora.numero) return;
+    if (antes.revelacao == null && agora.revelacao != null) som.tocar(som.Som.revelacao);
+    if (agora.vacilaram.any((id) => !antes.vacilaram.contains(id))) som.tocar(som.Som.vacilo);
+  }
+
+  /// O comando pode chegar sozinho (o celular de quem estava com ele sumiu):
+  /// quem ganhou precisa saber que agora puxa as cartas.
+  void _avisarDoComando(VisaoDaSala? antes, VisaoDaSala agora) {
+    if (antes == null || !mounted || antes.souAnfitriao == agora.souAnfitriao) return;
+    avisar(
+      context,
+      agora.souAnfitriao
+          ? 'Agora você está no comando 👑 Você puxa as cartas.'
+          : 'O comando passou para ${agora.anfitriao?.nome ?? 'outra pessoa'} 👑',
+    );
   }
 
   /// Uma vez por sala: se alguém da turma já viu a carta, ela vai para o fim do monte.
@@ -258,6 +293,22 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   @override
   Future<void> registrarMomento(Uint8List foto) =>
       _agir((token) => widget.api.registrarMomento(_codigo, token, _rodada, foto));
+
+  @override
+  Future<void> passarComando(String jogadorId) =>
+      _agir((token) => widget.api.passarComando(_codigo, token, jogadorId));
+
+  @override
+  Future<void> reagir(String emoji) => _agir((token) => widget.api.reagir(_codigo, token, _rodada, emoji));
+
+  @override
+  bool get somLigado => som.somLigado;
+
+  @override
+  Future<void> alternarSom() async {
+    setState(() => som.somLigado = !som.somLigado);
+    await widget.sessoes.guardarSom(som.somLigado);
+  }
 
   @override
   Future<void> encerrar() => _agir((token) => widget.api.encerrar(_codigo, token));

@@ -200,12 +200,13 @@ public sealed class BaralhoTestes
         // A Roda de Música é surpresa de vez em quando: não mexe na mistura das outras.
         var outras = cartas.Where(c => c.Modo != ModoDeJogo.Musica).ToList();
         double Parte(Func<Carta, bool> filtro) => outras.Count(filtro) / (double)outras.Count;
-        var deVoto = Parte(c => c.Modo is ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.Jurados);
+        var deVoto = Parte(c => c.Modo is ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.Jurados
+            or ModoDeJogo.Impostor);
         var desafios = Parte(c => c.Duelo);
         var mimica = Parte(c => c.Modo == ModoDeJogo.ImagemEAcao);
-        Assert.True(deVoto >= 0.35, $"votação, tribunal e jurados: {deVoto:P0}");
-        // Esperado: uns 7,5% (Quem é mais provável pesa 5 e 40% dele é duelo).
-        Assert.True(desafios >= 0.065, $"duelos: {desafios:P0}");
+        Assert.True(deVoto >= 0.35, $"votação, tribunal, jurados e impostor: {deVoto:P0}");
+        // Esperado: uns 6,9% (Quem é mais provável pesa 5 de 29, e 40% dele é duelo).
+        Assert.True(desafios >= 0.06, $"duelos: {desafios:P0}");
         Assert.True(mimica >= 0.12, $"imagem e ação: {mimica:P0}");
     }
 

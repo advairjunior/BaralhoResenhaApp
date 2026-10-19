@@ -16,6 +16,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.imagemEAcao => 'Imagem e Ação',
         ModoDeJogo.jurados => 'Jurados',
         ModoDeJogo.musica => 'Roda de Música',
+        ModoDeJogo.impostor => 'Impostor',
       };
 
   String get emoji => switch (this) {
@@ -30,6 +31,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.imagemEAcao => '🎭',
         ModoDeJogo.jurados => '⭐',
         ModoDeJogo.musica => '🎵',
+        ModoDeJogo.impostor => '🕵️',
       };
 
   String get explicacao => switch (this) {
@@ -51,6 +53,8 @@ extension VisualDoModo on ModoDeJogo {
             'fulano se veste bem?"). Média alta distribui goles; média baixa leva ponto.',
         ModoDeJogo.musica => 'A carta dá o tema ("abertura de novela") e cada um canta na sua vez, na ordem '
             'sorteada. Travou, leva ponto.',
+        ModoDeJogo.impostor => 'Todo mundo recebe a mesma palavra, menos um, que só sabe o tema. Cada um fala '
+            'uma pista e a turma vota no impostor. Precisa de 4 pessoas.',
       };
 
   Color get cor => switch (this) {
@@ -65,6 +69,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.imagemEAcao => CoresBaralho.mimica,
         ModoDeJogo.jurados => CoresBaralho.jurados,
         ModoDeJogo.musica => CoresBaralho.musica,
+        ModoDeJogo.impostor => CoresBaralho.impostor,
       };
 }
 

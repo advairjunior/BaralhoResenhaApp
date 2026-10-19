@@ -40,6 +40,8 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
         // Demora mais que uma carta comum: tempero, não prato principal.
         [ModoDeJogo.Correio] = 1,
         [ModoDeJogo.ImagemEAcao] = 4,
+        // Uma roda de pistas e uma votação: rende, mas demora, como o Correio.
+        [ModoDeJogo.Impostor] = 1,
     };
 
     /// <summary>
@@ -73,6 +75,8 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
                 quantidadeDeJogadores >= 3)
             // Com menos de três escrevendo, todo mundo adivinha quem escreveu.
             .Where(modo => modo != ModoDeJogo.Correio || quantidadeDeJogadores >= 4)
+            // Com três, dois inocentes e um impostor: o primeiro voto já entrega.
+            .Where(modo => modo != ModoDeJogo.Impostor || quantidadeDeJogadores >= 4)
             .Where(modo => modo != ModoDeJogo.RegraRelampago || !regraEmAndamento)
             .Where(modo => modo != ModoDeJogo.CasaisEmJogo || casais > 0)
             .ToList();

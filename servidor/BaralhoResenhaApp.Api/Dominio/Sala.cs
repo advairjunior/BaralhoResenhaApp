@@ -23,8 +23,8 @@ public sealed class Jogador
     public bool SemAlcool { get; init; }
     public bool Anfitriao { get; set; }
 
-    /// <summary>Última vez que o celular falou com a sala (consulta ou ação).</summary>
-    public DateTimeOffset UltimoSinal { get; set; }
+    /// <summary>Última vez que o celular falou com a sala (ver <see cref="Sala.TempoSemSinal"/>).</summary>
+    public DateTimeOffset VistoEm { get; set; }
     /// <summary>Vezes que a carta pegou a pessoa (o placar da noite).</summary>
     public int Pontos { get; set; }
 
@@ -74,6 +74,9 @@ public sealed class EstatisticasDoJogador
 
     /// <summary>Vezes que quebrou uma regra-relâmpago.</summary>
     public int Vacilos { get; set; }
+
+    /// <summary>Vezes que foi o impostor e a turma não pegou.</summary>
+    public int Disfarces { get; set; }
 }
 
 public sealed class Rodada
@@ -159,22 +162,35 @@ public sealed class Rodada
     /// <summary>Imagem e Ação: os times da carta (um só quando uma pessoa faz para todos).</summary>
     public IReadOnlyList<TimeDaMimica> Times { get; init; } = [];
 
-    /// <summary>Imagem e Ação: o que o mímico pode dizer, ex.: "Ação · 3 palavras".</summary>
+    /// <summary>
+    /// Imagem e Ação: o que o mímico pode dizer, ex.: "Ação · 3 palavras".
+    /// Impostor: o tema, que até o impostor sabe.
+    /// </summary>
     public string? Dica
     {
         get
         {
             if (Carta.Categoria is not { } categoria) return null;
+            if (Carta.Modo == ModoDeJogo.Impostor) return $"Tema: {categoria}";
             var palavras = Carta.Texto.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
             return $"{categoria} · {palavras} {(palavras == 1 ? "palavra" : "palavras")}";
         }
     }
 
-    /// <summary>Na mímica, a palavra é segredo de quem faz até a revelação.</summary>
-    public string TextoPara(Guid jogadorId, bool revelada) =>
-        Times.Count == 0 || revelada || Times.Any(t => t.Mimico == jogadorId)
+    /// <summary>Impostor: quem não recebe a palavra. Segredo até a revelação.</summary>
+    public Guid? Impostor { get; init; }
+
+    /// <summary>
+    /// Na mímica, a palavra é segredo de quem faz até a revelação; no Impostor,
+    /// só o impostor fica sem ela.
+    /// </summary>
+    public string TextoPara(Guid jogadorId, bool revelada)
+    {
+        if (Impostor == jogadorId && !revelada) return "🕵️ Você é o impostor!";
+        return Times.Count == 0 || revelada || Times.Any(t => t.Mimico == jogadorId)
             ? Texto
             : "🎭 Adivinhe a mímica!";
+    }
 
     /// <summary>Duelo: os dois da carta. Eles se apresentam e a turma vota.</summary>
     public IReadOnlyList<Guid> Duelistas { get; init; } = [];
@@ -185,9 +201,12 @@ public sealed class Rodada
     /// <summary>Roda de Música: quem travou na sua vez (e levou o ponto).</summary>
     public HashSet<Guid> Travaram { get; } = [];
 
+    /// <summary>A reação de cada um nesta carta (😂 🔥 💀 😱).</summary>
+    public Dictionary<Guid, string> Reacoes { get; } = [];
+
     public bool PedeResposta =>
         Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio
-            or ModoDeJogo.Jurados ||
+            or ModoDeJogo.Jurados or ModoDeJogo.Impostor ||
         (Carta.Modo == ModoDeJogo.MaisProvavel && Votacao);
 }
 
@@ -228,6 +247,10 @@ public sealed record Revelacao(
 
     /// <summary>Jurados: as notas, em ordem e sem dizer quem deu qual.</summary>
     public IReadOnlyList<int> Notas { get; init; } = [];
+
+    /// <summary>Impostor: quem era, e se a turma pegou (sozinho no topo dos votos).</summary>
+    public Guid? Impostor { get; init; }
+    public bool Pegaram { get; init; }
 }
 
 /// <param name="Quem">Quem faz: entrevista, missão, pergunta ou piada.</param>
@@ -325,11 +348,11 @@ public sealed partial class Sala
             var mesmoNome = _jogadores.FirstOrDefault(j => MesmoNome(j.Nome, nomeLimpo));
             if (mesmoNome is not null)
             {
-                if (agora - mesmoNome.UltimoSinal < TempoParaVoltar)
+                if (agora - mesmoNome.VistoEm < TempoParaVoltar)
                     throw new AcaoNaoPermitidaException(MensagemDeNomeEmUso);
                 // Caiu da sala e voltou: segue a mesma pessoa, e o celular antigo deixa de valer.
                 mesmoNome.Token = NovoToken();
-                mesmoNome.UltimoSinal = agora;
+                mesmoNome.VistoEm = agora;
                 Tocar();
                 return mesmoNome;
             }
@@ -340,10 +363,9 @@ public sealed partial class Sala
                 Nome = nomeLimpo,
                 SemAlcool = semAlcool,
                 Anfitriao = _jogadores.Count == 0,
-                UltimoSinal = agora
+                VistoEm = agora
             };
             _jogadores.Add(jogador);
-            if (jogador.Anfitriao) _donoDoComando = jogador.Id;
             Tocar();
             return jogador;
         }
@@ -375,9 +397,6 @@ public sealed partial class Sala
         DesfazerCasal(jogador);
         if (jogador.Anfitriao && _jogadores.Count > 0)
             _jogadores[0].Anfitriao = true;
-        // Quem criou a sala saiu de vez: o comando fica com quem está mandando agora.
-        if (jogador.Id == _donoDoComando)
-            _donoDoComando = _jogadores.FirstOrDefault(j => j.Anfitriao)?.Id;
         RevelarSeTodosResponderam();
         Tocar();
     }
@@ -385,24 +404,7 @@ public sealed partial class Sala
     /// <summary>Quem a mesa não espera mais: está sem sinal há <see cref="TempoParaCair"/>.</summary>
     private readonly HashSet<Guid> _caidos = [];
 
-    /// <summary>
-    /// Quem criou a sala. Se cair, o comando vai para alguém da mesa e volta quando a
-    /// pessoa voltar, para a noite não travar esperando quem passa as cartas.
-    /// </summary>
-    private Guid? _donoDoComando;
-
-    private void ConferirQuemManda()
-    {
-        var dono = _jogadores.FirstOrDefault(j => j.Id == _donoDoComando);
-        var atual = _jogadores.FirstOrDefault(j => j.Anfitriao);
-        var quemManda = dono is not null && Conectado(dono) ? dono
-            : atual is not null && Conectado(atual) ? atual
-            : NaMesa.FirstOrDefault();
-        if (quemManda is null || quemManda.Anfitriao) return;
-        foreach (var jogador in _jogadores) jogador.Anfitriao = jogador == quemManda;
-    }
-
-    internal bool Conectado(Jogador jogador) => _relogio.GetUtcNow() - jogador.UltimoSinal < TempoParaCair;
+    internal bool Conectado(Jogador jogador) => _relogio.GetUtcNow() - jogador.VistoEm < TempoParaCair;
 
     /// <summary>Quem a carta espera: quem está conectado.</summary>
     private IEnumerable<Jogador> NaMesa => _jogadores.Where(Conectado);
@@ -420,7 +422,6 @@ public sealed partial class Sala
             if (caidos.SetEquals(_caidos)) return false;
             _caidos.Clear();
             _caidos.UnionWith(caidos);
-            ConferirQuemManda();
             RevelarSeTodosResponderam();
             Tocar();
             return true;
@@ -517,6 +518,7 @@ public sealed partial class Sala
             }
 
             if (rodada.Carta.Modo == ModoDeJogo.Correio) resposta = ValidarBilhete(rodada, jogador, resposta);
+            if (rodada.Carta.Modo == ModoDeJogo.Impostor) ValidarVotoNoImpostor(jogador, resposta);
 
             if (rodada.Carta.Modo == ModoDeJogo.EuNunca && resposta is not (RespostaJa or RespostaNunca))
                 throw new AcaoNaoPermitidaException("Responda se já fez ou se nunca fez.");
@@ -656,7 +658,8 @@ public sealed partial class Sala
         {
             var jogador = _jogadores.FirstOrDefault(j => j.Token == token)
                 ?? throw new JogadorNaoReconhecidoException();
-            jogador.UltimoSinal = _relogio.GetUtcNow();
+            // Toda consulta e toda ação contam como "estou aqui".
+            jogador.VistoEm = _relogio.GetUtcNow();
             return jogador;
         }
     }
@@ -714,6 +717,7 @@ public sealed partial class Sala
             .Replace("{jogador2}", sorteados[^1].Nome)
             .Replace("{jogador}", sorteados[0].Nome);
         var (palpiteiro, alvo) = carta.Modo == ModoDeJogo.CasaisEmJogo ? EscolherCasal() : (null, null);
+        var impostor = carta.Modo == ModoDeJogo.Impostor ? _jogadores[_sorteio.Next(_jogadores.Count)] : null;
         if (alvo is not null) texto = texto.Replace("{par}", alvo.Nome);
         Rodada = new Rodada
         {
@@ -728,9 +732,14 @@ public sealed partial class Sala
                 (carta.Elogio || carta.Duelo || _sorteio.NextDouble() < ChanceDeVotacao),
             Duelistas = carta.Duelo && sorteados.Count == 2 ? [sorteados[0].Id, sorteados[1].Id] : [],
             Times = carta.Modo == ModoDeJogo.ImagemEAcao ? MontarTimes() : [],
-            Fila = carta.Modo == ModoDeJogo.Musica
-                ? [sorteados[0].Id, .. _jogadores.Where(j => j.Id != sorteados[0].Id).OrderBy(_ => _sorteio.Next()).Select(j => j.Id)]
-                : []
+            Fila = carta.Modo switch
+            {
+                ModoDeJogo.Musica =>
+                    [sorteados[0].Id, .. _jogadores.Where(j => j.Id != sorteados[0].Id).OrderBy(_ => _sorteio.Next()).Select(j => j.Id)],
+                ModoDeJogo.Impostor => FilaDasPistas(impostor!),
+                _ => []
+            },
+            Impostor = impostor?.Id
         };
         PresenteDaRodada();
         if (carta.Modo == ModoDeJogo.RegraRelampago)
@@ -785,6 +794,10 @@ public sealed partial class Sala
         else if (rodada.Carta.Modo == ModoDeJogo.Jurados)
         {
             revelacao = RevelarJurados(rodada, respostas);
+        }
+        else if (rodada.Carta.Modo == ModoDeJogo.Impostor)
+        {
+            revelacao = RevelarImpostor(rodada, respostas);
         }
         else if (rodada.Carta.Modo == ModoDeJogo.Tribunal)
         {

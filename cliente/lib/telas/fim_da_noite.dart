@@ -151,6 +151,7 @@ class CartaoDosPremios extends StatelessWidget {
                 if (resumo.pontos > 0) _Numero(valor: '${resumo.pontos}', rotulo: 'pontos 🥤'),
               ],
             ),
+            if (resumo.cartaDaNoite case final carta?) _CartaDaNoite(carta: carta),
           ],
           const SizedBox(height: EspacoBaralho.grande),
           if (premios.isEmpty)
@@ -181,6 +182,37 @@ class CartaoDosPremios extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A carta que mais rendeu reação na noite.
+class _CartaDaNoite extends StatelessWidget {
+  const _CartaDaNoite({required this.carta});
+
+  final CartaDaNoite carta;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        margin: const EdgeInsets.only(top: EspacoBaralho.base),
+        padding: const EdgeInsets.all(EspacoBaralho.medio),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.25),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: CoresBaralho.ambar.withValues(alpha: 0.5)),
+        ),
+        child: Column(
+          children: [
+            const Text('🃏 Carta da noite',
+                style: TextStyle(color: CoresBaralho.ambar, fontWeight: FontWeight.w600)),
+            const SizedBox(height: EspacoBaralho.mini),
+            Text('“${carta.texto}”', textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: EspacoBaralho.mini),
+            Text(
+              carta.reacoes.entries.map((reacao) => '${reacao.key} ${reacao.value}').join('   '),
+              style: const TextStyle(color: CoresBaralho.textoSecundario),
+            ),
+          ],
+        ),
+      );
 }
 
 class _Numero extends StatelessWidget {

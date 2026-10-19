@@ -4,6 +4,7 @@ import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 
 import '../dominio/modelos.dart';
+import '../infraestrutura/som.dart';
 import '../tema/tema_baralho.dart';
 import 'bebida.dart';
 import 'visual.dart';
@@ -47,7 +48,10 @@ class _ContagemParaApontarState extends State<ContagemParaApontar> {
     _relogio = Timer.periodic(const Duration(milliseconds: 100), (relogio) {
       if (!mounted) return relogio.cancel();
       setState(() {});
-      if (_numero == 0) relogio.cancel();
+      if (_numero == 0) {
+        relogio.cancel();
+        tocar(Som.tempo);
+      }
     });
   }
 

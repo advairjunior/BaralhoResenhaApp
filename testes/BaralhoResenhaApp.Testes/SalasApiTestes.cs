@@ -107,6 +107,37 @@ public sealed class SalasApiTestes(WebApplicationFactory<Program> fabrica)
     }
 
     [Fact]
+    public async Task QuemEstaNoComandoPassaOComandoParaOutro()
+    {
+        var ana = await CriarSala("Ana");
+        var bia = await Entrar(ana.Codigo, "Bia");
+        var biaId = (await Visao(ana.Codigo, bia.Token)).GetProperty("euId").GetString();
+
+        var resposta = await Enviar(HttpMethod.Post, $"/api/salas/{ana.Codigo}/comando", ana.Token,
+            new { jogadorId = biaId });
+
+        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
+        Assert.False((await resposta.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("souAnfitriao").GetBoolean());
+        Assert.True((await Visao(ana.Codigo, bia.Token)).GetProperty("souAnfitriao").GetBoolean());
+    }
+
+    [Fact]
+    public async Task ReacaoNaCartaApareceParaATurma()
+    {
+        var ana = await CriarSala("Ana");
+        var bia = await Entrar(ana.Codigo, "Bia");
+        await Enviar(HttpMethod.Post, $"/api/salas/{ana.Codigo}/comecar", ana.Token);
+        var numero = (await Visao(ana.Codigo, bia.Token)).GetProperty("rodada").GetProperty("numero").GetInt32();
+
+        var resposta = await Enviar(HttpMethod.Post, $"/api/salas/{ana.Codigo}/reacao", bia.Token,
+            new { rodada = numero, emoji = "😂" });
+
+        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
+        var rodada = (await Visao(ana.Codigo, ana.Token)).GetProperty("rodada");
+        Assert.Equal(1, rodada.GetProperty("reacoes").GetProperty("😂").GetInt32());
+    }
+
+    [Fact]
     public async Task UltimoASairFechaASala()
     {
         var ana = await CriarSala("Ana");

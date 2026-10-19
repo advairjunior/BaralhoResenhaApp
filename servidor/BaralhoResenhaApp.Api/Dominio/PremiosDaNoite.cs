@@ -3,7 +3,8 @@ namespace BaralhoResenhaApp.Api.Dominio;
 /// <param name="Jogadores">Quem leva; empate leva junto (até três).</param>
 public sealed record Premio(string Emoji, string Titulo, string Descricao, IReadOnlyList<Guid> Jogadores);
 
-public sealed record ResumoDaNoite(int Cartas, int Minutos, int Goles, int Pontos);
+/// <param name="CartaDaNoite">A carta que mais rendeu reação; nula sem reações.</param>
+public sealed record ResumoDaNoite(int Cartas, int Minutos, int Goles, int Pontos, CartaDaNoite? CartaDaNoite = null);
 
 /// <summary>
 /// Os prêmios saem das estatísticas da noite. Prêmio sem ninguém pontuando
@@ -61,6 +62,8 @@ public static class PremiosDaNoite
             (n, _) => $"Usou {Plural(n, "carta", "cartas")} na manga", minimo: 2);
         Individual("🚨", "Vacilão(ona) da regra", j => j.Estatisticas.Vacilos,
             (n, _) => $"Quebrou as regras {Plural(n, "vez", "vezes")}", minimo: 2);
+        Individual("🕵️", "Mestre do disfarce", j => j.Estatisticas.Disfarces,
+            (n, _) => $"Foi o impostor e escapou {Plural(n, "vez", "vezes")}");
         Individual("👮", "Fiscal da resenha", j => j.Estatisticas.Tiradas,
             (n, _) => $"Tirou {Plural(n, "carta", "cartas")} do baralho", minimo: 2);
         DoCasal("💞", "Casal em sintonia", j => j.Estatisticas.Acertos,
@@ -80,7 +83,8 @@ public static class PremiosDaNoite
             sala.Rodada?.Numero ?? 0,
             Math.Max(minutos, 0),
             jogadores.Where(j => !j.SemAlcool).Sum(j => j.Goles),
-            jogadores.Where(j => j.SemAlcool).Sum(j => j.Pontos));
+            jogadores.Where(j => j.SemAlcool).Sum(j => j.Pontos),
+            sala.EscolherCartaDaNoite());
     }
 
     private static string Plural(int n, string um, string varios) => $"{n} {(n == 1 ? um : varios)}";

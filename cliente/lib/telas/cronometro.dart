@@ -4,6 +4,7 @@ import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 
 import '../dominio/modelos.dart';
+import '../infraestrutura/som.dart';
 import '../tema/tema_baralho.dart';
 
 /// Cronômetro da carta ("em 5 segundos", mímica de 60 s). Quem criou a sala
@@ -47,7 +48,10 @@ class _CronometroState extends State<Cronometro> {
       _relogio = Timer.periodic(const Duration(milliseconds: 200), (relogio) {
         if (!mounted) return relogio.cancel();
         setState(() {});
-        if (_segundosQueFaltam == 0) relogio.cancel();
+        if (_segundosQueFaltam == 0) {
+          relogio.cancel();
+          tocar(Som.tempo);
+        }
       });
     }
   }
