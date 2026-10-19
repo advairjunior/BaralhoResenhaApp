@@ -196,6 +196,12 @@ app.MapPost("/api/salas/{codigo}/tirar", (
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
     Agir(codigo, http, salas, notificador, (sala, token) => sala.Tirar(token, requisicao.Rodada)));
 
+app.MapPost("/api/salas/{codigo}/reacao", (
+    string codigo, ReagirNaCarta requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador,
+        (sala, token) => sala.Reagir(token, requisicao.Rodada, requisicao.Emoji)));
+
 app.MapPost("/api/salas/{codigo}/encerrar", (
     string codigo, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
     Agir(codigo, http, salas, notificador, (sala, token) => sala.Encerrar(token)));
@@ -321,6 +327,7 @@ public sealed record DefinirPar(Guid? ParId);
 public sealed record JulgarPalpite(int Rodada, bool Acertou);
 public sealed record MarcarApontado(int Rodada, Guid JogadorId);
 public sealed record PassarOComando(Guid JogadorId);
+public sealed record ReagirNaCarta(int Rodada, string Emoji);
 public sealed record EscolherFavorito(int Rodada, int Indice);
 public sealed record ResultadoDaMimica(int Rodada, int? Vencedor);
 public sealed record UsarCartaNaManga(int Rodada, CartaNaManga Carta, Guid? Alvo);

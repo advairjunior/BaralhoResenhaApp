@@ -145,6 +145,10 @@ class ApiBaralho {
   Future<VisaoDaSala> tirar(String codigo, String token, int rodada) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/tirar', token, corpo: {'rodada': rodada});
 
+  /// Reação rápida na carta; a mesma de novo desfaz.
+  Future<VisaoDaSala> reagir(String codigo, String token, int rodada, String emoji) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/reacao', token, corpo: {'rodada': rodada, 'emoji': emoji});
+
   /// Quem está no comando (puxa, pula, revela) passa para outra pessoa.
   Future<VisaoDaSala> passarComando(String codigo, String token, String jogadorId) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/comando', token, corpo: {'jogadorId': jogadorId});

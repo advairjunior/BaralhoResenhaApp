@@ -122,6 +122,22 @@ public sealed class SalasApiTestes(WebApplicationFactory<Program> fabrica)
     }
 
     [Fact]
+    public async Task ReacaoNaCartaApareceParaATurma()
+    {
+        var ana = await CriarSala("Ana");
+        var bia = await Entrar(ana.Codigo, "Bia");
+        await Enviar(HttpMethod.Post, $"/api/salas/{ana.Codigo}/comecar", ana.Token);
+        var numero = (await Visao(ana.Codigo, bia.Token)).GetProperty("rodada").GetProperty("numero").GetInt32();
+
+        var resposta = await Enviar(HttpMethod.Post, $"/api/salas/{ana.Codigo}/reacao", bia.Token,
+            new { rodada = numero, emoji = "😂" });
+
+        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
+        var rodada = (await Visao(ana.Codigo, ana.Token)).GetProperty("rodada");
+        Assert.Equal(1, rodada.GetProperty("reacoes").GetProperty("😂").GetInt32());
+    }
+
+    [Fact]
     public async Task UltimoASairFechaASala()
     {
         var ana = await CriarSala("Ana");

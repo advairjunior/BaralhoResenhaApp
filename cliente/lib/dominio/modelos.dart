@@ -367,6 +367,8 @@ class Rodada {
     this.contaEssa = false,
     this.fila = const [],
     this.travaram = const [],
+    this.reacoes = const {},
+    this.minhaReacao,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -418,6 +420,8 @@ class Rodada {
         contaEssa: json['contaEssa'] as bool? ?? false,
         fila: List<String>.from((json['fila'] as List?) ?? const []),
         travaram: List<String>.from((json['travaram'] as List?) ?? const []),
+        reacoes: Map<String, int>.from((json['reacoes'] as Map?) ?? const {}),
+        minhaReacao: json['minhaReacao'] as String?,
       );
 
   final int numero;
@@ -510,6 +514,10 @@ class Rodada {
   /// Roda de Música: a ordem em que cada um canta e quem travou.
   final List<String> fila;
   final List<String> travaram;
+
+  /// Quantas reações de cada (😂 🔥 💀 😱) a carta já rendeu.
+  final Map<String, int> reacoes;
+  final String? minhaReacao;
 }
 
 class Momento {
@@ -556,19 +564,38 @@ class Premio {
 }
 
 class ResumoDaNoite {
-  const ResumoDaNoite({required this.cartas, required this.minutos, required this.goles, required this.pontos});
+  const ResumoDaNoite(
+      {required this.cartas, required this.minutos, required this.goles, required this.pontos, this.cartaDaNoite});
 
   factory ResumoDaNoite.deJson(Map<String, dynamic> json) => ResumoDaNoite(
         cartas: json['cartas'] as int,
         minutos: json['minutos'] as int,
         goles: json['goles'] as int,
         pontos: json['pontos'] as int,
+        cartaDaNoite: json['cartaDaNoite'] == null
+            ? null
+            : CartaDaNoite.deJson(json['cartaDaNoite'] as Map<String, dynamic>),
       );
 
   final int cartas;
   final int minutos;
   final int goles;
   final int pontos;
+
+  /// A carta que mais rendeu reação; nula sem reações.
+  final CartaDaNoite? cartaDaNoite;
+}
+
+class CartaDaNoite {
+  const CartaDaNoite({required this.texto, required this.reacoes});
+
+  factory CartaDaNoite.deJson(Map<String, dynamic> json) => CartaDaNoite(
+        texto: json['texto'] as String,
+        reacoes: Map<String, int>.from(json['reacoes'] as Map),
+      );
+
+  final String texto;
+  final Map<String, int> reacoes;
 }
 
 /// Como o jogo faz a regra-relâmpago acontecer a cada carta.

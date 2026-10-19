@@ -183,6 +183,9 @@ public sealed class Rodada
     /// <summary>Roda de Música: quem travou na sua vez (e levou o ponto).</summary>
     public HashSet<Guid> Travaram { get; } = [];
 
+    /// <summary>A reação de cada um nesta carta (😂 🔥 💀 😱).</summary>
+    public Dictionary<Guid, string> Reacoes { get; } = [];
+
     public bool PedeResposta =>
         Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio
             or ModoDeJogo.Jurados ||

@@ -42,6 +42,7 @@ abstract interface class AcoesDaSala {
   Future<void> julgar({required bool acertou});
   Future<void> registrarMomento(Uint8List foto);
   Future<void> passarComando(String jogadorId);
+  Future<void> reagir(String emoji);
 
   /// Som e vibração deste celular (não passa pelo servidor).
   bool get somLigado;
@@ -284,6 +285,9 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   @override
   Future<void> passarComando(String jogadorId) =>
       _agir((token) => widget.api.passarComando(_codigo, token, jogadorId));
+
+  @override
+  Future<void> reagir(String emoji) => _agir((token) => widget.api.reagir(_codigo, token, _rodada, emoji));
 
   @override
   bool get somLigado => som.somLigado;

@@ -108,6 +108,7 @@ class Jogo extends StatelessWidget {
                   // Carta nova, carta virada: a chave nova faz a virada de novo.
                   CartaQueVira(key: ValueKey(rodada.numero), rodada: rodada),
                 _BarraDaCarta(visao: visao, rodada: rodada, acoes: acoes),
+                _Reacoes(rodada: rodada, acoes: acoes),
                 DicaDePrimeiraVez(key: ValueKey('dica-${rodada.numero}'), visao: visao, rodada: rodada),
                 const SizedBox(height: EspacoBaralho.base),
                 // A mímica e o aponta no 3 têm a contagem no painel deles.
@@ -176,6 +177,71 @@ class _PlacarAoVivo extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Reação rápida na carta: todo mundo vê a contagem, ninguém vê quem reagiu.
+/// A carta que mais rende vira a carta da noite.
+class _Reacoes extends StatelessWidget {
+  const _Reacoes({required this.rodada, required this.acoes});
+
+  static const emojis = ['😂', '🔥', '💀', '😱'];
+
+  final Rodada rodada;
+  final AcoesDaSala acoes;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          for (final emoji in emojis)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: EspacoBaralho.mini),
+              child: _BotaoDeReacao(
+                emoji: emoji,
+                vezes: rodada.reacoes[emoji] ?? 0,
+                minha: rodada.minhaReacao == emoji,
+                aoTocar: () => acoes.reagir(emoji),
+              ),
+            ),
+        ],
+      );
+}
+
+class _BotaoDeReacao extends StatelessWidget {
+  const _BotaoDeReacao({required this.emoji, required this.vezes, required this.minha, required this.aoTocar});
+
+  final String emoji;
+  final int vezes;
+  final bool minha;
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        key: Key('reacao-$emoji'),
+        color: minha ? CoresBaralho.ambar.withValues(alpha: 0.22) : CoresBaralho.superficieElevada,
+        shape: StadiumBorder(side: BorderSide(color: minha ? CoresBaralho.ambar : CoresBaralho.borda)),
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: aoTocar,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 44, minWidth: 56),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: EspacoBaralho.medio),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(emoji, style: const TextStyle(fontSize: 20)),
+                  if (vezes > 0) ...[
+                    const SizedBox(width: EspacoBaralho.mini),
+                    Text('$vezes', style: const TextStyle(fontWeight: FontWeight.w600)),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 /// Aviso curto em cima da carta.
