@@ -38,6 +38,7 @@ abstract interface class AcoesDaSala {
   Future<void> definirPar(String? parId);
   Future<void> julgar({required bool acertou});
   Future<void> registrarMomento(Uint8List foto);
+  Future<void> passarComando(String jogadorId);
   Future<void> encerrar();
   Future<void> retomar();
   Future<Uint8List> baixarFoto(String endereco);
@@ -149,7 +150,20 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
     final carta = visao.rodada?.cartaId;
     if (carta != null && carta != _visao?.rodada?.cartaId) widget.sessoes.marcarVista(carta);
     if (visao.fase == FaseDaSala.lobby && !_vistasEnviadas) _enviarVistas();
+    _avisarDoComando(_visao, visao);
     if (mounted) setState(() => _visao = visao);
+  }
+
+  /// O comando pode chegar sozinho (o celular de quem estava com ele sumiu):
+  /// quem ganhou precisa saber que agora puxa as cartas.
+  void _avisarDoComando(VisaoDaSala? antes, VisaoDaSala agora) {
+    if (antes == null || !mounted || antes.souAnfitriao == agora.souAnfitriao) return;
+    avisar(
+      context,
+      agora.souAnfitriao
+          ? 'Agora você está no comando 👑 Você puxa as cartas.'
+          : 'O comando passou para ${agora.anfitriao?.nome ?? 'outra pessoa'} 👑',
+    );
   }
 
   /// Uma vez por sala: se alguém da turma já viu a carta, ela vai para o fim do monte.
@@ -246,6 +260,10 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   @override
   Future<void> registrarMomento(Uint8List foto) =>
       _agir((token) => widget.api.registrarMomento(_codigo, token, _rodada, foto));
+
+  @override
+  Future<void> passarComando(String jogadorId) =>
+      _agir((token) => widget.api.passarComando(_codigo, token, jogadorId));
 
   @override
   Future<void> encerrar() => _agir((token) => widget.api.encerrar(_codigo, token));

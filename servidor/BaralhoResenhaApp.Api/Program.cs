@@ -66,8 +66,21 @@ app.MapPost("/api/salas/{codigo}/jogadores", (
     return Results.Ok(new EntradaNaSala(sala.Codigo, jogador.Token));
 });
 
-app.MapGet("/api/salas/{codigo}", (string codigo, HttpRequest http, SalasEmMemoria salas) =>
-    Results.Ok(salas.Obter(codigo).Visao(Token(http))));
+// A consulta a cada 6 s também diz que o celular está aí: se quem está no
+// comando sumiu, o comando passa sozinho e os outros celulares ficam sabendo.
+app.MapGet("/api/salas/{codigo}", (
+    string codigo, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+{
+    var sala = salas.Obter(codigo);
+    var token = Token(http);
+    if (sala.MarcarPresenca(token)) notificador.Publicar(sala.Codigo);
+    return Results.Ok(sala.Visao(token));
+});
+
+app.MapPost("/api/salas/{codigo}/comando", (
+    string codigo, PassarOComando requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.PassarComando(token, requisicao.JogadorId)));
 
 app.MapDelete("/api/salas/{codigo}/jogadores/eu", (
     string codigo, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
@@ -307,6 +320,7 @@ public sealed record ComecarNoite(IReadOnlyList<string>? Vistas);
 public sealed record DefinirPar(Guid? ParId);
 public sealed record JulgarPalpite(int Rodada, bool Acertou);
 public sealed record MarcarApontado(int Rodada, Guid JogadorId);
+public sealed record PassarOComando(Guid JogadorId);
 public sealed record EscolherFavorito(int Rodada, int Indice);
 public sealed record ResultadoDaMimica(int Rodada, int? Vencedor);
 public sealed record UsarCartaNaManga(int Rodada, CartaNaManga Carta, Guid? Alvo);

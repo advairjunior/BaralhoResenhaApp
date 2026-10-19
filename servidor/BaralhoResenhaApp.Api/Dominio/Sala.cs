@@ -20,6 +20,9 @@ public sealed class Jogador
     public required string Nome { get; init; }
     public bool SemAlcool { get; init; }
     public bool Anfitriao { get; set; }
+
+    /// <summary>Última vez que o celular falou com a sala (ver <see cref="Sala.TempoSemSinal"/>).</summary>
+    public DateTimeOffset VistoEm { get; set; }
     /// <summary>Vezes que a carta pegou a pessoa (o placar da noite).</summary>
     public int Pontos { get; set; }
 
@@ -310,7 +313,8 @@ public sealed partial class Sala
                     .Replace('+', '-').Replace('/', '_'),
                 Nome = nomeLimpo,
                 SemAlcool = semAlcool,
-                Anfitriao = _jogadores.Count == 0
+                Anfitriao = _jogadores.Count == 0,
+                VistoEm = _relogio.GetUtcNow()
             };
             _jogadores.Add(jogador);
             Tocar();
@@ -559,8 +563,13 @@ public sealed partial class Sala
     internal Jogador Reconhecer(string token)
     {
         lock (_trinco)
-            return _jogadores.FirstOrDefault(j => j.Token == token)
+        {
+            var jogador = _jogadores.FirstOrDefault(j => j.Token == token)
                 ?? throw new JogadorNaoReconhecidoException();
+            // Toda consulta e toda ação contam como "estou aqui".
+            jogador.VistoEm = _relogio.GetUtcNow();
+            return jogador;
+        }
     }
 
     private Jogador ExigirAnfitriao(string token, string mensagem = "Só quem criou a sala pode fazer isso.")

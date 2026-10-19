@@ -60,6 +60,7 @@ class Jogo extends StatelessWidget {
                   aoMudar: acoes.configurar,
                 ),
               'encerrar' => _confirmarEncerramento(context, acoes),
+              'comando' => escolherQuemAssumeOComando(context, visao, acoes),
               'como-funciona' => abrirComoFunciona(context, visao),
               _ => confirmarSaida(context, acoes),
             },
@@ -69,8 +70,10 @@ class Jogo extends StatelessWidget {
                 value: 'configurar',
                 child: Text(visao.souAnfitriao ? 'Nível e modos' : 'Ver nível e modos'),
               ),
-              if (visao.souAnfitriao)
+              if (visao.souAnfitriao) ...[
+                const PopupMenuItem(value: 'comando', child: Text('Passar o comando 👑')),
                 const PopupMenuItem(value: 'encerrar', child: Text('Encerrar a noite 🏆')),
+              ],
               const PopupMenuItem(value: 'sair', child: Text('Sair da sala')),
             ],
           ),

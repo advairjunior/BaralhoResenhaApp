@@ -107,6 +107,21 @@ public sealed class SalasApiTestes(WebApplicationFactory<Program> fabrica)
     }
 
     [Fact]
+    public async Task QuemEstaNoComandoPassaOComandoParaOutro()
+    {
+        var ana = await CriarSala("Ana");
+        var bia = await Entrar(ana.Codigo, "Bia");
+        var biaId = (await Visao(ana.Codigo, bia.Token)).GetProperty("euId").GetString();
+
+        var resposta = await Enviar(HttpMethod.Post, $"/api/salas/{ana.Codigo}/comando", ana.Token,
+            new { jogadorId = biaId });
+
+        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
+        Assert.False((await resposta.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("souAnfitriao").GetBoolean());
+        Assert.True((await Visao(ana.Codigo, bia.Token)).GetProperty("souAnfitriao").GetBoolean());
+    }
+
+    [Fact]
     public async Task UltimoASairFechaASala()
     {
         var ana = await CriarSala("Ana");

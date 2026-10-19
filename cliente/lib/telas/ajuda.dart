@@ -157,6 +157,11 @@ Future<void> abrirComoFunciona(BuildContext context, VisaoDaSala visao) {
       texto: 'Só ${visao.anfitriao?.nome ?? 'quem criou a sala'} passa as cartas. '
           'O resto responde, vota ou marca "Me pegou!" quando a carta pedir.',
     ),
+    const _Secao(
+      titulo: '👑 O comando',
+      texto: 'Quem passa as cartas pode passar o comando para outra pessoa pelo menu. '
+          'Se o celular dela apagar ou ficar sem bateria, o comando passa sozinho para o próximo da mesa.',
+    ),
     const _Passo(numero: 3, texto: 'Embaixo de toda carta tem "ⓘ Como joga" explicando aquele jogo.'),
     const _Passo(numero: 4, texto: 'No fim da noite saem os prêmios e o mural com as fotos de reação.'),
     const SizedBox(height: EspacoBaralho.base),

@@ -6,6 +6,7 @@ import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
 import 'ajuda.dart';
 import 'configuracao_do_jogo.dart';
+import 'controles_do_anfitriao.dart';
 import 'sala.dart';
 import 'selfie.dart';
 import 'visual.dart';
@@ -78,12 +79,18 @@ class Lobby extends StatelessWidget {
                   aoMudar: acoes.configurar,
                 ),
                 const SizedBox(height: EspacoBaralho.grande),
-                if (visao.souAnfitriao)
+                if (visao.souAnfitriao) ...[
                   FilledButton(
                     onPressed: podeComecar ? acoes.comecar : null,
                     child: Text(podeComecar ? 'Começar a resenha 🍻' : 'Esperando a turma entrar…'),
-                  )
-                else
+                  ),
+                  if (podeComecar)
+                    TextButton(
+                      key: const Key('passar-comando'),
+                      onPressed: () => escolherQuemAssumeOComando(context, visao, acoes),
+                      child: const Text('👑 Passar o comando'),
+                    ),
+                ] else
                   Text(
                     'Esperando ${visao.anfitriao?.nome ?? 'o anfitrião'} começar…',
                     textAlign: TextAlign.center,
