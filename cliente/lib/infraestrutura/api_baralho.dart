@@ -38,6 +38,16 @@ class ApiBaralho {
 
   String enderecoTempoReal(String codigo) => '$_enderecoBase/api/tempo-real/${_codigo(codigo)}';
 
+  /// No plano gratuito o servidor dorme sem uso: cutucar logo ao abrir o app
+  /// adianta o despertar enquanto a pessoa digita o nome e tira a selfie.
+  Future<void> acordar() async {
+    try {
+      await _enviar('GET', '/api/saude');
+    } on FalhaNaApi {
+      // Só um cutucão: quem precisa da resposta é criar ou entrar na sala.
+    }
+  }
+
   Future<Entrada> criarSala(String nome, {required bool semAlcool}) async {
     final resposta = await _enviar('POST', '/api/salas', corpo: {'nome': nome, 'semAlcool': semAlcool});
     return Entrada.deJson(resposta as Map<String, dynamic>);

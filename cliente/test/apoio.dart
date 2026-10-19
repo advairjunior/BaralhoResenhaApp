@@ -16,10 +16,21 @@ class ServidorFalso {
   /// Fotos recebidas, na ordem.
   final fotos = <List<int>>[];
 
+  /// Vezes que o app cutucou o servidor para acordar (fica fora de [recebidas]).
+  int acordou = 0;
+
+  /// Servidor dormindo: cada resposta demora isso.
+  Duration atraso = Duration.zero;
+
   late final api = ApiBaralho(
     enderecoBase: 'http://teste',
     cliente: MockClient((requisicao) async {
       final chave = '${requisicao.method} ${requisicao.url.path}';
+      if (chave == 'GET /api/saude') {
+        acordou++;
+        return http.Response('{"status":"ok"}', 200);
+      }
+      if (atraso > Duration.zero) await Future<void>.delayed(atraso);
       final ehFoto = requisicao.headers['Content-Type'] == 'image/jpeg';
       if (ehFoto) fotos.add(requisicao.bodyBytes);
       recebidas.add((

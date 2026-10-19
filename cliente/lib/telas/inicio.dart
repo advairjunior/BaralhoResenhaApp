@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -90,9 +92,15 @@ class _InicioState extends State<Inicio> {
 
   bool get _veioPeloLink => widget.codigoInicial != null;
 
+  /// O servidor pode estar dormindo: depois de uns segundos, explica a demora.
+  static const _paciencia = Duration(seconds: 3);
+  Timer? _relogioDaDemora;
+  bool _demorando = false;
+
   @override
   void initState() {
     super.initState();
+    widget.api.acordar();
     _codigo.text = widget.codigoInicial?.toUpperCase() ?? '';
     widget.sessoes.preferencias().then((preferencias) {
       if (!mounted) return;
@@ -105,6 +113,7 @@ class _InicioState extends State<Inicio> {
 
   @override
   void dispose() {
+    _relogioDaDemora?.cancel();
     _nome.dispose();
     _codigo.dispose();
     super.dispose();
@@ -130,6 +139,9 @@ class _InicioState extends State<Inicio> {
       }
     }
     setState(() => _enviando = true);
+    _relogioDaDemora = Timer(_paciencia, () {
+      if (mounted) setState(() => _demorando = true);
+    });
     try {
       final entrada = criar
           ? await widget.api.criarSala(nome, semAlcool: _semAlcool)
@@ -149,7 +161,13 @@ class _InicioState extends State<Inicio> {
     } catch (erro) {
       if (mounted) avisar(context, erro);
     } finally {
-      if (mounted) setState(() => _enviando = false);
+      _relogioDaDemora?.cancel();
+      if (mounted) {
+        setState(() {
+          _enviando = false;
+          _demorando = false;
+        });
+      }
     }
   }
 
@@ -267,6 +285,16 @@ class _InicioState extends State<Inicio> {
                       TextButton(
                         onPressed: () => Navigator.of(context).pushReplacementNamed('/'),
                         child: const Text('Criar outra sala'),
+                      ),
+                    if (_demorando)
+                      const Padding(
+                        padding: EdgeInsets.only(top: EspacoBaralho.medio),
+                        child: Text(
+                          '☕ Acordando o baralho… Na primeira sala da noite o servidor leva até 1 minuto para acordar.',
+                          key: Key('acordando'),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: CoresBaralho.ambar),
+                        ),
                       ),
                     const SizedBox(height: EspacoBaralho.base),
                     TextButton(
