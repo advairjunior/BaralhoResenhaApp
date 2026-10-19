@@ -81,6 +81,13 @@ ComoJoga comoJoga(Rodada rodada) {
         'Travou, esqueceu a letra ou repetiu? Qualquer um da turma toca em "Travou" e a pessoa leva 1 ponto.',
         'Aparece de vez em quando, como surpresa: não tira o lugar das outras brincadeiras.',
       ]),
+    Rodada(modo: ModoDeJogo.impostor) => ('impostor', ModoDeJogo.impostor.titulo, [
+        'Todo mundo recebeu a mesma palavra no celular, menos um: o impostor, que só sabe o tema.',
+        'Na ordem da tela, cada um fala uma pista em voz alta. Uma palavra só, sem entregar demais!',
+        'O impostor finge que sabe: ouve as pistas e inventa a dele.',
+        'Depois, todo mundo vota em segredo em quem acha que é o impostor.',
+        'Pegaram (ele sozinho no topo)? O impostor leva 1 ponto. Empatou ou erraram? Ele escapa, ganha uma carta na manga, e quem votou errado leva 1 ponto.',
+      ]),
     Rodada(modo: ModoDeJogo.jurados) => ('jurados', ModoDeJogo.jurados.titulo, [
         'O app elegeu a pessoa da carta: ela só espera a nota.',
         'O resto da turma é jurado: cada um dá de 1 a 5 estrelas, em segredo.',

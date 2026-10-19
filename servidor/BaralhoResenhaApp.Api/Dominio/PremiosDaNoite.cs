@@ -62,6 +62,8 @@ public static class PremiosDaNoite
             (n, _) => $"Usou {Plural(n, "carta", "cartas")} na manga", minimo: 2);
         Individual("🚨", "Vacilão(ona) da regra", j => j.Estatisticas.Vacilos,
             (n, _) => $"Quebrou as regras {Plural(n, "vez", "vezes")}", minimo: 2);
+        Individual("🕵️", "Mestre do disfarce", j => j.Estatisticas.Disfarces,
+            (n, _) => $"Foi o impostor e escapou {Plural(n, "vez", "vezes")}");
         Individual("👮", "Fiscal da resenha", j => j.Estatisticas.Tiradas,
             (n, _) => $"Tirou {Plural(n, "carta", "cartas")} do baralho", minimo: 2);
         DoCasal("💞", "Casal em sintonia", j => j.Estatisticas.Acertos,

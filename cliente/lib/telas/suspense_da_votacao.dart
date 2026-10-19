@@ -50,6 +50,16 @@ class SuspenseDaVotacao extends StatefulWidget {
         },
       );
     }
+    if (rodada.modo == ModoDeJogo.impostor) {
+      final impostor = visao.jogador(revelacao.impostor ?? '');
+      return SuspenseDaVotacao(
+        key: key,
+        chave: chave,
+        maisVotados: [?impostor],
+        chamada: 'E o impostor era…',
+        resultado: revelacao.pegaram ? 'PEGARAM! 🕵️' : 'ESCAPOU! 😈',
+      );
+    }
     final ids = revelacao.escolhidos.isNotEmpty ? revelacao.escolhidos : revelacao.perderam;
     if (rodada.duelo) {
       return SuspenseDaVotacao(

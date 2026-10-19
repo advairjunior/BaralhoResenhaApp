@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 
@@ -256,6 +256,8 @@ class Revelacao {
     this.contadores = const [],
     this.media,
     this.notas = const [],
+    this.impostor,
+    this.pegaram = false,
   });
 
   factory Revelacao.deJson(Map<String, dynamic> json) => Revelacao(
@@ -278,11 +280,17 @@ class Revelacao {
         contadores: List<String>.from((json['contadores'] as List?) ?? const []),
         media: (json['media'] as num?)?.toDouble(),
         notas: List<int>.from((json['notas'] as List?) ?? const []),
+        impostor: json['impostor'] as String?,
+        pegaram: json['pegaram'] as bool? ?? false,
       );
 
   /// Jurados: a média das estrelas e as notas, sem dizer quem deu qual.
   final double? media;
   final List<int> notas;
+
+  /// Impostor: quem era, e se a turma pegou.
+  final String? impostor;
+  final bool pegaram;
 
   /// "Conta essa": quem já fez, na ordem em que cada um conta a sua.
   final List<String> contadores;
@@ -369,6 +377,7 @@ class Rodada {
     this.travaram = const [],
     this.reacoes = const {},
     this.minhaReacao,
+    this.souImpostor = false,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -422,6 +431,7 @@ class Rodada {
         travaram: List<String>.from((json['travaram'] as List?) ?? const []),
         reacoes: Map<String, int>.from((json['reacoes'] as Map?) ?? const {}),
         minhaReacao: json['minhaReacao'] as String?,
+        souImpostor: json['souImpostor'] as bool? ?? false,
       );
 
   final int numero;
@@ -518,6 +528,9 @@ class Rodada {
   /// Quantas reações de cada (😂 🔥 💀 😱) a carta já rendeu.
   final Map<String, int> reacoes;
   final String? minhaReacao;
+
+  /// Impostor: este celular não recebeu a palavra.
+  final bool souImpostor;
 }
 
 class Momento {

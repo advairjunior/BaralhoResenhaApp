@@ -133,7 +133,9 @@ class Jogo extends StatelessWidget {
         ),
           ),
           if (rodada.revelacao case final revelacao?
-              when rodada.modo == ModoDeJogo.maisProvavel || rodada.modo == ModoDeJogo.tribunal)
+              when rodada.modo == ModoDeJogo.maisProvavel ||
+                  rodada.modo == ModoDeJogo.tribunal ||
+                  rodada.modo == ModoDeJogo.impostor)
             Positioned.fill(
               child: SuspenseDaVotacao.da(
                 key: ValueKey('suspense-${visao.codigo}-${rodada.numero}'),
@@ -371,6 +373,7 @@ class _AreaDeAcao extends StatelessWidget {
             ModoDeJogo.casaisEmJogo => RevelacaoDoCasal(visao: visao, rodada: rodada, acoes: acoes),
             ModoDeJogo.tribunal => _RevelacaoDoTribunal(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.jurados => _RevelacaoDosJurados(visao: visao, rodada: rodada, revelacao: revelacao),
+            ModoDeJogo.impostor => _RevelacaoDoImpostor(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.maisProvavel when rodada.jokenpo =>
               RevelacaoDoJokenpo(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.maisProvavel when rodada.duelo =>
@@ -480,6 +483,30 @@ class _AreaDeAcao extends StatelessWidget {
               : EscreverBilhete(key: ValueKey('bilhete-${rodada.numero}'), visao: visao, rodada: rodada, acoes: acoes),
         ),
       ModoDeJogo.imagemEAcao => PainelDaMimica(visao: visao, rodada: rodada, acoes: acoes),
+      ModoDeJogo.impostor => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          _PistasDoImpostor(visao: visao, rodada: rodada),
+          const SizedBox(height: EspacoBaralho.grande),
+          _Respondendo(
+            visao: visao,
+            rodada: rodada,
+            acoes: acoes,
+            opcoes: Wrap(
+              spacing: EspacoBaralho.pequeno,
+              runSpacing: EspacoBaralho.pequeno,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final jogador in visao.jogadores)
+                  if (jogador.id != visao.euId)
+                    _BotaoDeVoto(
+                      key: Key('votar-${jogador.id}'),
+                      jogador: jogador,
+                      escolhido: rodada.minhaResposta == jogador.id,
+                      aoTocar: () => acoes.responder(jogador.id),
+                    ),
+              ],
+            ),
+          ),
+        ]),
       ModoDeJogo.casaisEmJogo => RespostaDoCasal(visao: visao, rodada: rodada, acoes: acoes),
       ModoDeJogo.jurados => _Respondendo(
           visao: visao,
@@ -548,6 +575,7 @@ class _Respondendo extends StatelessWidget {
                   ? switch (rodada.modo) {
                       ModoDeJogo.euNunca => 'Responda em segredo:',
                       ModoDeJogo.jurados => 'Dê sua nota em segredo:',
+                      ModoDeJogo.impostor => 'Depois das pistas, vote em segredo em quem é o impostor:',
                       _ => 'Vote em segredo:',
                     }
                   : 'Resposta guardada. Dá para trocar até revelar.',
@@ -1116,6 +1144,93 @@ class _Estrelas extends StatelessWidget {
       if (escolhida != null)
         Text('Sua nota: ${'⭐' * escolhida}', style: const TextStyle(color: CoresBaralho.textoSecundario)),
     ]);
+  }
+}
+
+/// Impostor: o tema e a ordem das pistas, faladas em voz alta antes do voto.
+class _PistasDoImpostor extends StatelessWidget {
+  const _PistasDoImpostor({required this.visao, required this.rodada});
+
+  final VisaoDaSala visao;
+  final Rodada rodada;
+
+  @override
+  Widget build(BuildContext context) {
+    final ordem = [
+      for (final id in rodada.fila)
+        if (visao.jogador(id) case final jogador?) id == visao.euId ? 'Você' : jogador.nome,
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (rodada.dica case final dica?)
+          Text(dica, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          rodada.souImpostor
+              ? 'Ninguém pode saber! Ouça as pistas e invente a sua. 🤫'
+              : 'Dê uma pista sem entregar a palavra: o impostor está ouvindo. 👀',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: CoresBaralho.textoSecundario),
+        ),
+        const SizedBox(height: EspacoBaralho.pequeno),
+        Text(
+          'Pistas, nesta ordem: ${ordem.join(' → ')}',
+          key: const Key('ordem-das-pistas'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: CoresBaralho.ambar, fontWeight: FontWeight.w600),
+        ),
+      ],
+    );
+  }
+}
+
+class _RevelacaoDoImpostor extends StatelessWidget {
+  const _RevelacaoDoImpostor({required this.visao, required this.rodada, required this.revelacao});
+
+  final VisaoDaSala visao;
+  final Rodada rodada;
+  final Revelacao revelacao;
+
+  @override
+  Widget build(BuildContext context) {
+    final impostor = visao.jogador(revelacao.impostor ?? '');
+    if (impostor == null) return const Text('O impostor saiu da sala. 🏃', textAlign: TextAlign.center);
+    final erraram = [for (final id in revelacao.perderam) ?visao.jogador(id)];
+    return Column(
+      key: const Key('resultado-do-impostor'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Center(
+          child: AvatarDoJogador(
+            jogador: impostor,
+            tamanho: 128,
+            destaque: revelacao.pegaram ? CoresBaralho.impostor : CoresBaralho.ambar,
+          ),
+        ),
+        const SizedBox(height: EspacoBaralho.medio),
+        Text(
+          revelacao.pegaram
+              ? 'Pegaram! ${impostor.nome} era o impostor 🕵️'
+              : '${impostor.nome} era o impostor e escapou! 😈',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        Text('A palavra era: ${rodada.texto}',
+            textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoSecundario, fontSize: 16)),
+        const SizedBox(height: EspacoBaralho.medio),
+        if (revelacao.pegaram)
+          Text('${impostor.nome} ${destinoDoPego(visao, impostor)}',
+              textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.ambar, fontSize: 16))
+        else if (erraram.isNotEmpty) ...[
+          Text('Quem votou errado: ${erraram.map((j) => j.nome).join(', ')}',
+              textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: EspacoBaralho.pequeno),
+          _ListaDePerdedores(visao: visao, jogadores: erraram, elogio: false),
+        ],
+        const SizedBox(height: EspacoBaralho.grande),
+        _VotosDeTodos(visao: visao, revelacao: revelacao),
+      ],
+    );
   }
 }
 

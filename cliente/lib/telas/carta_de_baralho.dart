@@ -47,6 +47,8 @@ _TemaDaCarta _temaDo(ModoDeJogo modo) => switch (modo) {
         const _TemaDaCarta(moldura: Color(0xFFA21CAF), papel: Color(0xFFFDF2FF), titulo: Color(0xFF86198F)),
       ModoDeJogo.musica =>
         const _TemaDaCarta(moldura: Color(0xFF0284C7), papel: Color(0xFFEFF9FF), titulo: Color(0xFF0369A1)),
+      ModoDeJogo.impostor =>
+        const _TemaDaCarta(moldura: Color(0xFF334155), papel: Color(0xFFF1F5F9), titulo: Color(0xFF1E293B)),
     };
 
 /// O que vai em cima do título: o jeito de jogar esta carta.
@@ -65,6 +67,7 @@ String? _jeitoDaCarta(Rodada rodada) => switch (rodada) {
       Rodada(modo: ModoDeJogo.correio) => '📮 BILHETE ANÔNIMO',
       Rodada(modo: ModoDeJogo.jurados) => '⭐ NOTA DE 1 A 5, EM SEGREDO',
       Rodada(modo: ModoDeJogo.musica) => '🎵 CADA UM CANTA NA SUA VEZ',
+      Rodada(modo: ModoDeJogo.impostor) => '🕵️ TEM UM IMPOSTOR NA MESA',
       _ => null,
     };
 
