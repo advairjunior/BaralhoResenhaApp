@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'apoio.dart';
 
-const _aviso = '☕ Acordando o baralho… Na primeira sala da noite o servidor leva até 1 minuto para acordar.';
+const _aviso = 'Carregando o aplicativo Baralho da Resenha, aguarde…';
 
 void main() {
   testWidgets('abrir o app já acorda o servidor enquanto a pessoa digita o nome', (tester) async {
@@ -29,6 +29,7 @@ void main() {
 
     await tester.pump(const Duration(seconds: 2));
     expect(find.text(_aviso), findsOneWidget);
+    expect(find.byKey(const Key('carregando')), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 30));
     await tester.pumpAndSettle();

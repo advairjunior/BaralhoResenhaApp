@@ -61,7 +61,7 @@ Correio da Resenha (bilhetes anônimos de até 20 letras) · Imagem e Ação (1 
   (mínimo 2) vira a Carta da noite no resumo.
 - **Celular na mesa:** a tela não apaga dentro da sala (Wake Lock); som e vibração na revelação,
   no vacilo e no fim do tempo (Web Audio, sem arquivo), desligáveis por celular.
-- **Servidor dormindo:** o app cutuca `/api/saude` ao abrir e avisa "Acordando o baralho…" depois de 3 s.
+- **Servidor dormindo:** o app cutuca `/api/saude` ao abrir e mostra "Carregando o aplicativo Baralho da Resenha, aguarde…" com um carregando depois de 3 s.
 
 ## Revisão das cartas
 

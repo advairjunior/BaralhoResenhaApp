@@ -289,11 +289,21 @@ class _InicioState extends State<Inicio> {
                     if (_demorando)
                       const Padding(
                         padding: EdgeInsets.only(top: EspacoBaralho.medio),
-                        child: Text(
-                          '☕ Acordando o baralho… Na primeira sala da noite o servidor leva até 1 minuto para acordar.',
-                          key: Key('acordando'),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: CoresBaralho.ambar),
+                        child: Column(
+                          key: Key('carregando'),
+                          children: [
+                            SizedBox(
+                              width: 28,
+                              height: 28,
+                              child: CircularProgressIndicator(strokeWidth: 3, color: CoresBaralho.ambar),
+                            ),
+                            SizedBox(height: EspacoBaralho.pequeno),
+                            Text(
+                              'Carregando o aplicativo Baralho da Resenha, aguarde…',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: CoresBaralho.ambar),
+                            ),
+                          ],
                         ),
                       ),
                     const SizedBox(height: EspacoBaralho.base),
