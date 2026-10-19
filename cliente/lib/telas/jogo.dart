@@ -61,6 +61,7 @@ class Jogo extends StatelessWidget {
                 ),
               'encerrar' => _confirmarEncerramento(context, acoes),
               'comando' => escolherQuemAssumeOComando(context, visao, acoes),
+              'som' => acoes.alternarSom(),
               'como-funciona' => abrirComoFunciona(context, visao),
               _ => confirmarSaida(context, acoes),
             },
@@ -74,6 +75,10 @@ class Jogo extends StatelessWidget {
                 const PopupMenuItem(value: 'comando', child: Text('Passar o comando 👑')),
                 const PopupMenuItem(value: 'encerrar', child: Text('Encerrar a noite 🏆')),
               ],
+              PopupMenuItem(
+                value: 'som',
+                child: Text(acoes.somLigado ? '🔇 Desligar som e vibração' : '🔊 Ligar som e vibração'),
+              ),
               const PopupMenuItem(value: 'sair', child: Text('Sair da sala')),
             ],
           ),

@@ -7,6 +7,7 @@ class SessoesLocais {
   static const _chaveNome = 'ultimo_nome';
   static const _chaveSemAlcool = 'sem_alcool';
   static const _chaveCartasVistas = 'cartas_vistas';
+  static const _chaveSom = 'som_ligado';
 
   /// Cartas guardadas: o bastante para lembrar várias noites sem pesar no aparelho.
   static const _limiteDeCartasVistas = 600;
@@ -41,6 +42,11 @@ class SessoesLocais {
     final excesso = vistas.length - _limiteDeCartasVistas;
     await preferencias.setStringList(_chaveCartasVistas, excesso > 0 ? vistas.sublist(excesso) : vistas);
   }
+
+  /// Som e vibração: ligados até a pessoa desligar.
+  Future<bool> somLigado() async => (await SharedPreferences.getInstance()).getBool(_chaveSom) ?? true;
+
+  Future<void> guardarSom(bool ligado) async => (await SharedPreferences.getInstance()).setBool(_chaveSom, ligado);
 
   Future<void> lembrar({required String nome, required bool semAlcool}) async {
     final preferencias = await SharedPreferences.getInstance();

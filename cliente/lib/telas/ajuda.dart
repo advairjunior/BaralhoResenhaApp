@@ -177,6 +177,10 @@ Future<void> abrirComoFunciona(BuildContext context, VisaoDaSala visao) {
             'Toque nelas para ver o que fazem.',
       ),
     const _Secao(
+      titulo: '🔊 Som e vibração',
+      texto: 'A revelação, o vacilo e o fim do tempo tocam no celular. Quer silêncio? Desligue no menu ⋮.',
+    ),
+    const _Secao(
       titulo: '👎 Tira essa',
       texto: 'Carta que ninguém quer jogar? Quem criou a sala tira, e ela sai do baralho da noite.',
     ),
