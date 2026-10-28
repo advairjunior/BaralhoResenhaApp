@@ -165,7 +165,8 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
         Text('Jogos na mistura', style: texto.titleMedium),
         Text(
           'Ligue um jogo para jogar só ele, ou vários para embaralhar as cartas, '
-          'sem repetir o mesmo jogo muitas vezes seguidas.',
+          'sem repetir o mesmo jogo muitas vezes seguidas. Em cada jogo, Pouco sai a metade '
+          'e Muito sai o dobro: mais Tribunal, menos Beba se.',
           style: texto.bodyMedium?.copyWith(color: CoresBaralho.textoApagado),
         ),
         const SizedBox(height: EspacoBaralho.pequeno),
@@ -179,7 +180,7 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
               child: const Text('🎲 Ligar todos os jogos'),
             ),
           ),
-        for (final modo in ModoDeJogo.values)
+        for (final modo in ModoDeJogo.values) ...[
           SwitchListTile(
             key: Key('modo-${modo.name}'),
             contentPadding: EdgeInsets.zero,
@@ -188,6 +189,14 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
             title: Text('${modo.emoji}  ${modo.titulo}'),
             subtitle: Text(modo.explicacao, style: const TextStyle(color: CoresBaralho.textoApagado)),
           ),
+          // Com um jogo só, não tem com quem dividir a mistura.
+          if (configuracao.modos.contains(modo) && configuracao.modos.length > 1)
+            _PesoNaMistura(
+              modo: modo,
+              peso: configuracao.pesoDo(modo),
+              aoMudar: podeEditar ? (peso) => aoMudar(configuracao.comPeso(modo, peso)) : null,
+            ),
+        ],
         const Divider(color: CoresBaralho.borda, height: EspacoBaralho.grande),
         SwitchListTile(
           key: const Key('zona-segura'),
@@ -236,6 +245,44 @@ class _ResumoDaMistura extends StatelessWidget {
       child: Text(
         texto,
         style: const TextStyle(color: CoresBaralho.ambar, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+/// "Mais Tribunal, menos Beba se": quanto o jogo sai na mistura.
+class _PesoNaMistura extends StatelessWidget {
+  const _PesoNaMistura({required this.modo, required this.peso, required this.aoMudar});
+
+  final ModoDeJogo modo;
+  final PesoDoJogo peso;
+  final ValueChanged<PesoDoJogo>? aoMudar;
+
+  static const _titulos = {PesoDoJogo.pouco: 'Pouco', PesoDoJogo.normal: 'Normal', PesoDoJogo.muito: 'Muito'};
+
+  @override
+  Widget build(BuildContext context) {
+    final mudar = aoMudar;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: EspacoBaralho.pequeno),
+      child: Wrap(
+        spacing: EspacoBaralho.pequeno,
+        children: [
+          for (final opcao in PesoDoJogo.values)
+            ChoiceChip(
+              key: Key('peso-${modo.name}-${opcao.name}'),
+              label: Text(_titulos[opcao]!),
+              selected: peso == opcao,
+              showCheckmark: false,
+              selectedColor: CoresBaralho.ambarEscuro,
+              side: BorderSide(color: peso == opcao ? CoresBaralho.ambar : CoresBaralho.borda),
+              labelStyle: TextStyle(
+                color: peso == opcao ? CoresBaralho.ambar : CoresBaralho.textoSecundario,
+                fontWeight: peso == opcao ? FontWeight.w600 : FontWeight.normal,
+              ),
+              onSelected: mudar == null ? null : (_) => mudar(opcao),
+            ),
+        ],
       ),
     );
   }

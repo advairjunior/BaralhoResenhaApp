@@ -44,6 +44,20 @@ public sealed class SalasApiTestes(WebApplicationFactory<Program> fabrica)
     }
 
     [Fact]
+    public async Task PesoPorJogoVaiEVoltaNaConfiguracao()
+    {
+        var ana = await CriarSala("Ana");
+
+        await Enviar(HttpMethod.Put, $"/api/salas/{ana.Codigo}/configuracao", ana.Token,
+            new { nivel = "Leve", modos = new[] { "EuNunca", "BebaSe", "Tribunal" }, zonaSegura = true,
+                muito = new[] { "Tribunal" }, pouco = new[] { "BebaSe" } });
+
+        var configuracao = (await Visao(ana.Codigo, ana.Token)).GetProperty("configuracao");
+        Assert.Equal(["Tribunal"], configuracao.GetProperty("muito").EnumerateArray().Select(m => m.GetString()));
+        Assert.Equal(["BebaSe"], configuracao.GetProperty("pouco").EnumerateArray().Select(m => m.GetString()));
+    }
+
+    [Fact]
     public async Task CriarEntrarEJogarUmaRodadaDeEuNunca()
     {
         var ana = await CriarSala("Ana");

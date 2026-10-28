@@ -82,12 +82,12 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
             .ToList();
 
         if (modos.Remove(ModoDeJogo.Musica) &&
-            (modos.Count == 0 || sorteio.Next(ChanceDeMusica) == 0) &&
+            (modos.Count == 0 || Saiu(ChanceDeMusica, configuracao.PesoDo(ModoDeJogo.Musica), sorteio)) &&
             SortearDoModo(ModoDeJogo.Musica, configuracao, usadas, tiradas, sorteio) is { } musica)
             return musica;
 
         if (modos.Remove(ModoDeJogo.RegraRelampago) &&
-            (modos.Count == 0 || sorteio.Next(ChanceDeRelampago) == 0) &&
+            (modos.Count == 0 || Saiu(ChanceDeRelampago, configuracao.PesoDo(ModoDeJogo.RegraRelampago), sorteio)) &&
             SortearDoModo(ModoDeJogo.RegraRelampago, configuracao, usadas, tiradas, sorteio) is { } regra)
             return regra;
 
@@ -101,7 +101,7 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
 
         while (modos.Count > 0)
         {
-            var modo = SortearComPeso(modos, sorteio);
+            var modo = SortearComPeso(modos, configuracao, sorteio);
             var carta = SortearDoModo(modo, configuracao, usadas, tiradas, sorteio);
             if (carta is not null) return carta;
             modos.Remove(modo);
@@ -109,13 +109,23 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
         return null;
     }
 
-    private static ModoDeJogo SortearComPeso(List<ModoDeJogo> modos, Random sorteio)
+    /// <summary>Uma em cada <paramref name="chance"/> cartas; Muito dobra, Pouco corta pela metade.</summary>
+    private static bool Saiu(int chance, double peso, Random sorteio) => peso switch
     {
-        var total = modos.Sum(modo => Pesos.GetValueOrDefault(modo, 1));
+        > 1 => sorteio.Next(chance) < 2,
+        < 1 => sorteio.Next(chance * 2) == 0,
+        _ => sorteio.Next(chance) == 0
+    };
+
+    private static ModoDeJogo SortearComPeso(List<ModoDeJogo> modos, ConfiguracaoDoJogo configuracao, Random sorteio)
+    {
+        // Em meios pontos, para o Pouco caber num número inteiro.
+        int Peso(ModoDeJogo modo) => (int)(Pesos.GetValueOrDefault(modo, 1) * 2 * configuracao.PesoDo(modo));
+        var total = modos.Sum(Peso);
         var ponto = sorteio.Next(total);
         foreach (var modo in modos)
         {
-            ponto -= Pesos.GetValueOrDefault(modo, 1);
+            ponto -= Peso(modo);
             if (ponto < 0) return modo;
         }
         return modos[^1];

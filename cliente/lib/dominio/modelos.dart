@@ -7,6 +7,9 @@ enum FaseDaSala { lobby, carta, revelada, fim }
 /// Quantos pontos (vezes que a carta pegou) valem um gole de verdade.
 enum RitmoDaBebida { devagar, normal, raiz }
 
+/// Quanto um jogo ligado sai na mistura: Pouco é a metade, Muito é o dobro.
+enum PesoDoJogo { pouco, normal, muito }
+
 /// O que alguém ainda tem que fazer antes de a carta passar sozinha.
 enum MotivoPendente { beber, historia, elogio, correio, cantar }
 
@@ -73,6 +76,8 @@ class ConfiguracaoDoJogo {
     this.cartasNaManga = true,
     this.passarSozinho = true,
     this.cofrinho,
+    this.muito = const {},
+    this.pouco = const {},
   });
 
   /// Maior cofrinho que dá para escolher (igual ao servidor).
@@ -87,7 +92,12 @@ class ConfiguracaoDoJogo {
         cartasNaManga: json['cartasNaManga'] as bool? ?? true,
         passarSozinho: json['passarSozinho'] as bool? ?? true,
         cofrinho: json['cofrinho'] as int?,
+        muito: _modos(json['muito']),
+        pouco: _modos(json['pouco']),
       );
+
+  static Set<ModoDeJogo> _modos(Object? lista) =>
+      ((lista as List?) ?? const []).map((m) => _enum(ModoDeJogo.values, m)).toSet();
 
   /// Com [esquentar], é até onde a noite pode chegar.
   final NivelDaCarta nivel;
@@ -109,6 +119,21 @@ class ConfiguracaoDoJogo {
   /// Tamanho do cofrinho escolhido na mão; nulo segue o [ritmo].
   final int? cofrinho;
 
+  /// Jogos que saem o dobro ("mais Tribunal") e a metade ("menos Beba se").
+  final Set<ModoDeJogo> muito;
+  final Set<ModoDeJogo> pouco;
+
+  PesoDoJogo pesoDo(ModoDeJogo modo) => muito.contains(modo)
+      ? PesoDoJogo.muito
+      : pouco.contains(modo)
+          ? PesoDoJogo.pouco
+          : PesoDoJogo.normal;
+
+  ConfiguracaoDoJogo comPeso(ModoDeJogo modo, PesoDoJogo peso) => copiar(
+        muito: {...muito.where((m) => m != modo), if (peso == PesoDoJogo.muito) modo},
+        pouco: {...pouco.where((m) => m != modo), if (peso == PesoDoJogo.pouco) modo},
+      );
+
   int get pontosPorGole =>
       cofrinho ??
       switch (ritmo) {
@@ -126,6 +151,8 @@ class ConfiguracaoDoJogo {
     bool? cartasNaManga,
     bool? passarSozinho,
     int? cofrinho,
+    Set<ModoDeJogo>? muito,
+    Set<ModoDeJogo>? pouco,
   }) =>
       ConfiguracaoDoJogo(
         nivel: nivel ?? this.nivel,
@@ -137,6 +164,8 @@ class ConfiguracaoDoJogo {
         passarSozinho: passarSozinho ?? this.passarSozinho,
         // Escolher um ritmo volta o cofrinho para o tamanho dele.
         cofrinho: cofrinho ?? (ritmo != null ? null : this.cofrinho),
+        muito: muito ?? this.muito,
+        pouco: pouco ?? this.pouco,
       );
 
   Map<String, dynamic> paraJson() => {
@@ -148,6 +177,8 @@ class ConfiguracaoDoJogo {
         'cartasNaManga': cartasNaManga,
         'passarSozinho': passarSozinho,
         if (cofrinho != null) 'cofrinho': cofrinho,
+        if (muito.isNotEmpty) 'muito': [for (final modo in ModoDeJogo.values) if (muito.contains(modo)) paraServidor(modo)],
+        if (pouco.isNotEmpty) 'pouco': [for (final modo in ModoDeJogo.values) if (pouco.contains(modo)) paraServidor(modo)],
       };
 }
 

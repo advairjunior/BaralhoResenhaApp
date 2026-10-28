@@ -381,7 +381,14 @@ public sealed partial class Sala
                 throw new AcaoNaoPermitidaException("Nível de cartas desconhecido.");
             if (configuracao.Cofrinho is < 1 or > ConfiguracaoDoJogo.CofrinhoMaximo)
                 throw new AcaoNaoPermitidaException($"O cofrinho vai de 1 a {ConfiguracaoDoJogo.CofrinhoMaximo} pontos.");
-            Configuracao = configuracao with { Modos = configuracao.Modos.Distinct().ToList() };
+            if (configuracao.Muito?.Intersect(configuracao.Pouco ?? []).Any() == true)
+                throw new AcaoNaoPermitidaException("Um jogo não fica em Pouco e Muito ao mesmo tempo.");
+            Configuracao = configuracao with
+            {
+                Modos = configuracao.Modos.Distinct().ToList(),
+                Muito = configuracao.Muito?.Distinct().ToList() ?? [],
+                Pouco = configuracao.Pouco?.Distinct().ToList() ?? []
+            };
             Tocar();
         }
     }

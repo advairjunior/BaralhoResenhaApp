@@ -133,9 +133,15 @@ public sealed record ConfiguracaoDoJogo(
     RitmoDaBebida Ritmo = RitmoDaBebida.Devagar,
     bool CartasNaManga = true,
     bool PassarSozinho = true,
-    int? Cofrinho = null)
+    int? Cofrinho = null,
+    IReadOnlyList<ModoDeJogo>? Muito = null,
+    IReadOnlyList<ModoDeJogo>? Pouco = null)
 {
     public const int CartasPorNivel = 8;
+
+    /// <summary>"Mais Tribunal, menos Beba se": Muito sai o dobro, Pouco sai a metade.</summary>
+    public double PesoDo(ModoDeJogo modo) =>
+        Muito?.Contains(modo) == true ? 2 : Pouco?.Contains(modo) == true ? 0.5 : 1;
     public const int CofrinhoMaximo = 20;
 
     /// <summary>Tamanho do cofrinho: o escolhido na mão ou o do ritmo.</summary>

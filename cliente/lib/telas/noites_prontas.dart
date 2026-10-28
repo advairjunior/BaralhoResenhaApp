@@ -29,7 +29,11 @@ class NoitePronta {
       outra.cartasNaManga == configuracao.cartasNaManga &&
       outra.passarSozinho == configuracao.passarSozinho &&
       outra.modos.length == configuracao.modos.length &&
-      outra.modos.containsAll(configuracao.modos);
+      outra.modos.containsAll(configuracao.modos) &&
+      outra.muito.length == configuracao.muito.length &&
+      outra.muito.containsAll(configuracao.muito) &&
+      outra.pouco.length == configuracao.pouco.length &&
+      outra.pouco.containsAll(configuracao.pouco);
 }
 
 /// Casais em Jogo fica de fora de todas: quem quiser, liga na mão.
