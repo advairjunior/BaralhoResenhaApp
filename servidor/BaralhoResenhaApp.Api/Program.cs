@@ -9,6 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton(CatalogoDeCartas.Carregar());
 builder.Services.AddSingleton<SalasEmMemoria>();
 builder.Services.AddSingleton<NotificadorTempoReal>();
+// O Render preenche RENDER_EXTERNAL_URL sozinho; rodando local fica vazio e ninguém cutuca.
+builder.Services.AddHostedService(servicos => new MantemAcordado(
+    servicos.GetRequiredService<SalasEmMemoria>(),
+    new HttpClient { Timeout = TimeSpan.FromSeconds(30) },
+    builder.Configuration["RENDER_EXTERNAL_URL"],
+    TimeProvider.System,
+    servicos.GetRequiredService<ILogger<MantemAcordado>>()));
 builder.Services.ConfigureHttpJsonOptions(opcoes =>
     opcoes.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddCors(opcoes => opcoes.AddDefaultPolicy(politica => politica

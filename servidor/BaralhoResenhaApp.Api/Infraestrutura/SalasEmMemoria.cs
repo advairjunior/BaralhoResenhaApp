@@ -13,6 +13,8 @@ public sealed class SalasEmMemoria(Baralho baralho, TimeProvider? relogio = null
     private const string Letras = "ABCDEFGHJKLMNPQRSTUVWXYZ";
     internal const int TamanhoDoCodigo = 4;
     internal static readonly TimeSpan TempoParada = TimeSpan.FromHours(12);
+    // Cobre a pausa da pizza com todo mundo de celular bloqueado.
+    internal static readonly TimeSpan TempoAcordado = TimeSpan.FromHours(3);
 
     private readonly ConcurrentDictionary<string, Sala> _salas = new(StringComparer.OrdinalIgnoreCase);
     private readonly TimeProvider _relogio = relogio ?? TimeProvider.System;
@@ -35,6 +37,12 @@ public sealed class SalasEmMemoria(Baralho baralho, TimeProvider? relogio = null
     public void DescartarSeVazia(Sala sala)
     {
         if (sala.Vazia) _salas.TryRemove(sala.Codigo, out _);
+    }
+
+    public bool TemSalaEmJogo()
+    {
+        var limite = _relogio.GetUtcNow() - TempoAcordado;
+        return _salas.Values.Any(sala => sala.UltimaAtividade >= limite);
     }
 
     internal void LimparParadas()

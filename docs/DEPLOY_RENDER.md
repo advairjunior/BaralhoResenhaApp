@@ -28,6 +28,10 @@ Não há banco nem disco: nada a configurar além disso.
 
 - O serviço dorme depois de um tempo sem acesso; o primeiro acesso da noite demora uns
   segundos para acordar. Abra o site alguns minutos antes de a turma chegar.
+- Durante a noite ele não dorme: enquanto houver sala com atividade nas últimas 3 h, o próprio
+  servidor chama `RENDER_EXTERNAL_URL/api/saude` a cada 10 min (`MantemAcordado`), mesmo com
+  todos os celulares bloqueados. Sem sala em jogo, ele para de se cutucar e dorme normalmente.
+  O Render preenche `RENDER_EXTERNAL_URL` sozinho; não há nada a configurar.
 - Como as salas ficam em memória, **um deploy ou reinício no meio do jogo derruba a sala**.
   Não faça push durante uma noite de jogo.
 
