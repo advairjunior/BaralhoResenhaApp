@@ -50,7 +50,7 @@ public sealed class SalaTestes
         sala.Entrar("Ana", false);
 
         var erro = Assert.Throws<AcaoNaoPermitidaException>(() => sala.Entrar(" ana ", false));
-        Assert.Equal("Já tem alguém com esse nome na sala.", erro.Message);
+        Assert.Equal(Sala.MensagemDeNomeEmUso, erro.Message);
     }
 
     [Fact]

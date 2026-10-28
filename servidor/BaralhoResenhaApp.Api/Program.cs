@@ -74,13 +74,16 @@ app.MapPost("/api/salas/{codigo}/jogadores", (
 });
 
 // A consulta a cada 6 s também diz que o celular está aí: se quem está no
-// comando sumiu, o comando passa sozinho e os outros celulares ficam sabendo.
+// comando sumiu, o comando passa sozinho; se alguém caiu (ou voltou), a carta
+// pode revelar ou passar sem essa pessoa. Nos dois casos, a turma fica sabendo.
 app.MapGet("/api/salas/{codigo}", (
     string codigo, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
 {
     var sala = salas.Obter(codigo);
     var token = Token(http);
-    if (sala.MarcarPresenca(token)) notificador.Publicar(sala.Codigo);
+    var comandoMudou = sala.MarcarPresenca(token);
+    var mesaMudou = sala.ConferirQuemCaiu();
+    if (comandoMudou || mesaMudou) notificador.Publicar(sala.Codigo);
     return Results.Ok(sala.Visao(token));
 });
 
@@ -88,6 +91,11 @@ app.MapPost("/api/salas/{codigo}/comando", (
     string codigo, PassarOComando requisicao, HttpRequest http,
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
     Agir(codigo, http, salas, notificador, (sala, token) => sala.PassarComando(token, requisicao.JogadorId)));
+
+// Quem está no comando tira quem caiu e foi embora de vez.
+app.MapDelete("/api/salas/{codigo}/jogadores/{jogadorId:guid}", (
+    string codigo, Guid jogadorId, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.TirarDaSala(token, jogadorId)));
 
 app.MapDelete("/api/salas/{codigo}/jogadores/eu", (
     string codigo, HttpRequest http, SalasEmMemoria salas, NotificadorTempoReal notificador) =>

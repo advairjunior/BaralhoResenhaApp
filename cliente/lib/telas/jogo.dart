@@ -48,7 +48,7 @@ class Jogo extends StatelessWidget {
         actions: [
           IconButton(
             tooltip: 'Placar',
-            onPressed: () => abrirPlacar(context, visao),
+            onPressed: () => abrirPlacar(context, visao, acoes),
             icon: const Text('🏆', style: TextStyle(fontSize: 22)),
           ),
           PopupMenuButton<String>(
@@ -94,7 +94,7 @@ class Jogo extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(
                   EspacoBaralho.base, EspacoBaralho.pequeno, EspacoBaralho.base, EspacoBaralho.grande),
               children: [
-                _PlacarAoVivo(visao: visao),
+                _PlacarAoVivo(visao: visao, acoes: acoes),
                 if (visao.regra != null && rodada.modo != ModoDeJogo.regraRelampago)
                   RegraEmJogo(visao: visao, acoes: acoes),
                 if (visao.esquenta case Esquenta(subiuAgora: true, :final agora))
@@ -152,9 +152,10 @@ class Jogo extends StatelessWidget {
 
 /// Faixa discreta com os três mais pegos até agora; tocar abre o placar inteiro.
 class _PlacarAoVivo extends StatelessWidget {
-  const _PlacarAoVivo({required this.visao});
+  const _PlacarAoVivo({required this.visao, required this.acoes});
 
   final VisaoDaSala visao;
+  final AcoesDaSala acoes;
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +167,7 @@ class _PlacarAoVivo extends StatelessWidget {
     return InkWell(
       key: const Key('placar-ao-vivo'),
       borderRadius: BorderRadius.circular(12),
-      onTap: () => abrirPlacar(context, visao),
+      onTap: () => abrirPlacar(context, visao, acoes),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: EspacoBaralho.mini),
         child: Text(
@@ -552,7 +553,11 @@ class _Respondendo extends StatelessWidget {
   Widget build(BuildContext context) {
     final votantes = [
       for (final jogador in visao.jogadores)
-        if ((!_ficaDeFora(rodada) || jogador.id != rodada.alvo) && !rodada.duelistas.contains(jogador.id)) jogador,
+        if ((!_ficaDeFora(rodada) || jogador.id != rodada.alvo) &&
+            !rodada.duelistas.contains(jogador.id) &&
+            // A mesa não espera quem caiu, a não ser que já tenha respondido.
+            (jogador.conectado || jogador.respondeu))
+          jogador,
     ];
     final faltam = votantes.where((j) => !j.respondeu).toList();
     final souReu = (_ficaDeFora(rodada) && visao.euId == rodada.alvo) || rodada.duelistas.contains(visao.euId);
@@ -1394,7 +1399,7 @@ class _Recado extends StatelessWidget {
   }
 }
 
-Future<void> abrirPlacar(BuildContext context, VisaoDaSala visao) {
+Future<void> abrirPlacar(BuildContext context, VisaoDaSala visao, AcoesDaSala acoes) {
   final ordenados = [...visao.jogadores]..sort((a, b) => b.pontos.compareTo(a.pontos));
   final porGole = visao.configuracao.pontosPorGole;
   return showModalBottomSheet<void>(
@@ -1421,6 +1426,18 @@ Future<void> abrirPlacar(BuildContext context, VisaoDaSala visao) {
                   if (!jogador.semAlcool && porGole > 1)
                     Text('${jogador.pontos == 1 ? '1 ponto' : '${jogador.pontos} pontos'} · '
                         'cofrinho ${jogador.cofrinho}/$porGole'),
+                  if (!jogador.conectado) ...[
+                    const Text('📵 Sem conexão', style: TextStyle(color: CoresBaralho.coral)),
+                    if (visao.souAnfitriao && jogador.id != visao.euId)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                          onPressed: () => _confirmarTirarDaSala(context, jogador, acoes),
+                          child: const Text('Tirar da sala'),
+                        ),
+                      ),
+                  ],
                 ],
               ),
               trailing: Text(jogador.placar,
@@ -1430,4 +1447,25 @@ Future<void> abrirPlacar(BuildContext context, VisaoDaSala visao) {
       ),
     ),
   );
+}
+
+/// Quem caiu e foi embora de vez sai do placar; se voltar, entra como pessoa nova.
+Future<void> _confirmarTirarDaSala(BuildContext context, Jogador jogador, AcoesDaSala acoes) async {
+  final tirar = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Tirar ${jogador.nome} da sala?'),
+      content: const Text('Os pontos saem do placar. Se voltar, entra como pessoa nova.'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Deixar')),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Tirar', style: TextStyle(color: CoresBaralho.coral)),
+        ),
+      ],
+    ),
+  );
+  if (tirar != true || !context.mounted) return;
+  Navigator.pop(context);
+  await acoes.tirarDaSala(jogador.id);
 }

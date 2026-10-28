@@ -226,4 +226,16 @@ public sealed class NoiteCompletaTestes
 
         Assert.Equal("7 pontos · 2 goles", PremiosDaNoite.Calcular([ana], [])[0].Descricao);
     }
+
+    [Fact]
+    public void QuemMaisJaFezLevaOPremioDeAventureiroSemDuploSentido()
+    {
+        var ana = new Jogador { Id = Guid.NewGuid(), Token = "a", Nome = "Ana" };
+        ana.Estatisticas.JaFiz = 3;
+
+        var premio = PremiosDaNoite.Calcular([ana], []).Single(p => p.Descricao == "Respondeu \"já fiz\" 3 vezes");
+
+        Assert.Equal("🧭", premio.Emoji);
+        Assert.Equal("Aventureiro(a) da turma", premio.Titulo);
+    }
 }

@@ -94,7 +94,7 @@ sobre ex, ciúme e traição.
 
 - **Suspense na votação:** na Votação, tambor 🥁, "e o mais votado é…" e a foto gigante de quem a turma escolheu.
 - **Selfie de reação:** quem foi pego na carta (bebeu, conta a história, casal da vez) tira uma selfie com tema na hora da revelação; ela vai para o **mural da noite**.
-- **Fim da noite:** quem criou a sala encerra e todos veem os **Prêmios da Noite** (Rei(nha) da noite, Alvo preferido, Xodó da turma, Contador(a) de histórias, Já fez de tudo, Santo(a), Artista da mímica, Rei(nha) dos duelos, Vacilão(ona) da regra, Fiscal da resenha, Casal em sintonia, Casal que precisa conversar), o resumo e o mural. As fotos do mural **não ficam guardadas**: cada um escolhe as que quer ("Só as minhas", uma a uma ou todas) e salva no próprio celular antes de a sala fechar. O cartão dos prêmios vira imagem para mandar no grupo. "Só mais uma rodada" volta ao jogo com o placar mantido.
+- **Fim da noite:** quem criou a sala encerra e todos veem os **Prêmios da Noite** (Rei(nha) da noite, Alvo preferido, Xodó da turma, Contador(a) de histórias, Aventureiro(a) da turma, Santo(a), Artista da mímica, Rei(nha) dos duelos, Vacilão(ona) da regra, Fiscal da resenha, Casal em sintonia, Casal que precisa conversar), o resumo e o mural. As fotos do mural **não ficam guardadas**: cada um escolhe as que quer ("Só as minhas", uma a uma ou todas) e salva no próprio celular antes de a sala fechar. O cartão dos prêmios vira imagem para mandar no grupo. "Só mais uma rodada" volta ao jogo com o placar mantido.
 
 ## Cartas
 

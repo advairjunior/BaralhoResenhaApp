@@ -208,4 +208,34 @@ public sealed class SalasApiTestes(WebApplicationFactory<Program> fabrica)
 
         Assert.Equal("ok", resposta.GetProperty("status").GetString());
     }
+
+    [Fact]
+    public async Task AVisaoMostraQuemEstaConectado()
+    {
+        var ana = await CriarSala("Ana");
+        await Entrar(ana.Codigo, "Bia");
+
+        var jogadores = (await Visao(ana.Codigo, ana.Token)).GetProperty("jogadores").EnumerateArray();
+
+        Assert.All(jogadores, j => Assert.True(j.GetProperty("conectado").GetBoolean()));
+    }
+
+    [Fact]
+    public async Task SoQuemCriouASalaTiraAlguemESoQuemCaiu()
+    {
+        var ana = await CriarSala("Ana");
+        var bia = await Entrar(ana.Codigo, "Bia");
+        var caio = await Entrar(ana.Codigo, "Caio");
+        var idDoCaio = (await Visao(ana.Codigo, caio.Token)).GetProperty("euId").GetString();
+
+        var pelaBia = await Enviar(HttpMethod.Delete, $"/api/salas/{ana.Codigo}/jogadores/{idDoCaio}", bia.Token);
+        Assert.Equal(HttpStatusCode.Conflict, pelaBia.StatusCode);
+
+        var pelaAna = await Enviar(HttpMethod.Delete, $"/api/salas/{ana.Codigo}/jogadores/{idDoCaio}", ana.Token);
+        Assert.Equal(HttpStatusCode.Conflict, pelaAna.StatusCode);
+        Assert.Contains("ainda está conectado", await pelaAna.Content.ReadAsStringAsync());
+
+        var semToken = await _cliente.DeleteAsync($"/api/salas/{ana.Codigo}/jogadores/{idDoCaio}");
+        Assert.Equal(HttpStatusCode.Unauthorized, semToken.StatusCode);
+    }
 }

@@ -176,7 +176,9 @@ public sealed partial class Sala
             if (rodada.Carta.Modo == ModoDeJogo.Correio) Adicionar(rodada.Alvo, MotivoPendente.Correio);
         }
         Adicionar(DaVezDeCantar(rodada), MotivoPendente.Cantar);
-        foreach (var id in rodada.BebemAgora) Adicionar(id, MotivoPendente.Beber);
+        // Quem caiu não segura a carta por causa de um gole; quem está na vez continua sendo esperado.
+        foreach (var id in rodada.BebemAgora.Where(id => NaMesa.Any(j => j.Id == id)))
+            Adicionar(id, MotivoPendente.Beber);
         return pendentes;
     }
 
@@ -194,7 +196,7 @@ public sealed partial class Sala
 
     private bool ProntaParaPassar(Rodada rodada)
     {
-        var todosProntos = _jogadores.Count > 0 && _jogadores.All(j => rodada.Prontos.Contains(j.Id));
+        var todosProntos = NaMesa.Any() && NaMesa.All(j => rodada.Prontos.Contains(j.Id));
         if (Fase == FaseDaSala.Revelada)
             return (rodada.Carta.Modo != ModoDeJogo.CasaisEmJogo || rodada.Acertou is not null) &&
                 Pendentes(rodada).Count == 0;

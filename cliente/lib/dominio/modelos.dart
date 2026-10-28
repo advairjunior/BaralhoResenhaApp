@@ -216,6 +216,7 @@ class Jogador {
     this.cartasNaManga = 0,
     this.foto,
     this.parId,
+    this.conectado = true,
   });
 
   /// [enderecoBase] completa o caminho da selfie, que vem relativo da API.
@@ -231,6 +232,7 @@ class Jogador {
         respondeu: json['respondeu'] as bool,
         foto: json['foto'] == null ? null : '$enderecoBase${json['foto']}',
         parId: json['parId'] as String?,
+        conectado: json['conectado'] as bool? ?? true,
       );
 
   final String id;
@@ -255,6 +257,9 @@ class Jogador {
 
   /// Par do casal na sala.
   final String? parId;
+
+  /// Falso quando o celular está sem dar notícia há um minuto: a mesa não espera por ele.
+  final bool conectado;
 
   /// Placar: quem joga sem álcool conta pontos; os outros, goles de verdade.
   String get placar => semAlcool

@@ -196,6 +196,12 @@ Future<void> abrirComoFunciona(BuildContext context, VisaoDaSala visao) {
       titulo: '👎 Tira essa',
       texto: 'Carta que ninguém quer jogar? Quem criou a sala tira, e ela sai do baralho da noite.',
     ),
+    const _Secao(
+      titulo: '📵 Caiu da sala?',
+      texto: 'Abra o link e entre de novo com o mesmo nome: você volta com seus pontos e cartas. '
+          'A mesa não espera por quem caiu, e quem foi embora de vez sai pelo placar, '
+          'pela mão de quem está no comando.',
+    ),
   ]);
 }
 

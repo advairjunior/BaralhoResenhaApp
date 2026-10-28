@@ -183,6 +183,10 @@ class ApiBaralho {
   Future<void> sair(String codigo, String token) =>
       _enviar('DELETE', '/api/salas/${_codigo(codigo)}/jogadores/eu', token: token);
 
+  /// Quem criou a sala tira quem caiu e foi embora de vez.
+  Future<VisaoDaSala> tirarDaSala(String codigo, String token, String jogadorId) =>
+      _visao('DELETE', '/api/salas/${_codigo(codigo)}/jogadores/$jogadorId', token);
+
   Future<VisaoDaSala> _visao(String metodo, String rota, String token, {Object? corpo}) async {
     final resposta = await _enviar(metodo, rota, token: token, corpo: corpo);
     return VisaoDaSala.deJson(resposta as Map<String, dynamic>, enderecoBase: _enderecoBase);

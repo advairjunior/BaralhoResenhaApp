@@ -41,6 +41,8 @@ class ServidorFalso {
       ));
       final resposta = respostas[chave];
       if (resposta == null) return http.Response('{"mensagem":"Sala não encontrada."}', 404);
+      // Sem internet: a requisição nem chega.
+      if (resposta is Exception) throw resposta;
       if (resposta is List<int>) {
         return http.Response.bytes(resposta, 200, headers: {'content-type': 'image/jpeg'});
       }
@@ -59,7 +61,8 @@ Map<String, dynamic> jogadorJson(String id, String nome,
         int? pontos,
         int cofrinho = 0,
         bool respondeu = false,
-        String? foto}) =>
+        String? foto,
+        bool conectado = true}) =>
     {
       'id': id,
       'nome': nome,
@@ -70,6 +73,7 @@ Map<String, dynamic> jogadorJson(String id, String nome,
       'cofrinho': cofrinho,
       'respondeu': respondeu,
       'foto': foto,
+      'conectado': conectado,
     };
 
 Map<String, dynamic> visaoJson({
