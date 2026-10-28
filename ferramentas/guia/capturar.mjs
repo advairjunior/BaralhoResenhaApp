@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades'];
 
 const pagina = async () => {
   const p = await b.newPage();
@@ -161,6 +161,18 @@ for (const [n, frase] of [['Advair', 'na fila do INSS'], ['Júlia', 'no velório
 p = await abrir(s, 'Bruna');
 await rolar(p, 450);
 await foto(p, 'frase');
+await p.close();
+
+// Duas verdades e uma mentira: as três frases da pessoa da vez, na hora de votar.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['DuasVerdades'] }, (r) => r.cartaId === 'dv-001');
+const daVez = s.nomes[v.rodada.alvo];
+await api('POST', `${s.sala}/duas-verdades`, s.turma[daVez], {
+  rodada: v.rodada.numero, frases: ['Já perdi um voo dormindo', 'Já fui para o Japão', 'Já dormi no aeroporto'], mentira: 1,
+});
+p = await abrir(s, Object.keys(s.turma).find((n) => n !== daVez));
+await rolar(p, 450);
+await foto(p, 'mentira');
 await p.close();
 
 // Jurados: a média das estrelas, sem dizer quem deu qual nota.

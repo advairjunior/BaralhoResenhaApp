@@ -39,7 +39,8 @@ Casais em Jogo (opcional, desligado por padrão) · Tribunal da Turma · Rodada 
 Correio da Resenha (bilhetes anônimos de até 20 letras) · Imagem e Ação (1 mímico até 5 pessoas,
 2 times de 6 a 8, 3 times com 9+) · Jurados · Roda de Música · Impostor (palavra para todos menos
 um, que só sabe o tema; pistas em voz alta na ordem do app; voto secreto; 4+ pessoas) ·
-Termine a frase (cada um completa o começo da carta em segredo, a turma vota sem saber de quem é; 3+ pessoas).
+Termine a frase (cada um completa o começo da carta em segredo, a turma vota sem saber de quem é; 3+ pessoas) ·
+Duas verdades e uma mentira (a pessoa da vez escreve três frases sobre si e a turma vota na mentira; 3+ pessoas).
 
 ## Regras de produto já decididas
 
@@ -71,6 +72,11 @@ Termine a frase (cada um completa o começo da carta em segredo, a turma vota se
   de `OrdemDasFrases`. O autor só sai na revelação e só nas mais votadas, que distribuem goles
   (`Elogio`) e ganham carta na manga. Quem comanda passa para a votação com 2 frases. Peso 1
   (com 2, a mímica caía abaixo de 1 em 8).
+- **Duas verdades e uma mentira:** a pessoa da vez é o `Alvo` (rodízio). Ela manda as três frases
+  e a mentira por `POST /duas-verdades` (`Rodada.Afirmacoes`, `Rodada.Mentira`); a turma vê as
+  frases e só ela vê `MinhaMentira`. O voto é o índice pelo `Responder`. Quem errou leva ponto;
+  ninguém acertou → ela distribui goles (`Elogio`) e soma `MentirasPerfeitas` (prêmio 🤥
+  "Mentiroso(a) de respeito"). Peso 1.
 - **Servidor dormindo:** o app cutuca `/api/saude` ao abrir e mostra "Carregando o aplicativo Baralho da Resenha, aguarde…" com um carregando depois de 3 s.
   Durante a noite o próprio servidor se cutuca (`MantemAcordado`): com sala ativa nas últimas 3 h,
   chama `RENDER_EXTERNAL_URL/api/saude` a cada 10 min, porque celular bloqueado não consulta nada.

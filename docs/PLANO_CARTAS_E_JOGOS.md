@@ -97,7 +97,9 @@ está em `docs/PLANO_RECONEXAO_TV_JOGOS.md` (Etapa 3); aqui fica o como fazer.
    nova (roteiro em `ferramentas/guia/capturar.mjs`), linha na página de revisão.
 5. Commits: `feat: jogo novo, ✍️ Termine a frase` e `docs: captura do Termine a frase`.
 
-## Etapa 4: 🤥 Duas verdades e uma mentira (jogo novo)
+## Etapa 4: 🤥 Duas verdades e uma mentira (jogo novo) — feito em 2026-10-28
+
+Feito como abaixo, com peso 1 (como o Termine a frase, para a mímica seguir em 1 a cada 8).
 
 Especificação em `docs/PLANO_RECONEXAO_TV_JOGOS.md` (Etapa 3).
 
