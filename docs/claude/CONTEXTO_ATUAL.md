@@ -1,6 +1,6 @@
 # Baralho da Resenha — Contexto atual
 
-> Atualizado em: 2026-10-19
+> Atualizado em: 2026-10-28
 
 ## O que é
 
@@ -66,6 +66,12 @@ um, que só sabe o tema; pistas em voz alta na ordem do app; voto secreto; 4+ pe
   nulo); cada celular só sabe de si (`SouImpostor`). Pegaram = impostor sozinho no topo dos votos
   (empate, ele escapa). Escapou: carta na manga para ele, ponto para quem votou errado. Peso 1.
 - **Servidor dormindo:** o app cutuca `/api/saude` ao abrir e mostra "Carregando o aplicativo Baralho da Resenha, aguarde…" com um carregando depois de 3 s.
+  Durante a noite o próprio servidor se cutuca (`MantemAcordado`): com sala ativa nas últimas 3 h,
+  chama `RENDER_EXTERNAL_URL/api/saude` a cada 10 min, porque celular bloqueado não consulta nada.
+- **Rodízio do {jogador}:** a carta chama quem foi chamado menos vezes (`Jogador.Chamadas`), a sorte
+  só desempata; quem chega no meio entra com o mínimo da mesa. O impostor continua sorteado.
+- **Peso por jogo:** cada jogo ligado sai Pouco (metade), Normal ou Muito (dobro)
+  (`ConfiguracaoDoJogo.Muito`/`Pouco`); vale também para a chance da regra-relâmpago e da música.
 
 ## Revisão das cartas
 
@@ -76,11 +82,11 @@ que ele escrever. Quando ele avisar que terminou, ler as marcações e aplicar e
 ## Estado
 
 - Testes: servidor (xUnit) e cliente (flutter test) passando.
-- Ainda não testado com a turma em celulares reais (só Chrome com tela de celular).
+- Testado com a turma em celulares reais: umas 3 noites até 2026-10-28.
+- Revisão das cartas: todas as marcações aplicadas até 2026-10-28.
 
 ## Banco de ideias
 
 - Esquenta começando no Resenha e velocidade do esquenta (deixados para depois em 2026-10-19).
-- Peso por jogo: "mais Tribunal, menos Beba se" (deixado para depois em 2026-10-19).
 - Cartas da turma permanentes (exigiriam banco).
 - Guardar a sala para sobreviver a um deploy no meio da noite (esbarra em "nada vai para disco").
