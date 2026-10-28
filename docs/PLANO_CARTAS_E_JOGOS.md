@@ -24,7 +24,7 @@ menos um deles:
 
 ---
 
-## Etapa 1: cartas novas (só dados)
+## Etapa 1: cartas novas (só dados) — feito em 2026-10-28
 
 Entram em `servidor/BaralhoResenhaApp.Api/Dados/cartas.json`, cada uma perto das irmãs do mesmo
 jogo. Os ids abaixo foram conferidos no histórico: nunca foram usados (a página de revisão guarda
@@ -55,7 +55,7 @@ Cuidados:
 - Depois: publicar as cartas na página de revisão como 🆕, para o proprietário marcar.
 - Commit: `feat: 14 cartas que puxam história, segredo e lembrança da turma`.
 
-## Etapa 2: o rodízio não chama quem caiu
+## Etapa 2: o rodízio não chama quem caiu — feito em 2026-10-28
 
 Hoje o rodízio do `{jogador}` (`Sala.Distribuir`) pode chamar alguém que está sem sinal, e a carta
 fica esperando a pessoa (réu do Tribunal, quem abre a Roda de Música, a pessoa do Correio).
@@ -69,7 +69,10 @@ fica esperando a pessoa (réu do Tribunal, quem abre a Roda de Música, a pessoa
 4. Guia: acrescentar "Quem caiu não é chamado até voltar" na linha "Todo mundo tem a sua vez".
 5. Commit: `feat: o rodízio pula quem caiu da sala`.
 
-## Etapa 3: ✍️ Termine a frase (jogo novo)
+## Etapa 3: ✍️ Termine a frase (jogo novo) — feito em 2026-10-28
+
+Feito como abaixo, com uma diferença: peso 1, não 2 (com 2, a Imagem e Ação caía abaixo de
+1 em 8 cartas; quem quiser mais Termine a frase põe no Muito).
 
 O mais simples dos dois jogos: reaproveita o anonimato do Correio. A especificação de produto
 está em `docs/PLANO_RECONEXAO_TV_JOGOS.md` (Etapa 3); aqui fica o como fazer.

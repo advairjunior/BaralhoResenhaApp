@@ -38,7 +38,8 @@ Beba se · Regra-relâmpago (com iscas: entrevista, pergunta, missão, Mestre, p
 Casais em Jogo (opcional, desligado por padrão) · Tribunal da Turma · Rodada de Elogios ·
 Correio da Resenha (bilhetes anônimos de até 20 letras) · Imagem e Ação (1 mímico até 5 pessoas,
 2 times de 6 a 8, 3 times com 9+) · Jurados · Roda de Música · Impostor (palavra para todos menos
-um, que só sabe o tema; pistas em voz alta na ordem do app; voto secreto; 4+ pessoas).
+um, que só sabe o tema; pistas em voz alta na ordem do app; voto secreto; 4+ pessoas) ·
+Termine a frase (cada um completa o começo da carta em segredo, a turma vota sem saber de quem é; 3+ pessoas).
 
 ## Regras de produto já decididas
 
@@ -65,6 +66,11 @@ um, que só sabe o tema; pistas em voz alta na ordem do app; voto secreto; 4+ pe
 - **Impostor:** quem é o impostor fica em `Rodada.Impostor` e só sai na revelação (o `Alvo` fica
   nulo); cada celular só sabe de si (`SouImpostor`). Pegaram = impostor sozinho no topo dos votos
   (empate, ele escapa). Escapou: carta na manga para ele, ponto para quem votou errado. Peso 1.
+- **Termine a frase:** duas fases na mesma carta (`Rodada.Escrevendo`): a resposta é a frase (até
+  40 letras, guardada em `Rodada.Frases`) e, quando todos na mesa escreveram, vira o voto no índice
+  de `OrdemDasFrases`. O autor só sai na revelação e só nas mais votadas, que distribuem goles
+  (`Elogio`) e ganham carta na manga. Quem comanda passa para a votação com 2 frases. Peso 1
+  (com 2, a mímica caía abaixo de 1 em 8).
 - **Servidor dormindo:** o app cutuca `/api/saude` ao abrir e mostra "Carregando o aplicativo Baralho da Resenha, aguarde…" com um carregando depois de 3 s.
   Durante a noite o próprio servidor se cutuca (`MantemAcordado`): com sala ativa nas últimas 3 h,
   chama `RENDER_EXTERNAL_URL/api/saude` a cada 10 min, porque celular bloqueado não consulta nada.

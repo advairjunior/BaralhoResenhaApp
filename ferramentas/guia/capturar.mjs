@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase'];
 
 const pagina = async () => {
   const p = await b.newPage();
@@ -151,6 +151,16 @@ for (const n of Object.keys(s.turma)) if ((await api('GET', s.sala, s.turma[n]))
 p = await abrir(s, doImpostor);
 await rolar(p, 300);
 await foto(p, 'impostor');
+await p.close();
+
+// Termine a frase: as frases sem autor, na hora de votar.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['TermineAFrase'] }, (r) => r.cartaId === 'tf-001');
+for (const [n, frase] of [['Advair', 'na fila do INSS'], ['Júlia', 'no velório da tia'], ['Caio', 'no churrasco da sogra'], ['Bruna', 'no rodízio de sushi']])
+  await api('POST', `${s.sala}/respostas`, s.turma[n], { rodada: v.rodada.numero, resposta: frase });
+p = await abrir(s, 'Bruna');
+await rolar(p, 450);
+await foto(p, 'frase');
 await p.close();
 
 // Jurados: a média das estrelas, sem dizer quem deu qual nota.
