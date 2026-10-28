@@ -64,6 +64,7 @@ class Jogo extends StatelessWidget {
               'encerrar' => _confirmarEncerramento(context, acoes),
               'comando' => escolherQuemAssumeOComando(context, visao, acoes),
               'som' => acoes.alternarSom(),
+              'voz' => acoes.alternarVoz(),
               'como-funciona' => abrirComoFunciona(context, visao),
               _ => confirmarSaida(context, acoes),
             },
@@ -81,6 +82,12 @@ class Jogo extends StatelessWidget {
                 value: 'som',
                 child: Text(acoes.somLigado ? '🔇 Desligar som e vibração' : '🔊 Ligar som e vibração'),
               ),
+              // Só o celular de quem comanda lê as cartas em voz alta.
+              if (visao.souAnfitriao)
+                PopupMenuItem(
+                  value: 'voz',
+                  child: Text(acoes.vozLigada ? '🗣️ Desligar a voz das cartas' : '🗣️ Ligar a voz das cartas'),
+                ),
               const PopupMenuItem(value: 'sair', child: Text('Sair da sala')),
             ],
           ),

@@ -64,6 +64,10 @@ Duas verdades e uma mentira (a pessoa da vez escreve três frases sobre si e a t
   (mínimo 2) vira a Carta da noite no resumo.
 - **Celular na mesa:** a tela não apaga dentro da sala (Wake Lock); som e vibração na revelação,
   no vacilo e no fim do tempo (Web Audio, sem arquivo), desligáveis por celular.
+- **Voz das cartas:** só o celular de quem comanda lê a carta nova (`speechSynthesis`, sem servidor):
+  vários falando juntos viram eco. Personagens em rodízio pelo número da carta (`Personagem` em
+  `voz.dart`: tom e velocidade). Mímica, Impostor e Correio só são anunciados, nunca lidos.
+  Liga e desliga por celular no menu ⋮ (ligada por padrão).
 - **Impostor:** quem é o impostor fica em `Rodada.Impostor` e só sai na revelação (o `Alvo` fica
   nulo); cada celular só sabe de si (`SouImpostor`). Pegaram = impostor sozinho no topo dos votos
   (empate, ele escapa). Escapou: carta na manga para ele, ponto para quem votou errado. Peso 1.

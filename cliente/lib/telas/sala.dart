@@ -10,6 +10,8 @@ import '../infraestrutura/sessoes_locais.dart';
 import '../infraestrutura/som.dart' as som;
 import '../infraestrutura/tela_acordada.dart';
 import '../infraestrutura/tocador_de_som.dart' show prepararSom;
+import '../infraestrutura/falador.dart' show prepararVoz;
+import '../infraestrutura/voz.dart' as voz;
 import '../tema/tema_baralho.dart';
 import 'fim_da_noite.dart';
 import 'inicio.dart';
@@ -49,6 +51,10 @@ abstract interface class AcoesDaSala {
   /// Som e vibração deste celular (não passa pelo servidor).
   bool get somLigado;
   Future<void> alternarSom();
+
+  /// Voz das cartas: só o celular de quem comanda lê (não passa pelo servidor).
+  bool get vozLigada;
+  Future<void> alternarVoz();
   Future<void> encerrar();
   Future<void> retomar();
   Future<Uint8List> baixarFoto(String endereco);
@@ -92,6 +98,7 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
     // Celular parado na mesa apaga a tela, a aba congela e a pessoa perde a vez.
     manterTelaAcordada(true);
     prepararSom();
+    prepararVoz();
     _abrir();
   }
 
@@ -105,6 +112,7 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   Future<void> _abrir() async {
     _token = await widget.sessoes.token(_codigo);
     som.somLigado = await widget.sessoes.somLigado();
+    voz.vozLigada = await widget.sessoes.vozLigada();
     if (_token == null) {
       if (mounted) setState(() => _carregando = false);
       return;
@@ -174,7 +182,18 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
     if (visao.fase == FaseDaSala.lobby && !_vistasEnviadas) _enviarVistas();
     _avisarDoComando(_visao, visao);
     _tocarOQueMudou(_visao?.rodada, visao.rodada);
+    _lerCartaNova(_visao, visao);
     if (mounted) setState(() => _visao = visao);
+  }
+
+  /// Só um celular lê a carta em voz alta, o de quem comanda: vários falando
+  /// juntos nunca saem no mesmo tempo e viram eco. Quem abre o app no meio da
+  /// carta não ouve de novo.
+  void _lerCartaNova(VisaoDaSala? antes, VisaoDaSala agora) {
+    final rodada = agora.rodada;
+    if (antes == null || rodada == null || !agora.souAnfitriao || agora.fase != FaseDaSala.carta) return;
+    if (antes.rodada?.numero == rodada.numero) return;
+    voz.falarCarta(agora);
   }
 
   /// A mesa toda ouve junto: a revelação e o vacilo chegam pelo tempo real.
@@ -313,6 +332,15 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   Future<void> alternarSom() async {
     setState(() => som.somLigado = !som.somLigado);
     await widget.sessoes.guardarSom(som.somLigado);
+  }
+
+  @override
+  bool get vozLigada => voz.vozLigada;
+
+  @override
+  Future<void> alternarVoz() async {
+    setState(() => voz.vozLigada = !voz.vozLigada);
+    await widget.sessoes.guardarVoz(voz.vozLigada);
   }
 
   @override
