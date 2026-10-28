@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Time.Testing;
 using BaralhoResenhaApp.Api.Dominio;
 
 namespace BaralhoResenhaApp.Testes;
@@ -59,6 +60,65 @@ public sealed class RodizioTestes
         }
 
         Assert.InRange(chamados.Count(id => id == atrasado.Id), 1, 3);
+    }
+
+    /// <summary>O tempo passa e só os celulares de <paramref name="conectados"/> consultam a sala.</summary>
+    private static void PassarTempo(Sala sala, FakeTimeProvider relogio, TimeSpan tempo, params Jogador[] conectados)
+    {
+        for (var passou = TimeSpan.Zero; passou < tempo; passou += TimeSpan.FromSeconds(5))
+        {
+            relogio.Advance(TimeSpan.FromSeconds(5));
+            foreach (var jogador in conectados) sala.Visao(jogador.Token);
+        }
+    }
+
+    private static (Sala, Jogador[], FakeTimeProvider) MontarComRelogio(int semente, params string[] nomes)
+    {
+        var relogio = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        var sala = new Sala("ABCD", Tribunais(40), new Random(semente), relogio);
+        var todos = nomes.Select(n => sala.Entrar(n, false)).ToArray();
+        sala.Configurar(todos[0].Token, new ConfiguracaoDoJogo(NivelDaCarta.Leve, [ModoDeJogo.Tribunal], ZonaSegura: true));
+        sala.Comecar(todos[0].Token);
+        return (sala, todos, relogio);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(7)]
+    [InlineData(42)]
+    public void QuemCaiuNaoEhChamadoAteVoltar(int semente)
+    {
+        var (sala, todos, relogio) = MontarComRelogio(semente, "Ana", "Beto", "Caio", "Duda");
+        var caio = todos[2];
+        var naMesa = todos.Where(j => j != caio).ToArray();
+        PassarTempo(sala, relogio, Sala.TempoParaCair + TimeSpan.FromSeconds(5), naMesa);
+        var chamadasAntes = caio.Chamadas;
+
+        for (var i = 0; i < 9; i++)
+        {
+            Passar(sala, todos[0]);
+            Assert.NotEqual(caio.Id, Chamado(sala));
+        }
+        Assert.Equal(chamadasAntes, caio.Chamadas);
+    }
+
+    [Fact]
+    public void QuemVoltaEntraNaVoltaAtual()
+    {
+        var (sala, todos, relogio) = MontarComRelogio(3, "Ana", "Beto", "Caio", "Duda");
+        var caio = todos[2];
+        PassarTempo(sala, relogio, Sala.TempoParaCair + TimeSpan.FromSeconds(5), todos.Where(j => j != caio).ToArray());
+        for (var i = 0; i < 4; i++) Passar(sala, todos[0]);
+
+        sala.Visao(caio.Token);
+        var chamados = new List<Guid>();
+        for (var i = 0; i < 4; i++)
+        {
+            Passar(sala, todos[0]);
+            chamados.Add(Chamado(sala));
+        }
+
+        Assert.Contains(caio.Id, chamados);
     }
 
     [Fact]

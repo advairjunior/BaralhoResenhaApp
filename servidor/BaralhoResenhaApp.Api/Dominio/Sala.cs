@@ -725,7 +725,10 @@ public sealed partial class Sala
         if (_ultimosModos.Count > Baralho.MaximoSeguidas) _ultimosModos.RemoveAt(0);
         // Duelos usam duas pessoas diferentes: {jogador} e {jogador2}. Rodízio: sai quem
         // foi chamado menos vezes, e a sorte só desempata; ninguém fica esquecido na noite.
-        var sorteados = _jogadores.OrderBy(j => j.Chamadas).ThenBy(_ => _sorteio.Next()).Take(2).ToList();
+        // Quem caiu não é chamado (a carta ficaria esperando por ele) até voltar.
+        var naMesa = NaMesa.ToList();
+        var sorteados = (naMesa.Count > 0 ? naMesa : _jogadores)
+            .OrderBy(j => j.Chamadas).ThenBy(_ => _sorteio.Next()).Take(2).ToList();
         if (carta.Texto.Contains("{jogador}") ||
             carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados or ModoDeJogo.Musica)
             sorteados[0].Chamadas++;
