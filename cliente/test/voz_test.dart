@@ -78,6 +78,32 @@ void main() {
       expect(fala, isNot(contains('apelido')));
     });
 
+    test('o duelo é anunciado como duelo, não como "Quem é mais provável"', () {
+      final fala = falaDaCarta(_visao(_carta(
+        modo: 'MaisProvavel',
+        texto: 'Duelo de narração: Bia contra Caio.',
+        extras: {'duelistas': ['bia', 'caio']},
+      )));
+
+      expect(fala, endsWith('Duelo! Duelo de narração: Bia contra Caio.'));
+    });
+
+    test('o pedra, papel e tesoura é anunciado pelo nome', () {
+      final fala = falaDaCarta(_visao(_carta(
+        modo: 'MaisProvavel',
+        texto: 'Quem é mais provável de chegar atrasado?',
+        extras: {'duelistas': ['bia', 'caio'], 'jokenpo': true},
+      )));
+
+      expect(fala, contains('Pedra, papel e tesoura!'));
+    });
+
+    test('o "(a)" do masculino e feminino não é lido', () {
+      final fala = falaDaCarta(_visao(_carta(texto: 'Eu nunca fui expulso(a) de lugar nenhum com os(as) amigos(as).')));
+
+      expect(fala, endsWith('Eu nunca fui expulso de lugar nenhum com os amigos.'));
+    });
+
     test('cada carta sai com um personagem, e a chamada é dele', () {
       final personagens = {for (var numero = 1; numero <= Personagem.values.length; numero++) personagemDa(numero)};
 

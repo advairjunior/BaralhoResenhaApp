@@ -28,7 +28,10 @@ bool vozLigada = true;
 /// Emoji a voz leria pelo nome ("rosto chorando de rir"): sai antes de falar.
 final _emojis = RegExp(r'[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]', unicode: true);
 
-String _semEmoji(String texto) => texto.replaceAll(_emojis, '').replaceAll(RegExp(r'\s+'), ' ').replaceAll(' .', '.').trim();
+/// O "(a)" de "expulso(a)" a voz leria como "expulso a": fica só o masculino.
+final _generoEntreParenteses = RegExp(r'\((a|as|o|os)\)');
+
+String _semEmoji(String texto) => texto.replaceAll(_emojis, '').replaceAll(_generoEntreParenteses, '').replaceAll(RegExp(r'\s+'), ' ').replaceAll(' .', '.').trim();
 
 /// O que a mesa ouve. Carta com segredo (a palavra da mímica, a do Impostor, a
 /// pergunta do Correio) só é anunciada: o segredo continua só na tela de quem pode ver.
@@ -42,8 +45,10 @@ String falaDaCarta(VisaoDaSala visao) {
     ModoDeJogo.correio => 'A pergunta está no celular da turma.',
     _ => rodada.texto,
   };
-  final titulo = switch (rodada.modo) {
-    ModoDeJogo.correio => '${rodada.modo.titulo} para ${nome(rodada.alvo)}!',
+  final titulo = switch (rodada) {
+    Rodada(jokenpo: true) => 'Pedra, papel e tesoura!',
+    Rodada(duelo: true) => 'Duelo!',
+    Rodada(modo: ModoDeJogo.correio) => '${rodada.modo.titulo} para ${nome(rodada.alvo)}!',
     _ => '${rodada.modo.titulo}!',
   };
   return _semEmoji('${personagemDa(rodada.numero).chamada} $titulo $carta');
