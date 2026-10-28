@@ -128,6 +128,30 @@ public sealed class DuasVerdadesTestes
     }
 
     [Fact]
+    public void DepoisDaRevelacaoACartaEsperaAPessoaDaVezContarAsHistorias()
+    {
+        var mesa = Montar();
+        mesa.Escrever(mentira: 1);
+        mesa.Votar(mesa.Turma[0], 1);
+        mesa.Votar(mesa.Turma[1], 0);
+        mesa.Votar(mesa.Turma[2], 0);
+
+        Assert.Contains(mesa.Visao(mesa.Turma[0]).Pendentes,
+            p => p.JogadorId == mesa.DaVez.Id && p.Motivo == MotivoPendente.Historia);
+        Assert.Null(mesa.Visao(mesa.Turma[0]).PassaEmMs);
+
+        // No ritmo Raiz, quem errou também tem que beber antes de a carta passar.
+        mesa.Sala.MarcarPronto(mesa.Turma[1].Token, mesa.Rodada);
+        mesa.Sala.MarcarPronto(mesa.Turma[2].Token, mesa.Rodada);
+        Assert.Null(mesa.Visao(mesa.Turma[0]).PassaEmMs);
+
+        mesa.Sala.MarcarPronto(mesa.DaVez.Token, mesa.Rodada);
+
+        Assert.Empty(mesa.Visao(mesa.Turma[0]).Pendentes);
+        Assert.NotNull(mesa.Visao(mesa.Turma[0]).PassaEmMs);
+    }
+
+    [Fact]
     public void QuemCriouASalaNaoRevelaAntesDasFrases()
     {
         var mesa = Montar();

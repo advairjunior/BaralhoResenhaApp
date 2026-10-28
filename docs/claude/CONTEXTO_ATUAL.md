@@ -76,7 +76,7 @@ Duas verdades e uma mentira (a pessoa da vez escreve três frases sobre si e a t
   e a mentira por `POST /duas-verdades` (`Rodada.Afirmacoes`, `Rodada.Mentira`); a turma vê as
   frases e só ela vê `MinhaMentira`. O voto é o índice pelo `Responder`. Quem errou leva ponto;
   ninguém acertou → ela distribui goles (`Elogio`) e soma `MentirasPerfeitas` (prêmio 🤥
-  "Mentiroso(a) de respeito"). Peso 1.
+  "Mentiroso(a) de respeito"). Depois da revelação, ela fica com o "🎤 Contei" pendente. Peso 1.
 - **Servidor dormindo:** o app cutuca `/api/saude` ao abrir e mostra "Carregando o aplicativo Baralho da Resenha, aguarde…" com um carregando depois de 3 s.
   Durante a noite o próprio servidor se cutuca (`MantemAcordado`): com sala ativa nas últimas 3 h,
   chama `RENDER_EXTERNAL_URL/api/saude` a cada 10 min, porque celular bloqueado não consulta nada.

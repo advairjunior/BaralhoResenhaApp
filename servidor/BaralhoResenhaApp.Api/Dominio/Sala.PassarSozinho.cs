@@ -174,6 +174,8 @@ public sealed partial class Sala
             Adicionar(DaVezDeContar(rodada), MotivoPendente.Historia);
             if (revelacao.Elogio) foreach (var id in revelacao.Escolhidos) Adicionar(id, MotivoPendente.Elogio);
             if (rodada.Carta.Modo == ModoDeJogo.Correio) Adicionar(rodada.Alvo, MotivoPendente.Correio);
+            // Duas verdades: a turma quer ouvir a história das verdades (e da mentira) antes de seguir.
+            if (rodada.Carta.Modo == ModoDeJogo.DuasVerdades) Adicionar(rodada.Alvo, MotivoPendente.Historia);
         }
         Adicionar(DaVezDeCantar(rodada), MotivoPendente.Cantar);
         // Quem caiu não segura a carta por causa de um gole; quem está na vez continua sendo esperado.

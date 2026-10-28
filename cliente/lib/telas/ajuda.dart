@@ -118,6 +118,7 @@ ComoJoga comoJoga(Rodada rodada) {
         'Ela marca qual é a mentira. Só ela sabe; a turma vê as três frases.',
         'O resto vota em segredo em qual é a mentira. Vale perguntar e encarar antes de votar!',
         'Quem errou leva 1 ponto. Se ninguém acertou, a pessoa da vez distribui goles.',
+        'Depois, a pessoa da vez conta a história das verdades (e de onde tirou a mentira) e toca em "🎤 Contei".',
       ]),
     Rodada(modo: ModoDeJogo.imagemEAcao) => ('mimica', ModoDeJogo.imagemEAcao.titulo, [
         'Só quem faz a mímica vê a palavra. Dá para dizer a dica: a categoria e o número de palavras.',
