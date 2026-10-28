@@ -39,7 +39,13 @@ public enum ModoDeJogo
     /// Termine a frase: a carta dá o começo, cada um completa em segredo e a
     /// turma vota na melhor sem saber de quem é. Só a vencedora revela o autor.
     /// </summary>
-    TermineAFrase
+    TermineAFrase,
+
+    /// <summary>
+    /// Duas verdades e uma mentira: a pessoa da vez escreve três frases sobre si
+    /// e a turma vota em segredo em qual é a mentira.
+    /// </summary>
+    DuasVerdades
 }
 
 /// <summary>
@@ -169,6 +175,6 @@ public sealed record ConfiguracaoDoJogo(
         // Casais em Jogo começa desligado: quem quiser, liga.
         [ModoDeJogo.EuNunca, ModoDeJogo.MaisProvavel, ModoDeJogo.BebaSe, ModoDeJogo.RegraRelampago,
             ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados,
-            ModoDeJogo.Musica, ModoDeJogo.Impostor, ModoDeJogo.TermineAFrase],
+            ModoDeJogo.Musica, ModoDeJogo.Impostor, ModoDeJogo.TermineAFrase, ModoDeJogo.DuasVerdades],
         ZonaSegura: true);
 }

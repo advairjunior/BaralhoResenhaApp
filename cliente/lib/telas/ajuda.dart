@@ -113,6 +113,12 @@ ComoJoga comoJoga(Rodada rodada) {
         'Só a mais votada revela quem escreveu: essa pessoa distribui goles e ganha uma carta na manga. '
             'As outras continuam anônimas.',
       ]),
+    Rodada(modo: ModoDeJogo.duasVerdades) => ('duasVerdades', ModoDeJogo.duasVerdades.titulo, [
+        'A pessoa da vez escreve no celular três frases sobre o tema da carta: duas verdades e uma mentira.',
+        'Ela marca qual é a mentira. Só ela sabe; a turma vê as três frases.',
+        'O resto vota em segredo em qual é a mentira. Vale perguntar e encarar antes de votar!',
+        'Quem errou leva 1 ponto. Se ninguém acertou, a pessoa da vez distribui goles.',
+      ]),
     Rodada(modo: ModoDeJogo.imagemEAcao) => ('mimica', ModoDeJogo.imagemEAcao.titulo, [
         'Só quem faz a mímica vê a palavra. Dá para dizer a dica: a categoria e o número de palavras.',
         'Não vale falar, soletrar nem apontar para objetos.',

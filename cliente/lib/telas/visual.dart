@@ -18,6 +18,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.musica => 'Roda de Música',
         ModoDeJogo.impostor => 'Impostor',
         ModoDeJogo.termineAFrase => 'Termine a frase',
+        ModoDeJogo.duasVerdades => 'Duas verdades e uma mentira',
       };
 
   String get emoji => switch (this) {
@@ -34,6 +35,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.musica => '🎵',
         ModoDeJogo.impostor => '🕵️',
         ModoDeJogo.termineAFrase => '✍️',
+        ModoDeJogo.duasVerdades => '🤥',
       };
 
   String get explicacao => switch (this) {
@@ -59,6 +61,8 @@ extension VisualDoModo on ModoDeJogo {
             'uma pista e a turma vota no impostor. Precisa de 4 pessoas.',
         ModoDeJogo.termineAFrase => 'A carta dá o começo e cada um completa em segredo. A turma vota na melhor '
             'sem saber de quem é: quem escreveu distribui goles. Precisa de 3 pessoas.',
+        ModoDeJogo.duasVerdades => 'A pessoa da vez escreve três frases sobre si, uma delas mentira. A turma vota '
+            'em segredo: quem errar leva ponto; se ninguém acertar, ela distribui goles. Precisa de 3 pessoas.',
       };
 
   Color get cor => switch (this) {
@@ -75,6 +79,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.musica => CoresBaralho.musica,
         ModoDeJogo.impostor => CoresBaralho.impostor,
         ModoDeJogo.termineAFrase => CoresBaralho.frase,
+        ModoDeJogo.duasVerdades => CoresBaralho.mentira,
       };
 }
 

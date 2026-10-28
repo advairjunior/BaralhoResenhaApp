@@ -80,6 +80,9 @@ public sealed class EstatisticasDoJogador
 
     /// <summary>Vezes que foi o impostor e a turma não pegou.</summary>
     public int Disfarces { get; set; }
+
+    /// <summary>Duas verdades e uma mentira: vezes que ninguém achou a mentira.</summary>
+    public int MentirasPerfeitas { get; set; }
 }
 
 public sealed class Rodada
@@ -215,9 +218,15 @@ public sealed class Rodada
 
     public bool Escrevendo => Carta.Modo == ModoDeJogo.TermineAFrase && OrdemDasFrases is null;
 
+    /// <summary>Duas verdades e uma mentira: as três frases da pessoa da vez; vazio até ela escrever.</summary>
+    public IReadOnlyList<string> Afirmacoes { get; set; } = [];
+
+    /// <summary>Duas verdades e uma mentira: qual das três é a mentira. Segredo até a revelação.</summary>
+    public int? Mentira { get; set; }
+
     public bool PedeResposta =>
         Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio
-            or ModoDeJogo.Jurados or ModoDeJogo.Impostor or ModoDeJogo.TermineAFrase ||
+            or ModoDeJogo.Jurados or ModoDeJogo.Impostor or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades ||
         (Carta.Modo == ModoDeJogo.MaisProvavel && Votacao);
 }
 
@@ -265,6 +274,11 @@ public sealed record Revelacao(
 
     /// <summary>Termine a frase: as frases, da mais votada para a menos; autor só nas vencedoras.</summary>
     public IReadOnlyList<FraseRevelada> Frases { get; init; } = [];
+
+    /// <summary>Duas verdades e uma mentira: qual era, quantos votos cada frase teve e quem achou.</summary>
+    public int? Mentira { get; init; }
+    public IReadOnlyList<int> VotosNasAfirmacoes { get; init; } = [];
+    public IReadOnlyList<Guid> Acertaram { get; init; } = [];
 }
 
 public sealed record FraseRevelada(string Texto, int Votos, Guid? Autor);
@@ -550,6 +564,7 @@ public sealed partial class Sala
                 return;
             }
             if (rodada.Carta.Modo == ModoDeJogo.TermineAFrase) ValidarVotoNaFrase(rodada, jogador, resposta);
+            if (rodada.Carta.Modo == ModoDeJogo.DuasVerdades) ValidarVotoNaMentira(rodada, jogador, resposta);
             if (rodada.Carta.Modo == ModoDeJogo.Impostor) ValidarVotoNoImpostor(jogador, resposta);
 
             if (rodada.Carta.Modo == ModoDeJogo.EuNunca && resposta is not (RespostaJa or RespostaNunca))
@@ -582,6 +597,7 @@ public sealed partial class Sala
                 return;
             if (Rodada.Carta.Jokenpo)
                 throw new AcaoNaoPermitidaException("Os dois do duelo precisam jogar.");
+            if (Rodada.Carta.Modo == ModoDeJogo.DuasVerdades) ExigirAfirmacoes(Rodada);
             // Termine a frase: "revelar" durante a escrita passa para a votação.
             if (Rodada.Escrevendo)
             {
@@ -760,7 +776,8 @@ public sealed partial class Sala
         var sorteados = (naMesa.Count > 0 ? naMesa : _jogadores)
             .OrderBy(j => j.Chamadas).ThenBy(_ => _sorteio.Next()).Take(2).ToList();
         if (carta.Texto.Contains("{jogador}") ||
-            carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados or ModoDeJogo.Musica)
+            carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados or ModoDeJogo.Musica
+                or ModoDeJogo.DuasVerdades)
             sorteados[0].Chamadas++;
         if (carta.Texto.Contains("{jogador2}") && sorteados.Count == 2) sorteados[1].Chamadas++;
         var texto = carta.Texto
@@ -776,7 +793,9 @@ public sealed partial class Sala
             Texto = texto,
             Palpiteiro = palpiteiro?.Id,
             // No tribunal, o réu é o {jogador} da carta; no correio, quem está na foto.
-            Alvo = carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados ? sorteados[0].Id : alvo?.Id,
+            Alvo = carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados or ModoDeJogo.DuasVerdades
+                ? sorteados[0].Id
+                : alvo?.Id,
             // Elogio e duelo são sempre no celular: a graça é a foto de quem a turma escolheu.
             Votacao = carta.Modo == ModoDeJogo.MaisProvavel &&
                 (carta.Elogio || carta.Duelo || _sorteio.NextDouble() < ChanceDeVotacao),
@@ -816,7 +835,8 @@ public sealed partial class Sala
         var todosResponderam = rodada.Carta.Modo switch
         {
             ModoDeJogo.CasaisEmJogo => CasalRespondeu(rodada),
-            ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados => rodada.Respostas.Count > 0 &&
+            ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados or ModoDeJogo.DuasVerdades =>
+                rodada.Respostas.Count > 0 &&
                 NaMesa.Where(j => j.Id != rodada.Alvo).All(j => rodada.Respostas.ContainsKey(j.Id)),
             ModoDeJogo.MaisProvavel when rodada.Duelistas.Count > 0 => rodada.Respostas.Count > 0 &&
                 NaMesa.Where(j => !rodada.Duelistas.Contains(j.Id)).All(j => rodada.Respostas.ContainsKey(j.Id)),
@@ -857,6 +877,10 @@ public sealed partial class Sala
         else if (rodada.Carta.Modo == ModoDeJogo.TermineAFrase)
         {
             revelacao = RevelarFrases(rodada, respostas);
+        }
+        else if (rodada.Carta.Modo == ModoDeJogo.DuasVerdades)
+        {
+            revelacao = RevelarMentira(rodada, respostas);
         }
         else if (rodada.Carta.Modo == ModoDeJogo.Tribunal)
         {

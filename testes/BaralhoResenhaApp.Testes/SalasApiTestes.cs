@@ -58,6 +58,30 @@ public sealed class SalasApiTestes(WebApplicationFactory<Program> fabrica)
     }
 
     [Fact]
+    public async Task SoAPessoaDaVezEscreveAsDuasVerdades()
+    {
+        var ana = await CriarSala("Ana");
+        var turma = new[] { ana, await Entrar(ana.Codigo, "Bia"), await Entrar(ana.Codigo, "Caio") };
+        var sala = $"/api/salas/{ana.Codigo}";
+        await Enviar(HttpMethod.Put, $"{sala}/configuracao", ana.Token,
+            new { nivel = "Leve", modos = new[] { "DuasVerdades" }, zonaSegura = true });
+        await Enviar(HttpMethod.Post, $"{sala}/comecar", ana.Token);
+        var rodada = (await Visao(ana.Codigo, ana.Token)).GetProperty("rodada");
+        var alvo = rodada.GetProperty("alvo").GetString();
+        var daVez = turma.Single(j => Visao(ana.Codigo, j.Token).Result.GetProperty("euId").GetString() == alvo);
+        var outro = turma.First(j => j != daVez);
+        var corpo = new { rodada = rodada.GetProperty("numero").GetInt32(), frases = new[] { "Um", "Dois", "Três" }, mentira = 2 };
+
+        Assert.Equal(HttpStatusCode.Conflict, (await Enviar(HttpMethod.Post, $"{sala}/duas-verdades", outro.Token, corpo)).StatusCode);
+        var resposta = await Enviar(HttpMethod.Post, $"{sala}/duas-verdades", daVez.Token, corpo);
+
+        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
+        var visaoDoOutro = (await Visao(ana.Codigo, outro.Token)).GetProperty("rodada");
+        Assert.Equal(["Um", "Dois", "Três"], visaoDoOutro.GetProperty("afirmacoes").EnumerateArray().Select(f => f.GetString()));
+        Assert.Equal(JsonValueKind.Null, visaoDoOutro.GetProperty("minhaMentira").ValueKind);
+    }
+
+    [Fact]
     public async Task CriarEntrarEJogarUmaRodadaDeEuNunca()
     {
         var ana = await CriarSala("Ana");

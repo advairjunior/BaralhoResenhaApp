@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 
@@ -295,6 +295,9 @@ class Revelacao {
     this.impostor,
     this.pegaram = false,
     this.frases = const [],
+    this.mentira,
+    this.votosNasAfirmacoes = const [],
+    this.acertaram = const [],
   });
 
   factory Revelacao.deJson(Map<String, dynamic> json) => Revelacao(
@@ -323,10 +326,18 @@ class Revelacao {
           for (final frase in (json['frases'] as List?) ?? const [])
             FraseRevelada(frase['texto'] as String, frase['votos'] as int, frase['autor'] as String?),
         ],
+        mentira: json['mentira'] as int?,
+        votosNasAfirmacoes: List<int>.from((json['votosNasAfirmacoes'] as List?) ?? const []),
+        acertaram: List<String>.from((json['acertaram'] as List?) ?? const []),
       );
 
   /// Termine a frase: da mais votada para a menos; autor só nas vencedoras.
   final List<FraseRevelada> frases;
+
+  /// Duas verdades e uma mentira: qual era, os votos em cada frase e quem achou.
+  final int? mentira;
+  final List<int> votosNasAfirmacoes;
+  final List<String> acertaram;
 
   /// Jurados: a média das estrelas e as notas, sem dizer quem deu qual.
   final double? media;
@@ -433,6 +444,8 @@ class Rodada {
     this.escrevendo = false,
     this.frases = const [],
     this.minhaFrase,
+    this.afirmacoes = const [],
+    this.minhaMentira,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -490,6 +503,8 @@ class Rodada {
         escrevendo: json['escrevendo'] as bool? ?? false,
         frases: List<String>.from((json['frases'] as List?) ?? const []),
         minhaFrase: json['minhaFrase'] as int?,
+        afirmacoes: List<String>.from((json['afirmacoes'] as List?) ?? const []),
+        minhaMentira: json['minhaMentira'] as int?,
       );
 
   final int numero;
@@ -596,6 +611,11 @@ class Rodada {
   /// Termine a frase: as frases para votar, sem autor, e qual delas é a minha.
   final List<String> frases;
   final int? minhaFrase;
+
+  /// Duas verdades e uma mentira: as três frases da pessoa da vez (vazio até ela escrever)
+  /// e, só no celular dela, qual é a mentira.
+  final List<String> afirmacoes;
+  final int? minhaMentira;
 }
 
 class Momento {

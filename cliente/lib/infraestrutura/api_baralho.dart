@@ -104,6 +104,11 @@ class ApiBaralho {
       _visao('POST', '/api/salas/${_codigo(codigo)}/favorito', token,
           corpo: {'rodada': rodada, 'indice': indice});
 
+  /// Duas verdades e uma mentira: a pessoa da vez manda as três frases e qual é a mentira.
+  Future<VisaoDaSala> escreverDuasVerdades(String codigo, String token, int rodada, List<String> frases, int mentira) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/duas-verdades', token,
+          corpo: {'rodada': rodada, 'frases': frases, 'mentira': mentira});
+
   /// Regra-relâmpago: quem criou a sala marca (ou desmarca) quem vacilou.
   Future<VisaoDaSala> marcarVacilo(String codigo, String token, int rodada, String jogadorId) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/vacilo', token,

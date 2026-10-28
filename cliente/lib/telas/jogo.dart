@@ -15,6 +15,7 @@ import 'imagem_e_acao.dart';
 import 'jokenpo.dart';
 import 'correio.dart';
 import 'termine_a_frase.dart';
+import 'duas_verdades.dart';
 import 'configuracao_do_jogo.dart';
 import 'momentos.dart';
 import 'passar_sozinho.dart';
@@ -383,6 +384,7 @@ class _AreaDeAcao extends StatelessWidget {
             ModoDeJogo.imagemEAcao => RevelacaoDaMimica(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.correio => RevelacaoDoCorreio(visao: visao, rodada: rodada, revelacao: revelacao, acoes: acoes),
             ModoDeJogo.termineAFrase => RevelacaoDasFrases(visao: visao, revelacao: revelacao),
+            ModoDeJogo.duasVerdades => RevelacaoDaMentira(visao: visao, rodada: rodada, revelacao: revelacao),
             _ => _RevelacaoMaisProvavel(visao: visao, revelacao: revelacao),
           },
           MomentosDaRodada(visao: visao, rodada: rodada, acoes: acoes),
@@ -485,6 +487,22 @@ class _AreaDeAcao extends StatelessWidget {
               ? const SizedBox.shrink()
               : EscreverBilhete(key: ValueKey('bilhete-${rodada.numero}'), visao: visao, rodada: rodada, acoes: acoes),
         ),
+      // A pessoa da vez escreve primeiro; até lá, a turma só espera.
+      ModoDeJogo.duasVerdades when rodada.afirmacoes.isEmpty => visao.euId == rodada.alvo
+          ? EscreverDuasVerdades(key: ValueKey('duas-verdades-${rodada.numero}'), acoes: acoes)
+          : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              EsperandoAsAfirmacoes(visao: visao, rodada: rodada),
+              const SizedBox(height: EspacoBaralho.grande),
+              if (visao.souAnfitriao) TextButton(onPressed: acoes.proxima, child: const Text('Pular carta')),
+            ]),
+      ModoDeJogo.duasVerdades => _Respondendo(
+          visao: visao,
+          rodada: rodada,
+          acoes: acoes,
+          opcoes: visao.euId == rodada.alvo
+              ? MinhasAfirmacoes(rodada: rodada)
+              : VotarNaMentira(rodada: rodada, acoes: acoes),
+        ),
       ModoDeJogo.termineAFrase => _Respondendo(
           visao: visao,
           rodada: rodada,
@@ -586,7 +604,9 @@ class _Respondendo extends StatelessWidget {
                       ? 'A turma vai votar em quem mandou melhor.'
                       : rodada.modo == ModoDeJogo.jurados
                           ? 'Os jurados estão te avaliando…'
-                          : 'A turma está te julgando…')
+                          : rodada.modo == ModoDeJogo.duasVerdades
+                              ? 'A turma está tentando achar a sua mentira…'
+                              : 'A turma está te julgando…')
               : correio
                   ? (rodada.minhaResposta == null ? 'Escreva em segredo:' : 'Bilhete guardado. Dá para trocar até revelar.')
                   : frase && rodada.escrevendo
@@ -600,6 +620,7 @@ class _Respondendo extends StatelessWidget {
                       ModoDeJogo.euNunca => 'Responda em segredo:',
                       ModoDeJogo.jurados => 'Dê sua nota em segredo:',
                       ModoDeJogo.impostor => 'Depois das pistas, vote em segredo em quem é o impostor:',
+                      ModoDeJogo.duasVerdades => 'Qual é a mentira? Vote em segredo:',
                       _ => 'Vote em segredo:',
                     }
                   : 'Resposta guardada. Dá para trocar até revelar.',
@@ -612,7 +633,7 @@ class _Respondendo extends StatelessWidget {
         Text(
           escrevendo
               ? '${rodada.respostas} de ${votantes.length} já escreveram'
-              : rodada.duelo || frase
+              : rodada.duelo || frase || rodada.modo == ModoDeJogo.duasVerdades
                   ? '${rodada.respostas} de ${votantes.length} votaram'
                   : '${rodada.respostas} de ${votantes.length} responderam',
           textAlign: TextAlign.center,
@@ -643,7 +664,10 @@ class _Respondendo extends StatelessWidget {
 
 /// Tribunal e correio: a carta é sobre alguém, que não vota nem escreve.
 bool _ficaDeFora(Rodada rodada) =>
-    rodada.modo == ModoDeJogo.tribunal || rodada.modo == ModoDeJogo.correio || rodada.modo == ModoDeJogo.jurados;
+    rodada.modo == ModoDeJogo.tribunal ||
+    rodada.modo == ModoDeJogo.correio ||
+    rodada.modo == ModoDeJogo.jurados ||
+    rodada.modo == ModoDeJogo.duasVerdades;
 
 class _BotaoDeResposta extends StatelessWidget {
   const _BotaoDeResposta({required this.rotulo, required this.escolhido, required this.aoTocar});

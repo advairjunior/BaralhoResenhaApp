@@ -156,6 +156,12 @@ app.MapPost("/api/salas/{codigo}/favorito", (
     Agir(codigo, http, salas, notificador,
         (sala, token) => sala.EscolherFavorito(token, requisicao.Rodada, requisicao.Indice)));
 
+app.MapPost("/api/salas/{codigo}/duas-verdades", (
+    string codigo, EscreverDuasVerdades requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador,
+        (sala, token) => sala.EscreverDuasVerdades(token, requisicao.Rodada, requisicao.Frases, requisicao.Mentira)));
+
 app.MapPost("/api/salas/{codigo}/vacilo", (
     string codigo, MarcarApontado requisicao, HttpRequest http,
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
@@ -344,6 +350,7 @@ public sealed record MarcarApontado(int Rodada, Guid JogadorId);
 public sealed record PassarOComando(Guid JogadorId);
 public sealed record ReagirNaCarta(int Rodada, string Emoji);
 public sealed record EscolherFavorito(int Rodada, int Indice);
+public sealed record EscreverDuasVerdades(int Rodada, IReadOnlyList<string> Frases, int Mentira);
 public sealed record ResultadoDaMimica(int Rodada, int? Vencedor);
 public sealed record UsarCartaNaManga(int Rodada, CartaNaManga Carta, Guid? Alvo);
 
