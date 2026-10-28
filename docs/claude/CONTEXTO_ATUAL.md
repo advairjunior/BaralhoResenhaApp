@@ -88,5 +88,4 @@ que ele escrever. Quando ele avisar que terminou, ler as marcações e aplicar e
 ## Banco de ideias
 
 - Esquenta começando no Resenha e velocidade do esquenta (deixados para depois em 2026-10-19).
-- Cartas da turma permanentes (exigiriam banco).
 - Guardar a sala para sobreviver a um deploy no meio da noite (esbarra em "nada vai para disco").

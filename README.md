@@ -167,8 +167,7 @@ abrir espera uns 30 a 60 segundos. Durante o jogo a conexão de tempo real o man
 
 ## Próximas ideias
 
-- Esquenta começando no Resenha; noites prontas (presets); peso por jogo; velocidade do esquenta.
-- Cartas da turma: piadas internas e palavras de mímica salvas para o grupo.
-- Mural permanente ("Memórias da Resenha"), para rever as noites anteriores.
-
-As duas últimas precisam guardar dados além da noite: banco (PostgreSQL no Render) e fotos no R2, como no TocaEssa.
+- Esquenta começando no Resenha; velocidade do esquenta.
+- Mural permanente ("Memórias da Resenha"), para rever as noites anteriores. Precisa guardar
+  dados além da noite: banco (PostgreSQL no Render) e fotos no R2, como no TocaEssa.
+- Cartas, rodízio e jogos novos em andamento: [`docs/PLANO_CARTAS_E_JOGOS.md`](docs/PLANO_CARTAS_E_JOGOS.md).
