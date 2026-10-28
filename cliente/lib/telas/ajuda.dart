@@ -203,8 +203,10 @@ Future<void> abrirComoFunciona(BuildContext context, VisaoDaSala visao) {
           'e a carta que mais rendeu vira a Carta da noite nos prêmios.',
     ),
     const _Secao(
-      titulo: '🔊 Som e vibração',
-      texto: 'A revelação, o vacilo e o fim do tempo tocam no celular. Quer silêncio? Desligue no menu ⋮.',
+      titulo: '🔊 Som, voz e vibração',
+      texto: 'A revelação, o vacilo e o fim do tempo tocam no celular. O celular de quem está no comando '
+          'lê cada carta em voz alta, com um personagem diferente a cada vez. '
+          'Quer silêncio? Desligue no menu ⋮.',
     ),
     const _Secao(
       titulo: '👎 Tira essa',
