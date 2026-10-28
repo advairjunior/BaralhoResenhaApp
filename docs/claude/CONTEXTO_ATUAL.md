@@ -105,3 +105,12 @@ que ele escrever. Quando ele avisar que terminou, ler as marcações e aplicar e
 
 - Esquenta começando no Resenha e velocidade do esquenta (deixados para depois em 2026-10-19).
 - Guardar a sala para sobreviver a um deploy no meio da noite (esbarra em "nada vai para disco").
+- Voz das cartas com mais graça (pesquisado em 2026-10-28, em ordem de esforço):
+  - Uma voz do aparelho diferente para cada personagem (Luciana/Felipe no iPhone, as do Google no
+    Android), escolhida pelo nome; sem a voz, fica como hoje.
+  - Vinheta gravada: alguém da mesa grava "Duelo!", "Atenção, turma!"… e o app toca antes da carta,
+    com efeito de esquilo ou voz grossa pela velocidade do áudio. Só em memória, como as selfies.
+  - Voz neural no navegador (Piper ou Kokoro, que tem Dora, Alex e Santa em pt-BR): sem servidor,
+    mas baixa dezenas de MB e pode ser lenta no celular. Testar num protótipo antes.
+  - Clonar a voz de alguém da mesa: só com serviço pago (ElevenLabs) ou modelo aberto em GPU própria.
+    Esbarra em "nada sai da sala" e no custo; não há nada pronto para Flutter.
