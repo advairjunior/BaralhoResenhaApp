@@ -36,6 +36,9 @@ public sealed class Jogador
     /// <summary>Cartas na manga, estilo Uno (até 3). Só o dono vê quais são.</summary>
     public List<CartaNaManga> Mao { get; } = [];
 
+    /// <summary>Vezes que a carta chamou a pessoa pelo nome (rodízio do {jogador}).</summary>
+    public int Chamadas { get; set; }
+
     /// <summary>Rodada em que ganhou a última carta na manga (rodízio do presente).</summary>
     public int UltimaCartaEm { get; set; }
 
@@ -337,7 +340,9 @@ public sealed partial class Sala
                 Nome = nomeLimpo,
                 SemAlcool = semAlcool,
                 Anfitriao = _jogadores.Count == 0,
-                VistoEm = _relogio.GetUtcNow()
+                VistoEm = _relogio.GetUtcNow(),
+                // Quem chega no meio entra na volta atual, sem ser chamado várias vezes para compensar.
+                Chamadas = _jogadores.Count == 0 ? 0 : _jogadores.Min(j => j.Chamadas)
             };
             _jogadores.Add(jogador);
             Tocar();
@@ -635,8 +640,13 @@ public sealed partial class Sala
         _usadas.Add(carta.Id);
         _ultimosModos.Add(carta.Modo);
         if (_ultimosModos.Count > Baralho.MaximoSeguidas) _ultimosModos.RemoveAt(0);
-        // Duelos usam duas pessoas diferentes: {jogador} e {jogador2}.
-        var sorteados = _jogadores.OrderBy(_ => _sorteio.Next()).Take(2).ToList();
+        // Duelos usam duas pessoas diferentes: {jogador} e {jogador2}. Rodízio: sai quem
+        // foi chamado menos vezes, e a sorte só desempata; ninguém fica esquecido na noite.
+        var sorteados = _jogadores.OrderBy(j => j.Chamadas).ThenBy(_ => _sorteio.Next()).Take(2).ToList();
+        if (carta.Texto.Contains("{jogador}") ||
+            carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados or ModoDeJogo.Musica)
+            sorteados[0].Chamadas++;
+        if (carta.Texto.Contains("{jogador2}") && sorteados.Count == 2) sorteados[1].Chamadas++;
         var texto = carta.Texto
             .Replace("{jogador2}", sorteados[^1].Nome)
             .Replace("{jogador}", sorteados[0].Nome);
