@@ -49,7 +49,10 @@ public sealed record RodadaVisivel(
     IReadOnlyList<Guid> Travaram,
     IReadOnlyDictionary<string, int> Reacoes,
     string? MinhaReacao,
-    bool SouImpostor);
+    bool SouImpostor,
+    bool Escrevendo,
+    IReadOnlyList<string> Frases,
+    int? MinhaFrase);
 
 /// <summary>Esquenta sozinho: em que nível a noite está e quando sobe.</summary>
 /// <param name="SobeEm">Cartas até subir; nulo quando já chegou ao limite.</param>
@@ -92,7 +95,7 @@ public sealed record VisaoDaSala(
             sala.Configuracao,
             jogadores.Select(j => new JogadorVisivel(
                 j.Id, j.Nome, j.Anfitriao, j.SemAlcool, j.Pontos, j.Cofrinho, j.Goles,
-                rodada?.Respostas.ContainsKey(j.Id) ?? false,
+                rodada is not null && (rodada.Escrevendo ? rodada.Frases : rodada.Respostas).ContainsKey(j.Id),
                 j.Foto is null ? null : Endereco(j.Foto),
                 j.ParId,
                 j.Mao.Count,
@@ -105,8 +108,9 @@ public sealed record VisaoDaSala(
                     rodada.Carta.Nivel,
                     rodada.TextoPara(eu.Id, sala.Fase == FaseDaSala.Revelada),
                     rodada.PedeResposta,
-                    rodada.Respostas.GetValueOrDefault(eu.Id),
-                    rodada.Respostas.Count,
+                    // Termine a frase: enquanto escrevem, a resposta é a própria frase; depois, o voto.
+                    (rodada.Escrevendo ? rodada.Frases : rodada.Respostas).GetValueOrDefault(eu.Id),
+                    (rodada.Escrevendo ? rodada.Frases : rodada.Respostas).Count,
                     rodada.Beberam.Contains(eu.Id),
                     rodada.Beberam.ToList(),
                     sala.Fase == FaseDaSala.Revelada ? rodada.Revelacao : null,
@@ -141,7 +145,11 @@ public sealed record VisaoDaSala(
                     Sala.ContarReacoes(rodada),
                     rodada.Reacoes.GetValueOrDefault(eu.Id),
                     // Cada um só sabe de si; quem era aparece na revelação.
-                    rodada.Impostor == eu.Id),
+                    rodada.Impostor == eu.Id,
+                    rodada.Escrevendo,
+                    Sala.FrasesParaVotar(rodada),
+                    // Só para não votar na própria: ninguém mais sabe qual é.
+                    rodada.OrdemDasFrases?.IndexOf(eu.Id) is >= 0 and var minha ? minha : null),
             sala.Regra is { } regra ? regra with { PodemVacilar = sala.QuemPodeVacilar(regra) } : null,
             sala.Momentos.Select(m => new MomentoVisivel(
                 m.Id, m.JogadorId, m.NomeDoJogador, m.Rodada, m.Texto, Endereco(m.Foto))).ToList(),

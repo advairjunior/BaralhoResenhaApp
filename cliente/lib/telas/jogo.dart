@@ -14,6 +14,7 @@ import 'cronometro.dart';
 import 'imagem_e_acao.dart';
 import 'jokenpo.dart';
 import 'correio.dart';
+import 'termine_a_frase.dart';
 import 'configuracao_do_jogo.dart';
 import 'momentos.dart';
 import 'passar_sozinho.dart';
@@ -381,6 +382,7 @@ class _AreaDeAcao extends StatelessWidget {
               _RevelacaoDoDuelo(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.imagemEAcao => RevelacaoDaMimica(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.correio => RevelacaoDoCorreio(visao: visao, rodada: rodada, revelacao: revelacao, acoes: acoes),
+            ModoDeJogo.termineAFrase => RevelacaoDasFrases(visao: visao, revelacao: revelacao),
             _ => _RevelacaoMaisProvavel(visao: visao, revelacao: revelacao),
           },
           MomentosDaRodada(visao: visao, rodada: rodada, acoes: acoes),
@@ -483,6 +485,14 @@ class _AreaDeAcao extends StatelessWidget {
               ? const SizedBox.shrink()
               : EscreverBilhete(key: ValueKey('bilhete-${rodada.numero}'), visao: visao, rodada: rodada, acoes: acoes),
         ),
+      ModoDeJogo.termineAFrase => _Respondendo(
+          visao: visao,
+          rodada: rodada,
+          acoes: acoes,
+          opcoes: rodada.escrevendo
+              ? EscreverFrase(key: ValueKey('escrever-frase-${rodada.numero}'), rodada: rodada, acoes: acoes)
+              : VotarNaFrase(rodada: rodada, acoes: acoes),
+        ),
       ModoDeJogo.imagemEAcao => PainelDaMimica(visao: visao, rodada: rodada, acoes: acoes),
       ModoDeJogo.impostor => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           _PistasDoImpostor(visao: visao, rodada: rodada),
@@ -562,6 +572,9 @@ class _Respondendo extends StatelessWidget {
     final faltam = votantes.where((j) => !j.respondeu).toList();
     final souReu = (_ficaDeFora(rodada) && visao.euId == rodada.alvo) || rodada.duelistas.contains(visao.euId);
     final correio = rodada.modo == ModoDeJogo.correio;
+    final frase = rodada.modo == ModoDeJogo.termineAFrase;
+    // Escrevendo, "revelar" leva para a votação; com uma frase só, todo mundo sabe quem escreveu.
+    final escrevendo = correio || rodada.escrevendo;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -576,6 +589,12 @@ class _Respondendo extends StatelessWidget {
                           : 'A turma está te julgando…')
               : correio
                   ? (rodada.minhaResposta == null ? 'Escreva em segredo:' : 'Bilhete guardado. Dá para trocar até revelar.')
+                  : frase && rodada.escrevendo
+                  ? (rodada.minhaResposta == null
+                      ? 'Complete em segredo:'
+                      : 'Frase guardada. Dá para trocar até todo mundo escrever.')
+                  : frase && rodada.minhaResposta == null
+                  ? 'Vote em segredo na melhor:'
                   : rodada.minhaResposta == null
                   ? switch (rodada.modo) {
                       ModoDeJogo.euNunca => 'Responda em segredo:',
@@ -591,9 +610,9 @@ class _Respondendo extends StatelessWidget {
         opcoes,
         const SizedBox(height: EspacoBaralho.grande),
         Text(
-          correio
+          escrevendo
               ? '${rodada.respostas} de ${votantes.length} já escreveram'
-              : rodada.duelo
+              : rodada.duelo || frase
                   ? '${rodada.respostas} de ${votantes.length} votaram'
                   : '${rodada.respostas} de ${votantes.length} responderam',
           textAlign: TextAlign.center,
@@ -612,8 +631,8 @@ class _Respondendo extends StatelessWidget {
           Expanded(
             child: TextButton(
               // No correio, com um bilhete só todo mundo sabe quem escreveu.
-              onPressed: rodada.respostas >= (correio ? 2 : 1) ? acoes.revelar : null,
-              child: const Text('Revelar agora'),
+              onPressed: rodada.respostas >= (escrevendo ? 2 : 1) ? acoes.revelar : null,
+              child: Text(frase && rodada.escrevendo ? 'Ir para a votação' : 'Revelar agora'),
             ),
           ),
         ]),

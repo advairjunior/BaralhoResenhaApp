@@ -106,6 +106,13 @@ ComoJoga comoJoga(Rodada rodada) {
         'Anônimo de verdade: ninguém sabe quem escreveu o quê, nem quem criou a sala.',
         'No fim, todo mundo lê junto, e a pessoa da foto escolhe o bilhete favorito.',
       ]),
+    Rodada(modo: ModoDeJogo.termineAFrase) => ('termineAFrase', ModoDeJogo.termineAFrase.titulo, [
+        'A carta dá o começo. Cada um completa no celular, em segredo, com até 40 letras.',
+        'Quando todo mundo escreve, as frases aparecem embaralhadas e sem autor.',
+        'Vote na melhor. Não vale votar na sua.',
+        'Só a mais votada revela quem escreveu: essa pessoa distribui goles e ganha uma carta na manga. '
+            'As outras continuam anônimas.',
+      ]),
     Rodada(modo: ModoDeJogo.imagemEAcao) => ('mimica', ModoDeJogo.imagemEAcao.titulo, [
         'Só quem faz a mímica vê a palavra. Dá para dizer a dica: a categoria e o número de palavras.',
         'Não vale falar, soletrar nem apontar para objetos.',

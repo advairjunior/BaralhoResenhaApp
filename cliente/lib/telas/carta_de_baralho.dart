@@ -49,6 +49,8 @@ _TemaDaCarta _temaDo(ModoDeJogo modo) => switch (modo) {
         const _TemaDaCarta(moldura: Color(0xFF0284C7), papel: Color(0xFFEFF9FF), titulo: Color(0xFF0369A1)),
       ModoDeJogo.impostor =>
         const _TemaDaCarta(moldura: Color(0xFF334155), papel: Color(0xFFF1F5F9), titulo: Color(0xFF1E293B)),
+      ModoDeJogo.termineAFrase =>
+        const _TemaDaCarta(moldura: Color(0xFF4D7C0F), papel: Color(0xFFF7FDEB), titulo: Color(0xFF3F6212)),
     };
 
 /// O que vai em cima do título: o jeito de jogar esta carta.

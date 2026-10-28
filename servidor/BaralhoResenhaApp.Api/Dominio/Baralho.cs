@@ -42,6 +42,8 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
         [ModoDeJogo.ImagemEAcao] = 4,
         // Uma roda de pistas e uma votação: rende, mas demora, como o Correio.
         [ModoDeJogo.Impostor] = 1,
+        // Escrever e votar demora, como o Correio. Quem quiser mais, põe no Muito.
+        [ModoDeJogo.TermineAFrase] = 1,
     };
 
     /// <summary>
@@ -71,7 +73,7 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
             .Distinct()
             // Votação e tribunal precisam de gente para votar.
             .Where(modo => modo is not (ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.ImagemEAcao
-                    or ModoDeJogo.Jurados) ||
+                    or ModoDeJogo.Jurados or ModoDeJogo.TermineAFrase) ||
                 quantidadeDeJogadores >= 3)
             // Com menos de três escrevendo, todo mundo adivinha quem escreveu.
             .Where(modo => modo != ModoDeJogo.Correio || quantidadeDeJogadores >= 4)

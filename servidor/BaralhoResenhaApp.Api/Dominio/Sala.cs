@@ -207,9 +207,17 @@ public sealed class Rodada
     /// <summary>A reação de cada um nesta carta (😂 🔥 💀 😱).</summary>
     public Dictionary<Guid, string> Reacoes { get; } = [];
 
+    /// <summary>Termine a frase: o que cada um escreveu. O autor só sai se a frase vencer.</summary>
+    public Dictionary<Guid, string> Frases { get; } = [];
+
+    /// <summary>Termine a frase: de quem é cada frase, na ordem da votação; nulo enquanto escrevem.</summary>
+    public List<Guid>? OrdemDasFrases { get; set; }
+
+    public bool Escrevendo => Carta.Modo == ModoDeJogo.TermineAFrase && OrdemDasFrases is null;
+
     public bool PedeResposta =>
         Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio
-            or ModoDeJogo.Jurados or ModoDeJogo.Impostor ||
+            or ModoDeJogo.Jurados or ModoDeJogo.Impostor or ModoDeJogo.TermineAFrase ||
         (Carta.Modo == ModoDeJogo.MaisProvavel && Votacao);
 }
 
@@ -254,7 +262,12 @@ public sealed record Revelacao(
     /// <summary>Impostor: quem era, e se a turma pegou (sozinho no topo dos votos).</summary>
     public Guid? Impostor { get; init; }
     public bool Pegaram { get; init; }
+
+    /// <summary>Termine a frase: as frases, da mais votada para a menos; autor só nas vencedoras.</summary>
+    public IReadOnlyList<FraseRevelada> Frases { get; init; } = [];
 }
+
+public sealed record FraseRevelada(string Texto, int Votos, Guid? Autor);
 
 /// <param name="Quem">Quem faz: entrevista, missão, pergunta ou piada.</param>
 /// <param name="Para">Para quem: quem responde ou tem que segurar a risada.</param>
@@ -530,6 +543,13 @@ public sealed partial class Sala
             }
 
             if (rodada.Carta.Modo == ModoDeJogo.Correio) resposta = ValidarBilhete(rodada, jogador, resposta);
+            if (rodada.Escrevendo)
+            {
+                EscreverFrase(rodada, jogador, resposta);
+                Tocar();
+                return;
+            }
+            if (rodada.Carta.Modo == ModoDeJogo.TermineAFrase) ValidarVotoNaFrase(rodada, jogador, resposta);
             if (rodada.Carta.Modo == ModoDeJogo.Impostor) ValidarVotoNoImpostor(jogador, resposta);
 
             if (rodada.Carta.Modo == ModoDeJogo.EuNunca && resposta is not (RespostaJa or RespostaNunca))
@@ -562,6 +582,16 @@ public sealed partial class Sala
                 return;
             if (Rodada.Carta.Jokenpo)
                 throw new AcaoNaoPermitidaException("Os dois do duelo precisam jogar.");
+            // Termine a frase: "revelar" durante a escrita passa para a votação.
+            if (Rodada.Escrevendo)
+            {
+                if (Rodada.Frases.Count < 2)
+                    throw new AcaoNaoPermitidaException(
+                        "Espere pelo menos 2 frases: com uma só, todo mundo sabe quem escreveu.");
+                ComecarVotacaoDasFrases(Rodada);
+                Tocar();
+                return;
+            }
             if (Rodada.Respostas.Count == 0)
                 throw new AcaoNaoPermitidaException("Ninguém respondeu ainda.");
             if (Rodada.Carta.Modo == ModoDeJogo.CasaisEmJogo && !CasalRespondeu(Rodada))
@@ -773,6 +803,11 @@ public sealed partial class Sala
     private void RevelarSeTodosResponderam()
     {
         if (Fase != FaseDaSala.Carta || Rodada is not { PedeResposta: true } rodada) return;
+        if (rodada.Escrevendo)
+        {
+            ComecarVotacaoSeTodosEscreveram(rodada);
+            return;
+        }
         if (rodada.Carta.Jokenpo)
         {
             ResolverJokenpo(rodada);
@@ -818,6 +853,10 @@ public sealed partial class Sala
         else if (rodada.Carta.Modo == ModoDeJogo.Impostor)
         {
             revelacao = RevelarImpostor(rodada, respostas);
+        }
+        else if (rodada.Carta.Modo == ModoDeJogo.TermineAFrase)
+        {
+            revelacao = RevelarFrases(rodada, respostas);
         }
         else if (rodada.Carta.Modo == ModoDeJogo.Tribunal)
         {

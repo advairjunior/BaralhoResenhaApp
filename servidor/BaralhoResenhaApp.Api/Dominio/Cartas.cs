@@ -33,7 +33,13 @@ public enum ModoDeJogo
     /// Impostor: todo mundo recebe a mesma palavra, menos um, que só sabe o tema.
     /// Cada um fala uma pista e a turma vota em quem é o impostor.
     /// </summary>
-    Impostor
+    Impostor,
+
+    /// <summary>
+    /// Termine a frase: a carta dá o começo, cada um completa em segredo e a
+    /// turma vota na melhor sem saber de quem é. Só a vencedora revela o autor.
+    /// </summary>
+    TermineAFrase
 }
 
 /// <summary>
@@ -163,6 +169,6 @@ public sealed record ConfiguracaoDoJogo(
         // Casais em Jogo começa desligado: quem quiser, liga.
         [ModoDeJogo.EuNunca, ModoDeJogo.MaisProvavel, ModoDeJogo.BebaSe, ModoDeJogo.RegraRelampago,
             ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados,
-            ModoDeJogo.Musica, ModoDeJogo.Impostor],
+            ModoDeJogo.Musica, ModoDeJogo.Impostor, ModoDeJogo.TermineAFrase],
         ZonaSegura: true);
 }

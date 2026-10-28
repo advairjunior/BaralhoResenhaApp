@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 
@@ -294,6 +294,7 @@ class Revelacao {
     this.notas = const [],
     this.impostor,
     this.pegaram = false,
+    this.frases = const [],
   });
 
   factory Revelacao.deJson(Map<String, dynamic> json) => Revelacao(
@@ -318,7 +319,14 @@ class Revelacao {
         notas: List<int>.from((json['notas'] as List?) ?? const []),
         impostor: json['impostor'] as String?,
         pegaram: json['pegaram'] as bool? ?? false,
+        frases: [
+          for (final frase in (json['frases'] as List?) ?? const [])
+            FraseRevelada(frase['texto'] as String, frase['votos'] as int, frase['autor'] as String?),
+        ],
       );
+
+  /// Termine a frase: da mais votada para a menos; autor só nas vencedoras.
+  final List<FraseRevelada> frases;
 
   /// Jurados: a média das estrelas e as notas, sem dizer quem deu qual.
   final double? media;
@@ -358,6 +366,14 @@ class Revelacao {
 
   /// Eu Nunca: a maioria já fez, então leva quem nunca fez.
   final bool minoriaLeva;
+}
+
+class FraseRevelada {
+  const FraseRevelada(this.texto, this.votos, this.autor);
+
+  final String texto;
+  final int votos;
+  final String? autor;
 }
 
 /// Imagem e Ação: quem faz a mímica e quem adivinha (o mímico está junto).
@@ -414,6 +430,9 @@ class Rodada {
     this.reacoes = const {},
     this.minhaReacao,
     this.souImpostor = false,
+    this.escrevendo = false,
+    this.frases = const [],
+    this.minhaFrase,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -468,6 +487,9 @@ class Rodada {
         reacoes: Map<String, int>.from((json['reacoes'] as Map?) ?? const {}),
         minhaReacao: json['minhaReacao'] as String?,
         souImpostor: json['souImpostor'] as bool? ?? false,
+        escrevendo: json['escrevendo'] as bool? ?? false,
+        frases: List<String>.from((json['frases'] as List?) ?? const []),
+        minhaFrase: json['minhaFrase'] as int?,
       );
 
   final int numero;
@@ -567,6 +589,13 @@ class Rodada {
 
   /// Impostor: este celular não recebeu a palavra.
   final bool souImpostor;
+
+  /// Termine a frase: ainda escrevendo (a [minhaResposta] é a frase); depois, votando (é o voto).
+  final bool escrevendo;
+
+  /// Termine a frase: as frases para votar, sem autor, e qual delas é a minha.
+  final List<String> frases;
+  final int? minhaFrase;
 }
 
 class Momento {

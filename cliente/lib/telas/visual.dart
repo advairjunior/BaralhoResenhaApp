@@ -17,6 +17,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.jurados => 'Jurados',
         ModoDeJogo.musica => 'Roda de Música',
         ModoDeJogo.impostor => 'Impostor',
+        ModoDeJogo.termineAFrase => 'Termine a frase',
       };
 
   String get emoji => switch (this) {
@@ -32,6 +33,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.jurados => '⭐',
         ModoDeJogo.musica => '🎵',
         ModoDeJogo.impostor => '🕵️',
+        ModoDeJogo.termineAFrase => '✍️',
       };
 
   String get explicacao => switch (this) {
@@ -55,6 +57,8 @@ extension VisualDoModo on ModoDeJogo {
             'sorteada. Travou, leva ponto.',
         ModoDeJogo.impostor => 'Todo mundo recebe a mesma palavra, menos um, que só sabe o tema. Cada um fala '
             'uma pista e a turma vota no impostor. Precisa de 4 pessoas.',
+        ModoDeJogo.termineAFrase => 'A carta dá o começo e cada um completa em segredo. A turma vota na melhor '
+            'sem saber de quem é: quem escreveu distribui goles. Precisa de 3 pessoas.',
       };
 
   Color get cor => switch (this) {
@@ -70,6 +74,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.jurados => CoresBaralho.jurados,
         ModoDeJogo.musica => CoresBaralho.musica,
         ModoDeJogo.impostor => CoresBaralho.impostor,
+        ModoDeJogo.termineAFrase => CoresBaralho.frase,
       };
 }
 
