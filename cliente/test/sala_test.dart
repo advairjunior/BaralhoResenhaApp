@@ -96,6 +96,9 @@ void main() {
     expect(corpo['nivel'], 'Resenha');
     expect(corpo['esquentar'], isNot(true));
     expect((corpo['modos'] as List), containsAll(['MaisProvavel', 'Tribunal', 'Correio', 'ImagemEAcao']));
+    // Casais em Jogo saiu do app: nem na mistura, nem na lista de jogos.
+    expect((corpo['modos'] as List), isNot(contains('CasaisEmJogo')));
+    expect(find.byKey(const Key('modo-casaisEmJogo')), findsNothing);
     await fecharApp(tester);
   });
 

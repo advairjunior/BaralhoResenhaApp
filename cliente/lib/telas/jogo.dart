@@ -8,7 +8,6 @@ import 'ajuda.dart';
 import 'aponta_no_tres.dart';
 import 'bebida.dart';
 import 'cartas_na_manga.dart';
-import 'casais.dart';
 import 'controles_do_anfitriao.dart';
 import 'cronometro.dart';
 import 'imagem_e_acao.dart';
@@ -382,7 +381,6 @@ class _AreaDeAcao extends StatelessWidget {
                   _FilaDeHistorias(visao: visao, rodada: rodada, revelacao: revelacao, acoes: acoes),
                 _RevelacaoEuNunca(visao: visao, revelacao: revelacao),
               ]),
-            ModoDeJogo.casaisEmJogo => RevelacaoDoCasal(visao: visao, rodada: rodada, acoes: acoes),
             ModoDeJogo.tribunal => _RevelacaoDoTribunal(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.jurados => _RevelacaoDosJurados(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.impostor => _RevelacaoDoImpostor(visao: visao, rodada: rodada, revelacao: revelacao),
@@ -554,7 +552,6 @@ class _AreaDeAcao extends StatelessWidget {
             ),
           ),
         ]),
-      ModoDeJogo.casaisEmJogo => RespostaDoCasal(visao: visao, rodada: rodada, acoes: acoes),
       ModoDeJogo.jurados => _Respondendo(
           visao: visao,
           rodada: rodada,

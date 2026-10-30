@@ -200,8 +200,7 @@ public sealed partial class Sala
     {
         var todosProntos = NaMesa.Any() && NaMesa.All(j => rodada.Prontos.Contains(j.Id));
         if (Fase == FaseDaSala.Revelada)
-            return (rodada.Carta.Modo != ModoDeJogo.CasaisEmJogo || rodada.Acertou is not null) &&
-                Pendentes(rodada).Count == 0;
+            return Pendentes(rodada).Count == 0;
         return rodada.Carta.Modo switch
         {
             ModoDeJogo.BebaSe => todosProntos && Pendentes(rodada).Count == 0,

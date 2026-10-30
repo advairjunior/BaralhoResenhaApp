@@ -142,7 +142,7 @@ public sealed class EsquentaETiraEssaTestes
         var ana = new Jogador { Id = Guid.NewGuid(), Token = "a", Nome = "Ana" };
         ana.Estatisticas.Tiradas = 3;
 
-        var fiscal = Assert.Single(PremiosDaNoite.Calcular([ana], []));
+        var fiscal = Assert.Single(PremiosDaNoite.Calcular([ana]));
 
         Assert.Equal("Fiscal da resenha", fiscal.Titulo);
         Assert.Equal("Tirou 3 cartas do baralho", fiscal.Descricao);

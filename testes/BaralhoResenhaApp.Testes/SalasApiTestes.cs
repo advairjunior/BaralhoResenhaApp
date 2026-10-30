@@ -233,41 +233,50 @@ public sealed class SalasApiTestes(WebApplicationFactory<Program> fabrica)
     }
 
     [Fact]
-    public async Task CasalJogaJulgaRegistraOMomentoEANoiteTerminaComPremios()
+    public async Task QuemFoiPegoRegistraOMomentoEANoiteTerminaComPremios()
+    {
+        var ana = await CriarSala("Ana");
+        var beto = await Entrar(ana.Codigo, "Beto");
+        var sala = $"/api/salas/{ana.Codigo}";
+        await Enviar(HttpMethod.Put, $"{sala}/configuracao", ana.Token,
+            new { nivel = "Leve", modos = new[] { "EuNunca" }, zonaSegura = true });
+        await Enviar(HttpMethod.Post, $"{sala}/comecar", ana.Token);
+
+        var numero = (await Visao(ana.Codigo, ana.Token)).GetProperty("rodada").GetProperty("numero").GetInt32();
+        await Enviar(HttpMethod.Post, $"{sala}/respostas", ana.Token, new { rodada = numero, resposta = "ja" });
+        await Enviar(HttpMethod.Post, $"{sala}/respostas", beto.Token, new { rodada = numero, resposta = "nunca" });
+
+        var foto = new HttpRequestMessage(HttpMethod.Put, $"{sala}/momentos?rodada={numero}")
+        {
+            Content = new ByteArrayContent([0xFF, 0xD8, 0xFF, 0xE0])
+        };
+        foto.Headers.Authorization = new AuthenticationHeaderValue("Bearer", ana.Token);
+        Assert.Equal(HttpStatusCode.OK, (await _cliente.SendAsync(foto)).StatusCode);
+
+        var fim = await Enviar(HttpMethod.Post, $"{sala}/encerrar", ana.Token);
+        var visao = await fim.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("Fim", visao.GetProperty("fase").GetString());
+        Assert.Equal("Rei(nha) da noite", visao.GetProperty("premios")[0].GetProperty("titulo").GetString());
+        Assert.Equal(1, visao.GetProperty("momentos").GetArrayLength());
+    }
+
+    [Fact]
+    public async Task CasaisEmJogoSaiuDoApp()
     {
         var ana = await CriarSala("Ana");
         var beto = await Entrar(ana.Codigo, "Beto");
         var sala = $"/api/salas/{ana.Codigo}";
         var betoId = (await Visao(ana.Codigo, beto.Token)).GetProperty("euId").GetString();
 
-        Assert.Equal(HttpStatusCode.OK,
-            (await Enviar(HttpMethod.Put, $"{sala}/jogadores/eu/par", ana.Token, new { parId = betoId })).StatusCode);
-        await Enviar(HttpMethod.Put, $"{sala}/configuracao", ana.Token,
+        var configuracao = await Enviar(HttpMethod.Put, $"{sala}/configuracao", ana.Token,
             new { nivel = "Leve", modos = new[] { "CasaisEmJogo" }, zonaSegura = true });
-        await Enviar(HttpMethod.Post, $"{sala}/comecar", ana.Token);
+        var par = await Enviar(HttpMethod.Put, $"{sala}/jogadores/eu/par", ana.Token, new { parId = betoId });
 
-        var rodada = (await Visao(ana.Codigo, ana.Token)).GetProperty("rodada");
-        var numero = rodada.GetProperty("numero").GetInt32();
-        var alvoEhBeto = rodada.GetProperty("alvo").GetString() == betoId;
-        var (alvo, palpiteiro) = alvoEhBeto ? (beto, ana) : (ana, beto);
-        await Enviar(HttpMethod.Post, $"{sala}/respostas", alvo.Token, new { rodada = numero, resposta = "Jiló" });
-        await Enviar(HttpMethod.Post, $"{sala}/respostas", palpiteiro.Token, new { rodada = numero, resposta = "Jiló" });
-        var julgado = await Enviar(HttpMethod.Post, $"{sala}/julgar", alvo.Token, new { rodada = numero, acertou = true });
-        Assert.True((await julgado.Content.ReadFromJsonAsync<JsonElement>())
-            .GetProperty("rodada").GetProperty("acertou").GetBoolean());
-
-        var foto = new HttpRequestMessage(HttpMethod.Put, $"{sala}/momentos?rodada={numero}")
-        {
-            Content = new ByteArrayContent([0xFF, 0xD8, 0xFF, 0xE0])
-        };
-        foto.Headers.Authorization = new AuthenticationHeaderValue("Bearer", palpiteiro.Token);
-        Assert.Equal(HttpStatusCode.OK, (await _cliente.SendAsync(foto)).StatusCode);
-
-        var fim = await Enviar(HttpMethod.Post, $"{sala}/encerrar", ana.Token);
-        var visao = await fim.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.Equal("Fim", visao.GetProperty("fase").GetString());
-        Assert.Equal("Casal em sintonia", visao.GetProperty("premios")[0].GetProperty("titulo").GetString());
-        Assert.Equal(1, visao.GetProperty("momentos").GetArrayLength());
+        Assert.Equal(HttpStatusCode.BadRequest, configuracao.StatusCode);
+        // Sem a rota do par: sobra o "/jogadores/{id}" de tirar da sala, que não aceita PUT.
+        Assert.Contains(par.StatusCode, new[] { HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed });
+        var jogador = (await Visao(ana.Codigo, ana.Token)).GetProperty("jogadores")[0];
+        Assert.False(jogador.TryGetProperty("parId", out _));
     }
 
     [Fact]

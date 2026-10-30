@@ -65,11 +65,6 @@ ComoJoga comoJoga(Rodada rodada) {
         'Com entrevista, pergunta, missão ou piada: vem uma carta comum e depois a ⚡ vez da regra com a pergunta, 3 vezes. Siga o que ela pedir: é isso que faz a regra acontecer.',
         'Quebrou a regra? Quem criou a sala marca em "🚨 Alguém vacilou?" e a pessoa leva 1 ponto.',
       ]),
-    Rodada(modo: ModoDeJogo.casaisEmJogo) => ('casais', ModoDeJogo.casaisEmJogo.titulo, [
-        'Uma pessoa do casal escreve a resposta verdadeira sobre ela; o par tenta adivinhar.',
-        'Depois da revelação, quem respondeu diz se o palpite acertou.',
-        'Errou? O palpiteiro leva 1 ponto.',
-      ]),
     Rodada(modo: ModoDeJogo.tribunal) => ('tribunal', ModoDeJogo.tribunal.titulo, [
         'A pessoa da carta é o réu: ela só espera.',
         'O resto da turma vota em segredo: 👍 sim ou 👎 não.',

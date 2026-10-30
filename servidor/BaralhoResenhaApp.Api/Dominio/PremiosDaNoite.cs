@@ -15,8 +15,7 @@ public static class PremiosDaNoite
     private const int MaximoDeGanhadores = 3;
 
     /// <param name="salaSemAlcool">Na sala sem álcool, o cofrinho cheio virou prenda, não gole.</param>
-    public static IReadOnlyList<Premio> Calcular(
-        IReadOnlyList<Jogador> jogadores, IReadOnlyList<(Jogador Um, Jogador Outro)> casais, bool salaSemAlcool = false)
+    public static IReadOnlyList<Premio> Calcular(IReadOnlyList<Jogador> jogadores, bool salaSemAlcool = false)
     {
         var premios = new List<Premio>();
 
@@ -28,17 +27,6 @@ public static class PremiosDaNoite
             var ganhadores = jogadores.Where(j => valor(j) == maximo).ToList();
             if (ganhadores.Count > MaximoDeGanhadores) return;
             premios.Add(new Premio(emoji, titulo, descricao(maximo, ganhadores[0]), ganhadores.Select(j => j.Id).ToList()));
-        }
-
-        void DoCasal(string emoji, string titulo, Func<Jogador, int> valor, Func<int, string> descricao)
-        {
-            if (casais.Count == 0) return;
-            int DoisJuntos((Jogador Um, Jogador Outro) casal) => valor(casal.Um) + valor(casal.Outro);
-            var maximo = casais.Max(DoisJuntos);
-            if (maximo < 1) return;
-            var ganhadores = casais.Where(c => DoisJuntos(c) == maximo).ToList();
-            if (ganhadores.Count > 1) return;
-            premios.Add(new Premio(emoji, titulo, descricao(maximo), [ganhadores[0].Um.Id, ganhadores[0].Outro.Id]));
         }
 
         Individual(salaSemAlcool ? "🎟️" : "🍺", "Rei(nha) da noite", j => j.Pontos,
@@ -72,10 +60,6 @@ public static class PremiosDaNoite
             (n, _) => $"Enganou a turma inteira {Plural(n, "vez", "vezes")}");
         Individual("👮", "Fiscal da resenha", j => j.Estatisticas.Tiradas,
             (n, _) => $"Tirou {Plural(n, "carta", "cartas")} do baralho", minimo: 2);
-        DoCasal("💞", "Casal em sintonia", j => j.Estatisticas.Acertos,
-            n => $"Acertaram {Plural(n, "palpite", "palpites")} um sobre o outro");
-        DoCasal("😬", "Casal que precisa conversar", j => j.Estatisticas.Erros,
-            n => $"Erraram {Plural(n, "palpite", "palpites")} um sobre o outro");
 
         return premios;
     }

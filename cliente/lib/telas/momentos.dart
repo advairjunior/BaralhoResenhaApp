@@ -5,7 +5,7 @@ import '../tema/tema_baralho.dart';
 import 'sala.dart';
 import 'selfie.dart';
 
-/// Quem a carta pegou: bebeu, conta a história ou é do casal já julgado.
+/// Quem a carta pegou: bebeu, foi escolhido(a), conta a história ou é o réu.
 /// Espelha a regra do servidor para mostrar o botão só a quem pode usar.
 Set<String> protagonistasDa(Rodada rodada) => {
       ...?rodada.revelacao?.perderam,
@@ -13,10 +13,6 @@ Set<String> protagonistasDa(Rodada rodada) => {
       if (rodada.modo == ModoDeJogo.tribunal && rodada.revelacao != null)
         if (rodada.alvo case final reu?) reu,
       if (rodada.revelacao?.contaAHistoria case final historia?) historia,
-      if (rodada.modo == ModoDeJogo.casaisEmJogo && rodada.acertou != null) ...[
-        if (rodada.palpiteiro case final palpiteiro?) palpiteiro,
-        if (rodada.alvo case final alvo?) alvo,
-      ],
     };
 
 /// Tema da selfie de reação, de acordo com o que aconteceu na carta.
@@ -29,8 +25,6 @@ String temaDaReacao(Rodada rodada, String euId) {
     ModoDeJogo.maisProvavel => 'Cara de quem foi escolhido pela turma 👉',
     ModoDeJogo.tribunal when revelacao?.escolhidos.isNotEmpty ?? false => 'Cara de quem foi condenado(a) pela turma 🔨',
     ModoDeJogo.tribunal => 'Cara de quem foi absolvido(a) 😇',
-    ModoDeJogo.casaisEmJogo when rodada.acertou == true => 'Cara de casal em sintonia 💞',
-    ModoDeJogo.casaisEmJogo => 'Cara de quem errou sobre o próprio par 😬',
     _ => 'Cara de quem foi pego 🍺',
   };
 }

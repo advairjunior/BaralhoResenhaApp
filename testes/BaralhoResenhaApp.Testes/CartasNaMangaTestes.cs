@@ -202,7 +202,7 @@ public sealed class CartasNaMangaTestes
         var ana = new Jogador { Id = Guid.NewGuid(), Token = "a", Nome = "Ana" };
         ana.Estatisticas.CartasUsadas = 3;
 
-        var premio = PremiosDaNoite.Calcular([ana], []).Single();
+        var premio = PremiosDaNoite.Calcular([ana]).Single();
 
         Assert.Equal("Mestre das cartas na manga", premio.Titulo);
         Assert.Equal("Usou 3 cartas na manga", premio.Descricao);

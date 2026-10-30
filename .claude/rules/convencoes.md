@@ -10,7 +10,7 @@
 - Minimal APIs no `Program.cs` — sem controllers. Toda ação devolve a visão da sala
   e publica no tempo real (`/api/tempo-real/{codigo}`).
 - A sala é dividida em arquivos parciais por assunto: `Sala.cs` (rodadas e revelação),
-  `Sala.Casais.cs`, `Sala.Correio.cs`, `Sala.Duelo.cs`, `Sala.ImagemEAcao.cs`,
+  `Sala.Correio.cs`, `Sala.Duelo.cs`, `Sala.ImagemEAcao.cs`,
   `Sala.Regras.cs`, `Sala.Bebida.cs`, `Sala.Momentos.cs`, `Sala.Tirar.cs`, `Sala.Fim.cs`.
 - Todo acesso à sala passa pelo trinco dela (`lock (_trinco)`): vários celulares agem ao mesmo tempo.
 - Erros de regra do jogo são `AcaoNaoPermitidaException`; a mensagem vai direto para a tela.
@@ -20,7 +20,7 @@
 
 - Cartas em `servidor/BaralhoResenhaApp.Api/Dados/cartas.json`, uma por linha; iscas das
   regras-relâmpago em `Dados/iscas.json`. Os dois são recursos embutidos na DLL.
-- Ids estáveis por jogo (`en-`, `mp-`, `bs-`, `rr-`, `cs-`, `tr-`, `el-`, `co-`, `ia-`, `ju-`, `mu-`, `im-`):
+- Ids estáveis por jogo (`en-`, `mp-`, `bs-`, `rr-`, `tr-`, `el-`, `co-`, `ia-`, `ju-`, `mu-`, `im-`):
   a página de revisão usa o id para guardar as decisões.
 - Cartas são para a turma como amigos: nada centrado em casal, Leve é humor de adulto sem
   malícia (nunca infantil), e o que pede votação nunca fica no Beba se.

@@ -122,7 +122,7 @@ public sealed class DuasVerdadesTestes
             p => p.JogadorId == mesa.DaVez.Id && p.Motivo == MotivoPendente.Elogio);
         Assert.Equal(1, mesa.DaVez.Estatisticas.MentirasPerfeitas);
 
-        var premio = Assert.Single(PremiosDaNoite.Calcular(mesa.Todos, []), p => p.Titulo == "Mentiroso(a) de respeito");
+        var premio = Assert.Single(PremiosDaNoite.Calcular(mesa.Todos), p => p.Titulo == "Mentiroso(a) de respeito");
         Assert.Equal([mesa.DaVez.Id], premio.Jogadores);
         Assert.Equal("Enganou a turma inteira 1 vez", premio.Descricao);
     }

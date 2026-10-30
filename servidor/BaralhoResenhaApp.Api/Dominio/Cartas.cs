@@ -6,7 +6,6 @@ public enum ModoDeJogo
     MaisProvavel,
     BebaSe,
     RegraRelampago,
-    CasaisEmJogo,
 
     /// <summary>A turma julga uma pessoa: "{jogador} tem cara de…?", sim ou não.</summary>
     Tribunal,
@@ -210,7 +209,6 @@ public sealed record ConfiguracaoDoJogo(
 
     public static ConfiguracaoDoJogo Padrao { get; } = new(
         NivelDaCarta.Resenha,
-        // Casais em Jogo começa desligado: quem quiser, liga.
         [ModoDeJogo.EuNunca, ModoDeJogo.MaisProvavel, ModoDeJogo.BebaSe, ModoDeJogo.RegraRelampago,
             ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados,
             ModoDeJogo.Musica, ModoDeJogo.Impostor, ModoDeJogo.TermineAFrase, ModoDeJogo.DuasVerdades,

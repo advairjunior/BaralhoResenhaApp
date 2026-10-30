@@ -43,8 +43,6 @@ abstract interface class AcoesDaSala {
   Future<void> passarSozinho();
   Future<void> alternarBebi();
   Future<void> trocarFoto(Uint8List foto);
-  Future<void> definirPar(String? parId);
-  Future<void> julgar({required bool acertou});
   Future<void> registrarMomento(Uint8List foto);
   Future<void> passarComando(String jogadorId);
   Future<void> reagir(String emoji);
@@ -313,13 +311,6 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
 
   @override
   Future<void> trocarFoto(Uint8List foto) => _agir((token) => widget.api.enviarFoto(_codigo, token, foto));
-
-  @override
-  Future<void> definirPar(String? parId) => _agir((token) => widget.api.definirPar(_codigo, token, parId));
-
-  @override
-  Future<void> julgar({required bool acertou}) =>
-      _agir((token) => widget.api.julgar(_codigo, token, _rodada, acertou: acertou));
 
   @override
   Future<void> registrarMomento(Uint8List foto) =>

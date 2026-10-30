@@ -86,14 +86,6 @@ class ApiBaralho {
   Future<VisaoDaSala> alternarBebi(String codigo, String token, int rodada) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/bebi', token, corpo: {'rodada': rodada});
 
-  /// Marca o par do casal; nulo desfaz.
-  Future<VisaoDaSala> definirPar(String codigo, String token, String? parId) =>
-      _visao('PUT', '/api/salas/${_codigo(codigo)}/jogadores/eu/par', token, corpo: {'parId': parId});
-
-  Future<VisaoDaSala> julgar(String codigo, String token, int rodada, {required bool acertou}) =>
-      _visao('POST', '/api/salas/${_codigo(codigo)}/julgar', token,
-          corpo: {'rodada': rodada, 'acertou': acertou});
-
   /// Apontar no 3: quem criou a sala marca (ou desmarca) quem a turma apontou.
   Future<VisaoDaSala> marcarApontado(String codigo, String token, int rodada, String jogadorId) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/apontado', token,

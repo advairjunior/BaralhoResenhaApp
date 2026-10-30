@@ -20,7 +20,6 @@ abstract final class CoresBaralho {
   static const maisProvavel = Color(0xFF3B82F6);
   static const bebaSe = Color(0xFFF59E0B);
   static const relampago = Color(0xFFEAB308);
-  static const casais = Color(0xFFEC4899);
   static const tribunal = Color(0xFF14B8A6);
   static const correio = Color(0xFFE4572E);
   static const mimica = Color(0xFF22A06B);

@@ -39,8 +39,8 @@ public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = 
     internal const double PesoDoNivelAoEsquentar = 0.85;
 
     /// <summary>
-    /// Peso de cada jogo na mistura. Votação, desafios e Tribunal são o coração da noite; Casais em Jogo
-    /// é tempero: com tudo ligado, sai mais ou menos uma carta a cada vinte.
+    /// Peso de cada jogo na mistura. Votação, desafios e Tribunal são o coração da noite; Correio, Impostor
+    /// e os jogos que demoram são tempero.
     /// A regra-relâmpago tem chance própria (<see cref="ChanceDeRelampago"/>).
     /// </summary>
     internal static readonly IReadOnlyDictionary<ModoDeJogo, int> Pesos = new Dictionary<ModoDeJogo, int>
@@ -48,7 +48,6 @@ public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = 
         [ModoDeJogo.EuNunca] = 4,
         [ModoDeJogo.MaisProvavel] = 5,
         [ModoDeJogo.BebaSe] = 2,
-        [ModoDeJogo.CasaisEmJogo] = 1,
         [ModoDeJogo.Tribunal] = 4,
         [ModoDeJogo.Jurados] = 2,
         [ModoDeJogo.Elogios] = 1,
@@ -85,7 +84,6 @@ public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = 
         int quantidadeDeJogadores,
         bool regraEmAndamento,
         Random sorteio,
-        int casais = 0,
         IReadOnlyList<ModoDeJogo>? anteriores = null,
         IReadOnlySet<string>? tiradas = null)
     {
@@ -101,7 +99,6 @@ public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = 
             // Com três, dois inocentes e um impostor: o primeiro voto já entrega.
             .Where(modo => modo != ModoDeJogo.Impostor || quantidadeDeJogadores >= 4)
             .Where(modo => modo != ModoDeJogo.RegraRelampago || !regraEmAndamento)
-            .Where(modo => modo != ModoDeJogo.CasaisEmJogo || casais > 0)
             .ToList();
 
         if (modos.Remove(ModoDeJogo.Musica) &&

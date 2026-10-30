@@ -114,7 +114,7 @@ public sealed class DueloTestes
         var ana = new Jogador { Id = Guid.NewGuid(), Token = "a", Nome = "Ana" };
         ana.Estatisticas.DuelosVencidos = 2;
 
-        var premio = PremiosDaNoite.Calcular([ana], []).Single();
+        var premio = PremiosDaNoite.Calcular([ana]).Single();
 
         Assert.Equal("Rei(nha) dos duelos", premio.Titulo);
         Assert.Equal("Venceu 2 duelos", premio.Descricao);

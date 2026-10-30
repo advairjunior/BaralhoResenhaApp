@@ -227,7 +227,7 @@ public sealed class RegraComIscaTestes
         var beto = new Jogador { Id = Guid.NewGuid(), Token = "b", Nome = "Beto" };
         beto.Estatisticas.Vacilos = 2;
 
-        var premio = PremiosDaNoite.Calcular([beto], []).Single();
+        var premio = PremiosDaNoite.Calcular([beto]).Single();
 
         Assert.Equal("Vacilão(ona) da regra", premio.Titulo);
         Assert.Equal("Quebrou as regras 2 vezes", premio.Descricao);

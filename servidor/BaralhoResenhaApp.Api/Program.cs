@@ -138,17 +138,6 @@ app.MapPut("/api/salas/{codigo}/momentos", async Task<IResult> (
     return Results.Ok(sala.Visao(token));
 });
 
-app.MapPut("/api/salas/{codigo}/jogadores/eu/par", (
-    string codigo, DefinirPar requisicao, HttpRequest http,
-    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
-    Agir(codigo, http, salas, notificador, (sala, token) => sala.DefinirPar(token, requisicao.ParId)));
-
-app.MapPost("/api/salas/{codigo}/julgar", (
-    string codigo, JulgarPalpite requisicao, HttpRequest http,
-    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
-    Agir(codigo, http, salas, notificador,
-        (sala, token) => sala.Julgar(token, requisicao.Rodada, requisicao.Acertou)));
-
 app.MapPost("/api/salas/{codigo}/apontado", (
     string codigo, MarcarApontado requisicao, HttpRequest http,
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
@@ -362,8 +351,6 @@ public sealed record VotoNoMico(int Opcao);
 public sealed record HistoriaContada(int Rodada, Guid JogadorId);
 /// <param name="Vistas">Cartas das noites anteriores, guardadas no celular de quem criou a sala.</param>
 public sealed record ComecarNoite(IReadOnlyList<string>? Vistas);
-public sealed record DefinirPar(Guid? ParId);
-public sealed record JulgarPalpite(int Rodada, bool Acertou);
 public sealed record MarcarApontado(int Rodada, Guid JogadorId);
 public sealed record PassarOComando(Guid JogadorId);
 public sealed record ReagirNaCarta(int Rodada, string Emoji);

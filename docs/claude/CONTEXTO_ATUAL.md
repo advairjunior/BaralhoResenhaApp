@@ -35,7 +35,7 @@ Sala (código de 4 letras + QR)
 
 Eu Nunca · Quem é mais provável (votação no celular ou aponta no 3; elogio; ⚔️ duelo) ·
 Beba se · Regra-relâmpago (com iscas: entrevista, pergunta, missão, Mestre, piada; 🚨 vacilo) ·
-Casais em Jogo (opcional, desligado por padrão) · Tribunal da Turma · Rodada de Elogios ·
+Tribunal da Turma · Rodada de Elogios ·
 Correio da Resenha (bilhetes anônimos de até 20 letras) · Imagem e Ação (1 mímico até 5 pessoas,
 2 times de 6 a 8, 3 times com 9+) · Jurados · Roda de Música · Impostor (palavra para todos menos
 um, que só sabe o tema; pistas em voz alta na ordem do app; voto secreto; 4+ pessoas) ·
@@ -59,7 +59,10 @@ Batata quente (categoria; cada um fala e toca em "Falei!"; o pavio escondido é 
 - **Cartas na manga:** cada carta da mesa anota uma conta por pessoa (`ContaDaCarta`: pontos e goles); Escudo, Passa a bola, Devolve, Batata quente e Dobra mexem nessa conta. Mão secreta, até 3.
 - **Noites prontas:** presets só no app (`noites_prontas.dart`), sem mudança no servidor.
   A Noite das brincadeiras é a noite de jogos: sala sem álcool, cofrinho de 3 e todos os jogos menos
-  Eu Nunca, Beba se e Casais em Jogo (decidido pelo proprietário em 2026-10-30).
+  Eu Nunca e Beba se (decidido pelo proprietário em 2026-10-30).
+- **Casais em Jogo saiu do app** em 2026-10-30, a pedido do proprietário (ninguém jogava): sem jogo,
+  sem marcar par na sala de espera, sem prêmios de casal; saíram também as cartas que pediam casal
+  na mesa (bs-039, bs-040, rr-022, rr-024).
 - **Sala sem álcool** (`ConfiguracaoDoJogo.SemAlcool`, `Sala.SemAlcool.cs`): o cofrinho cheio (ou a
   dose) vira prenda, sorteada por nível de `Dados/prendas.json` e guardada na rodada; no elogio, quem a
   turma escolheu passa uma prenda. `Goles` passa a contar prendas, e o "sem álcool" individual não vale

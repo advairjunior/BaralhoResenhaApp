@@ -37,7 +37,6 @@ class NoitePronta {
       outra.pouco.containsAll(configuracao.pouco);
 }
 
-/// Casais em Jogo fica de fora de todas: quem quiser, liga na mão.
 const noitesProntas = [
   NoitePronta(
     chave: 'classica',

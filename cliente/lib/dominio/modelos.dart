@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades, chutaAi, batataQuente }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades, chutaAi, batataQuente }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 
@@ -223,7 +223,6 @@ class Jogador {
     this.cofrinho = 0,
     this.cartasNaManga = 0,
     this.foto,
-    this.parId,
     this.conectado = true,
   });
 
@@ -239,7 +238,6 @@ class Jogador {
         cartasNaManga: json['cartasNaManga'] as int? ?? 0,
         respondeu: json['respondeu'] as bool,
         foto: json['foto'] == null ? null : '$enderecoBase${json['foto']}',
-        parId: json['parId'] as String?,
         conectado: json['conectado'] as bool? ?? true,
       );
 
@@ -262,9 +260,6 @@ class Jogador {
 
   /// Endereço da selfie; nulo para quem entrou sem foto.
   final String? foto;
-
-  /// Par do casal na sala.
-  final String? parId;
 
   /// Falso quando o celular está sem dar notícia há um minuto: a mesa não espera por ele.
   final bool conectado;
@@ -289,8 +284,6 @@ class Revelacao {
     required this.votos,
     required this.perderam,
     required this.contaAHistoria,
-    this.respostaDoAlvo,
-    this.palpiteDoPar,
     this.elogio = false,
     this.escolhidos = const [],
     this.bilhetes = const [],
@@ -319,8 +312,6 @@ class Revelacao {
         ],
         perderam: List<String>.from(json['perderam'] as List),
         contaAHistoria: json['contaAHistoria'] as String?,
-        respostaDoAlvo: json['respostaDoAlvo'] as String?,
-        palpiteDoPar: json['palpiteDoPar'] as String?,
         elogio: json['elogio'] as bool? ?? false,
         escolhidos: List<String>.from((json['escolhidos'] as List?) ?? const []),
         bilhetes: List<String>.from((json['bilhetes'] as List?) ?? const []),
@@ -374,10 +365,6 @@ class Revelacao {
   final List<VotosRecebidos> votos;
   final List<String> perderam;
   final String? contaAHistoria;
-
-  /// Casais em Jogo: a verdade de quem foi perguntado e o chute do par.
-  final String? respostaDoAlvo;
-  final String? palpiteDoPar;
 
   /// Carta de elogio: quem a turma escolhe não bebe, distribui goles.
   final bool elogio;
@@ -436,9 +423,7 @@ class Rodada {
     required this.euBebi,
     required this.beberam,
     required this.revelacao,
-    this.palpiteiro,
     this.alvo,
-    this.acertou,
     this.votacao = false,
     this.elogio = false,
     this.favorito,
@@ -490,9 +475,7 @@ class Rodada {
         revelacao: json['revelacao'] == null
             ? null
             : Revelacao.deJson(json['revelacao'] as Map<String, dynamic>),
-        palpiteiro: json['palpiteiro'] as String?,
         alvo: json['alvo'] as String?,
-        acertou: json['acertou'] as bool?,
         votacao: json['votacao'] as bool? ?? false,
         elogio: json['elogio'] as bool? ?? false,
         favorito: json['favorito'] as int?,
@@ -553,12 +536,8 @@ class Rodada {
   final List<String> beberam;
   final Revelacao? revelacao;
 
-  /// Casais em Jogo: quem chuta e de quem é a pergunta.
-  final String? palpiteiro;
+  /// De quem é a carta: o réu do Tribunal, quem está na foto do Correio, a pessoa da vez.
   final String? alvo;
-
-  /// Casais em Jogo: o que o alvo julgou; nulo enquanto não julga.
-  final bool? acertou;
 
   /// Quem é mais provável: votação no celular ou, sem ela, apontar no 3.
   final bool votacao;

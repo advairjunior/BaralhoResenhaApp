@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using BaralhoResenhaApp.Api.Dominio;
 using BaralhoResenhaApp.Api.Infraestrutura;
 
@@ -111,7 +112,7 @@ public sealed class BaralhoTestes
         Assert.NotNull(baralho.Sortear(configuracao, usadas, 4, false, sorteio));
     }
 
-    private static List<ModoDeJogo> NoiteMisturada(ConfiguracaoDoJogo configuracao, int cartas, int casais = 1)
+    private static List<ModoDeJogo> NoiteMisturada(ConfiguracaoDoJogo configuracao, int cartas)
     {
         var baralho = CatalogoDeCartas.Carregar();
         var usadas = new HashSet<string>();
@@ -121,7 +122,7 @@ public sealed class BaralhoTestes
         var regraAte = 0;
         for (var i = 0; i < cartas; i++)
         {
-            var carta = baralho.Sortear(configuracao, usadas, 4, regraAte > i, sorteio, casais, anteriores)!;
+            var carta = baralho.Sortear(configuracao, usadas, 4, regraAte > i, sorteio, anteriores)!;
             usadas.Add(carta.Id);
             if (carta.Modo == ModoDeJogo.RegraRelampago) regraAte = i + 4;
             anteriores.Add(carta.Modo);
@@ -144,14 +145,13 @@ public sealed class BaralhoTestes
     }
 
     [Fact]
-    public void NaMisturaCasaisEmJogoEhTemperoEOsRapidosDominam()
+    public void NaMisturaARegraEhTemperoEOsRapidosDominam()
     {
         var modos = NoiteMisturada(TudoLigado, 1000);
         double Parte(ModoDeJogo modo) => modos.Count(m => m == modo) / (double)modos.Count;
 
-        Assert.InRange(Parte(ModoDeJogo.CasaisEmJogo), 0.03, 0.15);
         Assert.InRange(Parte(ModoDeJogo.RegraRelampago), 0.04, 0.20);
-        Assert.True(Parte(ModoDeJogo.EuNunca) > Parte(ModoDeJogo.CasaisEmJogo) * 2);
+        Assert.True(Parte(ModoDeJogo.EuNunca) > Parte(ModoDeJogo.Correio) * 2);
         Assert.True(Parte(ModoDeJogo.MaisProvavel) > 0.12);
         // Beba se cedeu espaço para votação, desafios, mímica e os jogos novos, mas segue na mesa.
         Assert.True(Parte(ModoDeJogo.BebaSe) > 0.05);
@@ -166,9 +166,13 @@ public sealed class BaralhoTestes
     }
 
     [Fact]
-    public void CasaisEmJogoComecaDesligado()
+    public void NenhumaCartaDependeDeTerCasalNaMesa()
     {
-        Assert.DoesNotContain(ModoDeJogo.CasaisEmJogo, ConfiguracaoDoJogo.Padrao.Modos);
+        // Casais em Jogo saiu do app: a turma joga como amigos, ninguém marca par.
+        var cartas = CatalogoDeCartas.Carregar().Cartas;
+
+        Assert.DoesNotContain(cartas, c => c.Id.StartsWith("cs-"));
+        Assert.DoesNotContain(cartas, c => Regex.IsMatch(c.Texto, @"\bcasa(l|is)\b|\{par\}", RegexOptions.IgnoreCase));
     }
 
     [Fact]
@@ -194,7 +198,7 @@ public sealed class BaralhoTestes
         var sorteio = new Random(11);
 
         var cartas = Enumerable.Range(0, 3000)
-            .Select(_ => baralho.Sortear(configuracao, new HashSet<string>(), 5, false, sorteio, casais: 2)!)
+            .Select(_ => baralho.Sortear(configuracao, new HashSet<string>(), 5, false, sorteio)!)
             .ToList();
 
         // A Roda de Música é surpresa de vez em quando: não mexe na mistura das outras.

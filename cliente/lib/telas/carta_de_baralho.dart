@@ -33,8 +33,6 @@ _TemaDaCarta _temaDo(ModoDeJogo modo) => switch (modo) {
         const _TemaDaCarta(moldura: Color(0xFFE88A00), papel: _papel, titulo: Color(0xFFA85F00)),
       ModoDeJogo.regraRelampago =>
         const _TemaDaCarta(moldura: Color(0xFF1C1A16), papel: Color(0xFFFFE45C), titulo: Color(0xFF1C1A16)),
-      ModoDeJogo.casaisEmJogo =>
-        const _TemaDaCarta(moldura: Color(0xFFD9327C), papel: Color(0xFFFFF0F6), titulo: Color(0xFFB21E61)),
       ModoDeJogo.tribunal =>
         const _TemaDaCarta(moldura: Color(0xFF0E8C7E), papel: Color(0xFFEDFAF7), titulo: Color(0xFF0A6B60)),
       ModoDeJogo.elogios =>

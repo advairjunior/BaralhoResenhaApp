@@ -67,11 +67,6 @@ class Lobby extends StatelessWidget {
                       ),
                   ],
                 ),
-                // Pares só importam quando o Casais em Jogo está na mistura.
-                if (visao.jogadores.length > 1 && visao.configuracao.modos.contains(ModoDeJogo.casaisEmJogo)) ...[
-                  const SizedBox(height: EspacoBaralho.base),
-                  _ParDoCasal(visao: visao, acoes: acoes),
-                ],
                 const SizedBox(height: EspacoBaralho.grande),
                 ConfiguracaoDoJogoEditor(
                   configuracao: visao.configuracao,
@@ -101,87 +96,6 @@ class Lobby extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Marca o par do casal (para o Casais em Jogo) e mostra os casais da mesa.
-class _ParDoCasal extends StatelessWidget {
-  const _ParDoCasal({required this.visao, required this.acoes});
-
-  final VisaoDaSala visao;
-  final AcoesDaSala acoes;
-
-  Future<void> _escolher(BuildContext context) async {
-    final outros = visao.jogadores.where((j) => j.id != visao.euId).toList();
-    final escolha = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.fromLTRB(EspacoBaralho.base, 0, EspacoBaralho.base, EspacoBaralho.base),
-          children: [
-            Text('Quem é o seu par? 💞', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: EspacoBaralho.pequeno),
-            for (final jogador in outros)
-              ListTile(
-                leading: AvatarDoJogador(jogador: jogador),
-                title: Text(jogador.nome),
-                subtitle: jogador.parId != null && jogador.parId != visao.euId
-                    ? Text('Já está com ${visao.jogador(jogador.parId!)?.nome ?? 'alguém'}')
-                    : null,
-                onTap: () => Navigator.pop(context, jogador.id),
-              ),
-            ListTile(
-              leading: const Text('🙋', style: TextStyle(fontSize: 28)),
-              title: const Text('Ninguém, vim sozinho(a)'),
-              onTap: () => Navigator.pop(context, ''),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (escolha == null) return;
-    await acoes.definirPar(escolha.isEmpty ? null : escolha);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final meuPar = visao.eu.parId == null ? null : visao.jogador(visao.eu.parId!);
-    final casais = <String>[
-      for (final jogador in visao.jogadores)
-        if (jogador.parId case final parId?)
-          if (jogador.id.compareTo(parId) < 0)
-            if (visao.jogador(parId) case final par?) '${jogador.nome} 💞 ${par.nome}',
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Material(
-          color: CoresBaralho.superficieElevada,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: CoresBaralho.borda),
-          ),
-          child: ListTile(
-            key: const Key('meu-par'),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            leading: meuPar == null
-                ? const Text('💞', style: TextStyle(fontSize: 26))
-                : AvatarDoJogador(jogador: meuPar, tamanho: 36, destaque: CoresBaralho.casais),
-            title: Text(meuPar == null ? 'Marcar seu par' : 'Seu par: ${meuPar.nome}'),
-            subtitle: const Text('Para o Casais em Jogo', style: TextStyle(color: CoresBaralho.textoApagado)),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => _escolher(context),
-          ),
-        ),
-        if (casais.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: EspacoBaralho.pequeno),
-            child: Text(casais.join('   ·   '),
-                textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoSecundario)),
-          ),
-      ],
     );
   }
 }

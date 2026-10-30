@@ -9,7 +9,6 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.maisProvavel => 'Quem é mais provável',
         ModoDeJogo.bebaSe => 'Beba se',
         ModoDeJogo.regraRelampago => 'Regra-relâmpago',
-        ModoDeJogo.casaisEmJogo => 'Casais em Jogo',
         ModoDeJogo.tribunal => 'Tribunal da Turma',
         ModoDeJogo.elogios => 'Rodada de Elogios',
         ModoDeJogo.correio => 'Correio da Resenha',
@@ -28,7 +27,6 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.maisProvavel => '👉',
         ModoDeJogo.bebaSe => '🍺',
         ModoDeJogo.regraRelampago => '⚡',
-        ModoDeJogo.casaisEmJogo => '💞',
         ModoDeJogo.tribunal => '⚖️',
         ModoDeJogo.elogios => '💛',
         ModoDeJogo.correio => '📮',
@@ -48,8 +46,6 @@ extension VisualDoModo on ModoDeJogo {
             'às vezes aponta no 3. Inclui os ⚔️ duelos e o ✊✋✌️ pedra, papel e tesoura.',
         ModoDeJogo.bebaSe => 'Cartas rápidas para a mesa inteira.',
         ModoDeJogo.regraRelampago => 'Uma regra maluca que vale por algumas cartas.',
-        ModoDeJogo.casaisEmJogo => 'Um do casal responde, o outro adivinha. Aparece de vez em quando, '
-            'como tempero. Marquem os pares na sala de espera.',
         ModoDeJogo.tribunal => 'A turma julga alguém da mesa, sim ou não, em segredo. Na zoeira, o sim '
             'condena; no elogio, o não condena e o sim faz o réu distribuir goles.',
         ModoDeJogo.elogios => 'Dinâmicas de elogio para alguém da mesa. Ninguém bebe: todo mundo sai se achando.',
@@ -78,7 +74,6 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.maisProvavel => CoresBaralho.maisProvavel,
         ModoDeJogo.bebaSe => CoresBaralho.bebaSe,
         ModoDeJogo.regraRelampago => CoresBaralho.relampago,
-        ModoDeJogo.casaisEmJogo => CoresBaralho.casais,
         ModoDeJogo.tribunal => CoresBaralho.tribunal,
         ModoDeJogo.elogios => CoresBaralho.elogios,
         ModoDeJogo.correio => CoresBaralho.correio,

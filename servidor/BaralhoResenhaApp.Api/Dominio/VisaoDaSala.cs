@@ -1,13 +1,11 @@
 namespace BaralhoResenhaApp.Api.Dominio;
 
 /// <param name="Foto">Caminho da selfie na API; nulo para quem não tirou.</param>
-/// <param name="ParId">Par do casal na sala, se marcou.</param>
 public sealed record JogadorVisivel(
     Guid Id, string Nome, bool Anfitriao, bool SemAlcool, int Pontos, int Cofrinho, int Goles, bool Respondeu,
-    string? Foto, Guid? ParId, int CartasNaManga, bool Conectado);
+    string? Foto, int CartasNaManga, bool Conectado);
 
-/// <param name="Palpiteiro">Casais em Jogo: quem tenta adivinhar.</param>
-/// <param name="Alvo">Casais em Jogo: de quem é a pergunta.</param>
+/// <param name="Alvo">De quem é a carta: o réu do Tribunal, quem está na foto do Correio, a pessoa da vez.</param>
 public sealed record RodadaVisivel(
     int Numero,
     ModoDeJogo Modo,
@@ -19,9 +17,7 @@ public sealed record RodadaVisivel(
     bool EuBebi,
     IReadOnlyList<Guid> Beberam,
     Revelacao? Revelacao,
-    Guid? Palpiteiro,
     Guid? Alvo,
-    bool? Acertou,
     bool Votacao,
     bool Elogio,
     int? Favorito,
@@ -103,7 +99,6 @@ public sealed record VisaoDaSala(
                 j.Id, j.Nome, j.Anfitriao, sala.SoPontos(j), j.Pontos, j.Cofrinho, j.Goles,
                 rodada is not null && (rodada.Escrevendo ? rodada.Frases : rodada.Respostas).ContainsKey(j.Id),
                 j.Foto is null ? null : Endereco(j.Foto),
-                j.ParId,
                 j.Mao.Count,
                 sala.Conectado(j))).ToList(),
             rodada is null || sala.Fase is FaseDaSala.Lobby or FaseDaSala.Fim
@@ -120,9 +115,7 @@ public sealed record VisaoDaSala(
                     rodada.Beberam.Contains(eu.Id),
                     rodada.Beberam.ToList(),
                     sala.Fase == FaseDaSala.Revelada ? rodada.Revelacao : null,
-                    rodada.Palpiteiro,
                     rodada.Alvo,
-                    rodada.Acertou,
                     rodada.Votacao,
                     rodada.Carta.Elogio,
                     rodada.Favorito,
@@ -165,7 +158,7 @@ public sealed record VisaoDaSala(
             sala.Regra is { } regra ? regra with { PodemVacilar = sala.QuemPodeVacilar(regra) } : null,
             sala.Momentos.Select(m => new MomentoVisivel(
                 m.Id, m.JogadorId, m.NomeDoJogador, m.Rodada, m.Texto, Endereco(m.Foto))).ToList(),
-            fim ? PremiosDaNoite.Calcular(jogadores, sala.Casais(), sala.Configuracao.SemAlcool) : null,
+            fim ? PremiosDaNoite.Calcular(jogadores, sala.Configuracao.SemAlcool) : null,
             fim ? PremiosDaNoite.Resumir(sala, jogadores) : null,
             Esquentando(sala),
             sala.CartaTiradaPor,

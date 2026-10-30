@@ -97,7 +97,7 @@ public sealed class TribunalEElogioTestes
         Assert.Equal([reu.Id], revelacao.Escolhidos);
         Assert.Equal(0, reu.Pontos);
         Assert.Equal(3, reu.Estatisticas.Elogios);
-        Assert.Equal("Xodó da turma", PremiosDaNoite.Calcular(mesa.Todos, [])[0].Titulo);
+        Assert.Equal("Xodó da turma", PremiosDaNoite.Calcular(mesa.Todos)[0].Titulo);
     }
 
     [Fact]

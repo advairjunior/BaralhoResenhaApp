@@ -32,13 +32,12 @@ public sealed partial class Sala
         }
     }
 
-    /// <summary>Quem a carta pegou: bebeu, foi escolhido(a), conta a história, é o réu ou o casal da vez.</summary>
+    /// <summary>Quem a carta pegou: bebeu, foi escolhido(a), conta a história ou é o réu.</summary>
     internal static HashSet<Guid> Protagonistas(Rodada rodada)
     {
         var protagonistas = new HashSet<Guid>(rodada.Revelacao?.Perderam ?? []);
         protagonistas.UnionWith(rodada.Revelacao?.Escolhidos ?? []);
         if (rodada.Revelacao?.ContaAHistoria is { } historia) protagonistas.Add(historia);
-        if (rodada.Palpiteiro is { } palpiteiro) protagonistas.Add(palpiteiro);
         if (rodada.Alvo is { } alvo) protagonistas.Add(alvo);
         return protagonistas;
     }

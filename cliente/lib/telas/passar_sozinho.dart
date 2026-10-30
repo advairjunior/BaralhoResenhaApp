@@ -115,8 +115,7 @@ class _PassarSozinhoState extends State<PassarSozinho> {
     final rodada = widget.rodada;
     final bebaSe = rodada.modo == ModoDeJogo.bebaSe;
     final prontoDeTodos = pedeProntoDeTodos(visao, rodada);
-    final casaisSemJulgar = rodada.modo == ModoDeJogo.casaisEmJogo && rodada.acertou == null;
-    final aparece = visao.fase == FaseDaSala.revelada ? !casaisSemJulgar : bebaSe || prontoDeTodos;
+    final aparece = visao.fase == FaseDaSala.revelada || bebaSe || prontoDeTodos;
     if (!visao.configuracao.passarSozinho || !aparece) return const SizedBox.shrink();
     final anfitriao = visao.anfitriao?.nome ?? 'Quem criou a sala';
     // A mesa não espera quem caiu: só conta quem está conectado (ou já ficou pronto).

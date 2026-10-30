@@ -44,8 +44,6 @@ public sealed class Jogador
     /// <summary>Rodada em que ganhou a última carta na manga (rodízio do presente).</summary>
     public int UltimaCartaEm { get; set; }
 
-    /// <summary>Par do casal na sala; os dois apontam um para o outro.</summary>
-    public Guid? ParId { get; set; }
     public EstatisticasDoJogador Estatisticas { get; } = new();
 }
 
@@ -62,10 +60,6 @@ public sealed class EstatisticasDoJogador
 
     /// <summary>Votos recebidos nas cartas de elogio.</summary>
     public int Elogios { get; set; }
-
-    /// <summary>Casais em Jogo, como palpiteiro.</summary>
-    public int Acertos { get; set; }
-    public int Erros { get; set; }
 
     public int DuelosVencidos { get; set; }
 
@@ -148,13 +142,8 @@ public sealed class Rodada
     public List<Guid> Ganharam { get; } = [];
     public Revelacao? Revelacao { get; set; }
 
-    /// <summary>Casais em Jogo: quem chuta a resposta.</summary>
-    public Guid? Palpiteiro { get; init; }
-
-    /// <summary>Casais em Jogo: de quem é a pergunta; responde a verdade e julga o palpite.</summary>
+    /// <summary>De quem é a carta: o réu do Tribunal, quem está na foto do Correio, a pessoa da vez.</summary>
     public Guid? Alvo { get; init; }
-
-    public bool? Acertou { get; set; }
 
     /// <summary>Correio: o bilhete que quem está na foto mais curtiu.</summary>
     public int? Favorito { get; set; }
@@ -237,7 +226,7 @@ public sealed class Rodada
     public string? PrendaDoElogio { get; set; }
 
     public bool PedeResposta =>
-        Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio
+        Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.Tribunal or ModoDeJogo.Correio
             or ModoDeJogo.Jurados or ModoDeJogo.Impostor or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades
             or ModoDeJogo.ChutaAi ||
         (Carta.Modo == ModoDeJogo.MaisProvavel && Votacao);
@@ -253,8 +242,6 @@ public sealed record Revelacao(
     IReadOnlyList<VotosRecebidos> Votos,
     IReadOnlyList<Guid> Perderam,
     Guid? ContaAHistoria,
-    string? RespostaDoAlvo = null,
-    string? PalpiteDoPar = null,
     bool Elogio = false)
 {
     /// <summary>Quem é mais provável: os mais votados, bebam (normal) ou não (elogio).</summary>
@@ -445,7 +432,6 @@ public sealed partial class Sala
     {
         _jogadores.Remove(jogador);
         Rodada?.Respostas.Remove(jogador.Id);
-        DesfazerCasal(jogador);
         if (jogador.Anfitriao && _jogadores.Count > 0)
             _jogadores[0].Anfitriao = true;
         RevelarSeTodosResponderam();
@@ -557,8 +543,6 @@ public sealed partial class Sala
             var rodada = Rodada!;
             if (!rodada.PedeResposta)
                 throw new AcaoNaoPermitidaException("Esta carta não pede resposta.");
-            if (rodada.Carta.Modo == ModoDeJogo.CasaisEmJogo)
-                resposta = ValidarRespostaDoCasal(rodada, jogador, resposta);
             if (rodada.Carta.Modo == ModoDeJogo.Tribunal)
             {
                 if (jogador.Id == rodada.Alvo)
@@ -630,8 +614,6 @@ public sealed partial class Sala
             }
             if (Rodada.Respostas.Count == 0)
                 throw new AcaoNaoPermitidaException("Ninguém respondeu ainda.");
-            if (Rodada.Carta.Modo == ModoDeJogo.CasaisEmJogo && !CasalRespondeu(Rodada))
-                throw new AcaoNaoPermitidaException("Os dois do casal precisam responder.");
             if (Rodada.Carta.Modo == ModoDeJogo.Correio && Rodada.Respostas.Count < 2)
                 throw new AcaoNaoPermitidaException(
                     "Espere pelo menos 2 bilhetes: com um só, todo mundo sabe quem escreveu.");
@@ -783,7 +765,7 @@ public sealed partial class Sala
         var configuracao = Configuracao with { Nivel = Configuracao.NivelNaCarta(indice) };
         CartaTiradaPor = null;
         var carta = _baralho.Sortear(
-                configuracao, _usadas, _jogadores.Count, Regra is not null, _sorteio, Casais().Count,
+                configuracao, _usadas, _jogadores.Count, Regra is not null, _sorteio,
                 _ultimosModos, _tiradas)
             ?? throw new AcaoNaoPermitidaException("Nenhuma carta combina com essa configuração.");
         _usadas.Add(carta.Id);
@@ -804,19 +786,16 @@ public sealed partial class Sala
             .Replace("{jogador2}", sorteados[^1].Nome)
             .Replace("{jogador}", sorteados[0].Nome);
         if (Configuracao.SemAlcool) texto = Baralho.SemBebida(texto);
-        var (palpiteiro, alvo) = carta.Modo == ModoDeJogo.CasaisEmJogo ? EscolherCasal() : (null, null);
         var impostor = carta.Modo == ModoDeJogo.Impostor ? _jogadores[_sorteio.Next(_jogadores.Count)] : null;
-        if (alvo is not null) texto = texto.Replace("{par}", alvo.Nome);
         Rodada = new Rodada
         {
             Numero = (Rodada?.Numero ?? 0) + 1,
             Carta = carta,
             Texto = texto,
-            Palpiteiro = palpiteiro?.Id,
             // No tribunal, o réu é o {jogador} da carta; no correio, quem está na foto.
             Alvo = carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados or ModoDeJogo.DuasVerdades
                 ? sorteados[0].Id
-                : alvo?.Id,
+                : null,
             // Elogio e duelo são sempre no celular: a graça é a foto de quem a turma escolheu.
             Votacao = carta.Modo == ModoDeJogo.MaisProvavel &&
                 (carta.Elogio || carta.Duelo || _sorteio.NextDouble() < ChanceDeVotacao),
@@ -858,7 +837,6 @@ public sealed partial class Sala
         }
         var todosResponderam = rodada.Carta.Modo switch
         {
-            ModoDeJogo.CasaisEmJogo => CasalRespondeu(rodada),
             ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados or ModoDeJogo.DuasVerdades =>
                 rodada.Respostas.Count > 0 &&
                 NaMesa.Where(j => j.Id != rodada.Alvo).All(j => rodada.Respostas.ContainsKey(j.Id)),
@@ -876,13 +854,7 @@ public sealed partial class Sala
         var respostas = rodada.Respostas.Where(r => presentes.Contains(r.Key)).ToList();
         Revelacao revelacao;
 
-        if (rodada.Carta.Modo == ModoDeJogo.CasaisEmJogo)
-        {
-            // Ninguém bebe ainda: o alvo julga se o palpite bateu.
-            revelacao = new Revelacao([], [], [], [], null,
-                rodada.Respostas[rodada.Alvo!.Value], rodada.Respostas[rodada.Palpiteiro!.Value]);
-        }
-        else if (rodada.Duelistas.Count > 0)
+        if (rodada.Duelistas.Count > 0)
         {
             revelacao = RevelarDuelo(rodada, respostas);
         }

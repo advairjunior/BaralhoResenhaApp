@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi', 'batataQuente'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi', 'batataQuente'];
 
 const pagina = async () => {
   const p = await b.newPage();
