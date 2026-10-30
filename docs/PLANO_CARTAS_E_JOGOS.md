@@ -130,6 +130,32 @@ Do smoke test de 2026-10-28 ficaram de fora, por precisarem de celular: selfie a
 outro aparelho e o mural no fim da noite. Conferir na próxima noite, junto com o peso por jogo e
 o rodízio, e ver no log do Render se o servidor ficou acordado na pausa (`MantemAcordado`).
 
+## Etapa 6: 🎯 Chuta aí (jogo novo) — feito em 2026-10-30
+
+Escolhido pelo proprietário em 2026-10-30 numa lista de cinco ideias.
+
+- Pergunta com resposta em número (`Carta.Resposta`, só aparece na revelação); cada um chuta em
+  segredo pelo `Responder`, com vírgula ou ponto (guardado sempre com ponto).
+- Revelação: resposta certa e chutes do mais perto ao mais longe. Mais longe leva ponto (empate,
+  todos); mais perto distribui goles (`Elogio`); na mosca ganha carta na manga. Todo mundo à mesma
+  distância: ninguém bebe.
+- 37 cartas `ch-` (27 Leve, 7 Resenha, 3 Picante), peso 1. Funciona com 2 pessoas.
+
+## Etapa 7: 🥔 Batata quente (jogo novo) — feito em 2026-10-30
+
+Pedido do proprietário: em vez de passar o celular de mão em mão (risco de quebrar), cada um
+aperta "Falei!" no próprio celular e a vez passa para o próximo.
+
+- A carta dá a categoria; a fila é a da Roda de Música (começa pelo `{jogador}` do rodízio). A
+  batata pula quem caiu.
+- O pavio (20 a 45 s, sorteado) é segredo do servidor: não vai em nenhuma visão. O
+  `PavioDaBatata` (serviço em segundo plano) confere as salas a cada segundo e publica no tempo
+  real quando estoura; a consulta dos celulares também confere. "Falei!" depois da hora não salva.
+- Estourou: quem está com a batata leva ponto, som próprio (`Som.estouro`). A voz anuncia com
+  quem a batata começa.
+- 34 cartas `bq-` (21 Leve, 9 Resenha, 4 Picante), peso 1.
+- Ninguém confere se a resposta vale: a turma cobra em voz alta, como na Roda de Música.
+
 ## Ordem
 
 1. Etapa 1 (cartas) e Etapa 2 (rodízio sem quem caiu): pequenas, entram juntas antes da
@@ -137,6 +163,8 @@ o rodízio, e ver no log do Render se o servidor ficou acordado na pausa (`Mante
 2. Etapa 3 (Termine a frase).
 3. Etapa 4 (Duas verdades).
 4. Etapa 5 na noite seguinte a cada entrega.
+5. Etapas 6 e 7 (Chuta aí e Batata quente): conferir na próxima noite se o peso 1 está bom e se
+   o pavio de 20 a 45 s rende uma volta inteira na mesa.
 
 Cada etapa: testes completos do servidor e do cliente, conferência no navegador na porta 5091,
 commit atômico, e push só com autorização.

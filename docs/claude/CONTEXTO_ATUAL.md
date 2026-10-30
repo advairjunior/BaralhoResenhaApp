@@ -40,7 +40,9 @@ Correio da Resenha (bilhetes anônimos de até 20 letras) · Imagem e Ação (1 
 2 times de 6 a 8, 3 times com 9+) · Jurados · Roda de Música · Impostor (palavra para todos menos
 um, que só sabe o tema; pistas em voz alta na ordem do app; voto secreto; 4+ pessoas) ·
 Termine a frase (cada um completa o começo da carta em segredo, a turma vota sem saber de quem é; 3+ pessoas) ·
-Duas verdades e uma mentira (a pessoa da vez escreve três frases sobre si e a turma vota na mentira; 3+ pessoas).
+Duas verdades e uma mentira (a pessoa da vez escreve três frases sobre si e a turma vota na mentira; 3+ pessoas) ·
+Chuta aí (pergunta com resposta em número; mais longe leva, mais perto distribui) ·
+Batata quente (categoria; cada um fala e toca em "Falei!"; o pavio escondido é do servidor e estoura sozinho).
 
 ## Regras de produto já decididas
 
@@ -114,3 +116,11 @@ que ele escrever. Quando ele avisar que terminou, ler as marcações e aplicar e
     mas baixa dezenas de MB e pode ser lenta no celular. Testar num protótipo antes.
   - Clonar a voz de alguém da mesa: só com serviço pago (ElevenLabs) ou modelo aberto em GPU própria.
     Esbarra em "nada sai da sala" e no custo; não há nada pronto para Flutter.
+- Jogos novos para depois (escolhidos pelo proprietário em 2026-10-30, junto com o Chuta aí e a
+  Batata quente, que já entraram):
+  - 📡 Na Mesma Onda (estilo Wavelength): a pessoa da vez vê um alvo escondido numa régua
+    ("comida ruim ↔ comida boa"), dá uma pista em voz alta e a turma arrasta um ponteiro; quanto
+    mais perto do alvo, menos gente bebe. Esforço médio.
+  - 🛑 Stop / Adedonha: sai uma letra e umas categorias, cada um escreve no celular, o primeiro
+    aperta STOP para todos; na revelação a turma derruba resposta forçada no voto e resposta
+    repetida não vale. Esforço médio (o grosso é a votação para derrubar).
