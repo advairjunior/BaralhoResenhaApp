@@ -42,10 +42,10 @@ public static class PremiosDaNoite
         }
 
         Individual(salaSemAlcool ? "🎟️" : "🍺", "Rei(nha) da noite", j => j.Pontos,
-            (n, j) => salaSemAlcool
-                ? $"{Plural(n, "ponto", "pontos")} · {Plural(j.Goles, "prenda", "prendas")}"
-                : j.SemAlcool || j.Goles == 0
-                    ? Plural(n, "ponto", "pontos")
+            (n, j) => (j.SemAlcool && !salaSemAlcool) || j.Goles == 0
+                ? Plural(n, "ponto", "pontos")
+                : salaSemAlcool
+                    ? $"{Plural(n, "ponto", "pontos")} · {Plural(j.Goles, "prenda", "prendas")}"
                     : $"{Plural(n, "ponto", "pontos")} · {Plural(j.Goles, "gole", "goles")}");
         Individual("👉", "Alvo preferido da turma", j => j.Estatisticas.VotosRecebidos,
             (n, _) => $"{Plural(n, "voto", "votos")} da turma nas votações");

@@ -175,6 +175,18 @@ public sealed class SemAlcoolTestes
     }
 
     [Fact]
+    public void QuemNaoPagouPrendaVeSoOsPontosNoPremio()
+    {
+        var (sala, ana, bia) = Mesa([Oculos], SemAlcool(ModoDeJogo.BebaSe) with { Ritmo = RitmoDaBebida.Devagar });
+        sala.AlternarBebi(bia.Token, sala.Rodada!.Numero);
+
+        sala.Encerrar(ana.Token);
+
+        var rei = sala.Visao(ana.Token).Premios!.Single(p => p.Titulo == "Rei(nha) da noite");
+        Assert.Equal("1 ponto", rei.Descricao);
+    }
+
+    [Fact]
     public void OBancoDePrendasTemDeTudoENadaDeBebida()
     {
         var prendas = CatalogoDeCartas.Carregar().Prendas;

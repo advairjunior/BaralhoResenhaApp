@@ -228,6 +228,13 @@ class _MicoDaNoite extends StatelessWidget {
   final MicoDaNoite mico;
   final AcoesDaSala acoes;
 
+  /// O mico é uma frase inteira: o botão cresce com ela e não espreme o texto.
+  static final _opcaoDoMico = ButtonStyle(
+    padding: const WidgetStatePropertyAll(
+        EdgeInsets.symmetric(horizontal: EspacoBaralho.base, vertical: EspacoBaralho.medio)),
+    shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+  );
+
   @override
   Widget build(BuildContext context) {
     final nomes = [for (final id in mico.pagadores) ?visao.jogador(id)?.nome];
@@ -270,8 +277,17 @@ class _MicoDaNoite extends StatelessWidget {
         for (final (indice, opcao) in mico.opcoes.indexed)
           mico.meuVoto == indice
               ? FilledButton(
-                  key: Key('mico-$indice'), onPressed: () => acoes.votarNoMico(indice), child: Text('$opcao ✓'))
-              : OutlinedButton(key: Key('mico-$indice'), onPressed: () => acoes.votarNoMico(indice), child: Text(opcao)),
+                  key: Key('mico-$indice'),
+                  style: _opcaoDoMico,
+                  onPressed: () => acoes.votarNoMico(indice),
+                  child: Text('$opcao ✓', textAlign: TextAlign.center, style: const TextStyle(height: 1.35)),
+                )
+              : OutlinedButton(
+                  key: Key('mico-$indice'),
+                  style: _opcaoDoMico,
+                  onPressed: () => acoes.votarNoMico(indice),
+                  child: Text(opcao, textAlign: TextAlign.center, style: const TextStyle(height: 1.35)),
+                ),
         Text('Votaram ${mico.votaram} de ${mico.eleitores}',
             textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoApagado)),
       ];

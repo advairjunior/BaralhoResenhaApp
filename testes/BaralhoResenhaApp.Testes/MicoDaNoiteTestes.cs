@@ -64,7 +64,7 @@ public sealed class MicoDaNoiteTestes
 
         mesa.Sala.Encerrar(mesa.Ana.Token);
 
-        Assert.Equal([mesa.Bia.Id, mesa.Caio.Id], mesa.Mico(mesa.Ana)!.Pagadores.Order());
+        Assert.Equal(new HashSet<Guid>([mesa.Bia.Id, mesa.Caio.Id]), mesa.Mico(mesa.Ana)!.Pagadores.ToHashSet());
     }
 
     [Fact]
