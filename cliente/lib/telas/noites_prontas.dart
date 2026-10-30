@@ -28,6 +28,7 @@ class NoitePronta {
       outra.cofrinho == configuracao.cofrinho &&
       outra.cartasNaManga == configuracao.cartasNaManga &&
       outra.passarSozinho == configuracao.passarSozinho &&
+      outra.semAlcool == configuracao.semAlcool &&
       outra.modos.length == configuracao.modos.length &&
       outra.modos.containsAll(configuracao.modos) &&
       outra.muito.length == configuracao.muito.length &&
@@ -78,20 +79,30 @@ const noitesProntas = [
     chave: 'brincadeiras',
     emoji: '🎭',
     titulo: 'Noite das brincadeiras',
-    descricao: 'Mímica, impostor, roda de música, duelos, jurados e Correio. Mais rir que beber.',
+    descricao: '🧃 Sem álcool: todos os jogos, menos Eu Nunca e Beba se. No lugar do gole, prenda; '
+        'no fim, o Mico da noite.',
+    // Noite de jogos não tem álcool: entra tudo, menos o que é feito para beber.
     configuracao: ConfiguracaoDoJogo(
       nivel: NivelDaCarta.resenha,
       modos: {
         ModoDeJogo.maisProvavel,
         ModoDeJogo.regraRelampago,
+        ModoDeJogo.tribunal,
         ModoDeJogo.elogios,
         ModoDeJogo.correio,
         ModoDeJogo.imagemEAcao,
         ModoDeJogo.jurados,
         ModoDeJogo.musica,
         ModoDeJogo.impostor,
+        ModoDeJogo.termineAFrase,
+        ModoDeJogo.duasVerdades,
+        ModoDeJogo.chutaAi,
+        ModoDeJogo.batataQuente,
       },
       zonaSegura: true,
+      // Prenda a cada 3 pontos: a graça é pagar, mas sem virar só prenda.
+      cofrinho: 3,
+      semAlcool: true,
     ),
   ),
   NoitePronta(

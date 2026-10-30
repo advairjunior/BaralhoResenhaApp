@@ -20,12 +20,18 @@ void main() {
       expect(servidor.recebidas.last.rota, 'PUT /api/salas/ABCD/configuracao');
       expect(servidor.recebidas.last.corpo, {
         'nivel': 'Resenha',
-        'modos': ['MaisProvavel', 'RegraRelampago', 'Elogios', 'Correio', 'ImagemEAcao', 'Jurados', 'Musica', 'Impostor'],
+        // Noite de jogos não tem álcool: entra tudo, menos o que é feito para beber.
+        'modos': [
+          'MaisProvavel', 'RegraRelampago', 'Tribunal', 'Elogios', 'Correio', 'ImagemEAcao', 'Jurados', 'Musica',
+          'Impostor', 'TermineAFrase', 'DuasVerdades', 'ChutaAi', 'BatataQuente',
+        ],
         'zonaSegura': true,
         'esquentar': false,
         'ritmo': 'Devagar',
         'cartasNaManga': true,
         'passarSozinho': true,
+        'cofrinho': 3,
+        'semAlcool': true,
       });
       await fecharApp(tester);
     });
