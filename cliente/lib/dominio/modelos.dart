@@ -797,6 +797,39 @@ class RegraAtiva {
   final int rodadasRestantes;
 }
 
+/// 🤡 Mico da noite: quem paga, as três opções e como está a votação.
+class MicoDaNoite {
+  const MicoDaNoite({
+    required this.pagadores,
+    required this.opcoes,
+    required this.votaram,
+    required this.eleitores,
+    this.meuVoto,
+    this.escolhido,
+    this.votos = const [],
+  });
+
+  factory MicoDaNoite.deJson(Map<String, dynamic> json) => MicoDaNoite(
+        pagadores: List<String>.from(json['pagadores'] as List),
+        opcoes: List<String>.from(json['opcoes'] as List),
+        votaram: json['votaram'] as int,
+        eleitores: json['eleitores'] as int,
+        meuVoto: json['meuVoto'] as int?,
+        escolhido: json['escolhido'] as int?,
+        votos: List<int>.from((json['votos'] as List?) ?? const []),
+      );
+
+  final List<String> pagadores;
+  final List<String> opcoes;
+  final int votaram;
+  final int eleitores;
+  final int? meuVoto;
+  final int? escolhido;
+
+  /// Votos em cada opção; vazio até a turma escolher.
+  final List<int> votos;
+}
+
 class VisaoDaSala {
   const VisaoDaSala({
     required this.codigo,
@@ -813,6 +846,7 @@ class VisaoDaSala {
     this.esquenta,
     this.cartaTiradaPor,
     this.minhaMao = const [],
+    this.mico,
   });
 
   factory VisaoDaSala.deJson(Map<String, dynamic> json, {String enderecoBase = ''}) => VisaoDaSala(
@@ -839,6 +873,7 @@ class VisaoDaSala {
         esquenta: json['esquenta'] == null ? null : Esquenta.deJson(json['esquenta'] as Map<String, dynamic>),
         cartaTiradaPor: json['cartaTiradaPor'] as String?,
         minhaMao: [for (final carta in (json['minhaMao'] as List?) ?? const []) _enum(CartaNaManga.values, carta)],
+        mico: json['mico'] == null ? null : MicoDaNoite.deJson(json['mico'] as Map<String, dynamic>),
       );
 
   final String codigo;
@@ -856,6 +891,9 @@ class VisaoDaSala {
 
   /// Quem tirou a carta anterior com o "Tira essa".
   final String? cartaTiradaPor;
+
+  /// Sala sem álcool, no fim: o mico de quem mais pontuou.
+  final MicoDaNoite? mico;
 
   /// Minhas cartas na manga (as dos outros são segredo).
   final List<CartaNaManga> minhaMao;

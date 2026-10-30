@@ -152,11 +152,13 @@ ComoJoga comoJoga(Rodada rodada) {
 String explicacaoDosPontos(ConfiguracaoDoJogo configuracao) => switch (configuracao) {
       ConfiguracaoDoJogo(semAlcool: true, pontosPorGole: 1) =>
         '🧃 Sala sem álcool: ninguém bebe. Cada vez que a carta te pega, você paga uma prenda, '
-            'que aparece na tela. Pagou? Toque em "Paguei".',
+            'que aparece na tela. Pagou? Toque em "Paguei". '
+            'No fim, quem fechou com mais pontos paga o 🤡 Mico da noite, escolhido pela turma.',
       ConfiguracaoDoJogo(semAlcool: true, :final pontosPorGole) =>
         '🧃 Sala sem álcool: ninguém bebe. Cada vez que a carta te pega, você ganha 1 ponto no cofrinho. '
             'A cada $pontosPorGole pontos, o cofrinho enche e você paga uma prenda, que aparece na tela. '
-            'Pagou? Toque em "Paguei".',
+            'Pagou? Toque em "Paguei". No fim, quem fechou com mais pontos paga o 🤡 Mico da noite, '
+            'escolhido pela turma.',
       ConfiguracaoDoJogo(pontosPorGole: 1) =>
         'Ritmo Raiz: cada ponto no cofrinho é 1 gole. Quem joga sem álcool só soma pontos.',
       ConfiguracaoDoJogo(:final pontosPorGole) => 'Cada vez que a carta te pega, você ganha 1 ponto no cofrinho. '

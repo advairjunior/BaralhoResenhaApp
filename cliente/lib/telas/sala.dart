@@ -58,6 +58,7 @@ abstract interface class AcoesDaSala {
   Future<void> alternarVoz();
   Future<void> encerrar();
   Future<void> retomar();
+  Future<void> votarNoMico(int opcao);
   Future<Uint8List> baixarFoto(String endereco);
   Future<void> sair();
 }
@@ -354,6 +355,9 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
 
   @override
   Future<void> retomar() => _agir((token) => widget.api.retomar(_codigo, token));
+
+  @override
+  Future<void> votarNoMico(int opcao) => _agir((token) => widget.api.votarNoMico(_codigo, token, opcao));
 
   @override
   Future<Uint8List> baixarFoto(String endereco) => widget.api.baixarFoto(endereco);

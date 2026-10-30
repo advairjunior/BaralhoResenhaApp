@@ -13,6 +13,7 @@ public sealed partial class Sala
             if (Fase == FaseDaSala.Fim) return;
             Fase = FaseDaSala.Fim;
             TerminouEm = _relogio.GetUtcNow();
+            SortearOMico();
             Tocar();
         }
     }
@@ -25,6 +26,7 @@ public sealed partial class Sala
             ExigirAnfitriao(token);
             if (Fase != FaseDaSala.Fim) return;
             TerminouEm = null;
+            Mico = null;
             Distribuir();
             Tocar();
         }

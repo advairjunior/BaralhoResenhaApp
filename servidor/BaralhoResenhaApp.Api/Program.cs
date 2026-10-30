@@ -167,6 +167,12 @@ app.MapPost("/api/salas/{codigo}/duas-verdades", (
     Agir(codigo, http, salas, notificador,
         (sala, token) => sala.EscreverDuasVerdades(token, requisicao.Rodada, requisicao.Frases, requisicao.Mentira)));
 
+// Mico da noite: cada um da turma vota em qual mico quem perdeu paga.
+app.MapPost("/api/salas/{codigo}/mico", (
+    string codigo, VotoNoMico requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.VotarNoMico(token, requisicao.Opcao)));
+
 // Batata quente: quem está com a batata falou e passa para o próximo.
 app.MapPost("/api/salas/{codigo}/batata", (
     string codigo, AcaoNaRodada requisicao, HttpRequest http,
@@ -352,6 +358,7 @@ public sealed record EntrarNaSala(string Nome, bool SemAlcool = false);
 public sealed record EntradaNaSala(string Codigo, string Token);
 public sealed record ResponderCarta(int Rodada, string Resposta);
 public sealed record AcaoNaRodada(int Rodada);
+public sealed record VotoNoMico(int Opcao);
 public sealed record HistoriaContada(int Rodada, Guid JogadorId);
 /// <param name="Vistas">Cartas das noites anteriores, guardadas no celular de quem criou a sala.</param>
 public sealed record ComecarNoite(IReadOnlyList<string>? Vistas);

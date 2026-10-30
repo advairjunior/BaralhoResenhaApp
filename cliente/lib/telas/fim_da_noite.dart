@@ -81,6 +81,10 @@ class _FimDaNoiteState extends State<FimDaNoite> {
                   icon: const Icon(Icons.ios_share_rounded),
                   label: const Text('Mandar no grupo da turma'),
                 ),
+                if (visao.mico case final mico?) ...[
+                  const SizedBox(height: EspacoBaralho.enorme),
+                  _MicoDaNoite(visao: visao, mico: mico, acoes: widget.acoes),
+                ],
                 if (visao.momentos.isNotEmpty) ...[
                   const SizedBox(height: EspacoBaralho.enorme),
                   Text('📸 Mural da noite (${visao.momentos.length})', style: texto.titleLarge),
@@ -142,8 +146,9 @@ class CartaoDosPremios extends StatelessWidget {
               style: const TextStyle(color: CoresBaralho.textoSecundario)),
           if (resumo != null) ...[
             const SizedBox(height: EspacoBaralho.base),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              runSpacing: EspacoBaralho.pequeno,
               children: [
                 _Numero(valor: '${resumo.cartas}', rotulo: 'cartas'),
                 if (resumo.minutos > 0) _Numero(valor: _duracao(resumo.minutos), rotulo: 'de resenha'),
@@ -213,6 +218,82 @@ class _CartaDaNoite extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// 🤡 Mico da noite: quem fechou com mais pontos paga, e a turma vota em qual.
+class _MicoDaNoite extends StatelessWidget {
+  const _MicoDaNoite({required this.visao, required this.mico, required this.acoes});
+
+  final VisaoDaSala visao;
+  final MicoDaNoite mico;
+  final AcoesDaSala acoes;
+
+  @override
+  Widget build(BuildContext context) {
+    final nomes = [for (final id in mico.pagadores) ?visao.jogador(id)?.nome];
+    final quem = nomes.length <= 1
+        ? (nomes.firstOrNull ?? 'Quem mais pontuou')
+        : '${nomes.take(nomes.length - 1).join(', ')} e ${nomes.last}';
+    final varios = nomes.length > 1;
+    final escolhido = mico.escolhido;
+    final List<Widget> conteudo;
+    if (escolhido != null) {
+      final votos = mico.votos.length > escolhido ? mico.votos[escolhido] : 0;
+      conteudo = [
+        Text(varios ? '$quem pagam:' : '$quem paga:', textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
+        Text(
+          mico.opcoes[escolhido],
+          key: const Key('mico-escolhido'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 22, height: 1.3, fontWeight: FontWeight.w700, color: CoresBaralho.ambar),
+        ),
+        if (votos > 0)
+          Text(votos == 1 ? '1 voto' : '$votos votos',
+              textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoApagado)),
+      ];
+    } else if (mico.pagadores.contains(visao.euId)) {
+      conteudo = [
+        const Text('Você fechou a noite com mais pontos. A turma está escolhendo o seu mico…',
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
+        Text('Votaram ${mico.votaram} de ${mico.eleitores}',
+            textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoApagado)),
+      ];
+    } else {
+      conteudo = [
+        Text(
+          varios
+              ? '$quem fecharam a noite com mais pontos e pagam um mico. Vote em qual:'
+              : '$quem fechou a noite com mais pontos e paga um mico. Vote em qual:',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 16),
+        ),
+        for (final (indice, opcao) in mico.opcoes.indexed)
+          mico.meuVoto == indice
+              ? FilledButton(
+                  key: Key('mico-$indice'), onPressed: () => acoes.votarNoMico(indice), child: Text('$opcao ✓'))
+              : OutlinedButton(key: Key('mico-$indice'), onPressed: () => acoes.votarNoMico(indice), child: Text(opcao)),
+        Text('Votaram ${mico.votaram} de ${mico.eleitores}',
+            textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoApagado)),
+      ];
+    }
+    return Container(
+      key: const Key('mico-da-noite'),
+      padding: const EdgeInsets.all(EspacoBaralho.base),
+      decoration: BoxDecoration(
+        color: CoresBaralho.superficieElevada,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: CoresBaralho.ambar),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: EspacoBaralho.pequeno,
+        children: [
+          Text('🤡 Mico da noite', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
+          ...conteudo,
+        ],
+      ),
+    );
+  }
 }
 
 class _Numero extends StatelessWidget {

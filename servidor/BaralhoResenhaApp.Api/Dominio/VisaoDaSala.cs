@@ -85,7 +85,8 @@ public sealed record VisaoDaSala(
     ResumoDaNoite? Resumo,
     EsquentaVisivel? Esquenta,
     string? CartaTiradaPor,
-    IReadOnlyList<CartaNaManga> MinhaMao)
+    IReadOnlyList<CartaNaManga> MinhaMao,
+    MicoVisivel? Mico)
 {
     internal static VisaoDaSala Montar(Sala sala, Jogador eu, IReadOnlyList<Jogador> jogadores)
     {
@@ -168,7 +169,8 @@ public sealed record VisaoDaSala(
             fim ? PremiosDaNoite.Resumir(sala, jogadores) : null,
             Esquentando(sala),
             sala.CartaTiradaPor,
-            eu.Mao.ToList());
+            eu.Mao.ToList(),
+            sala.MicoPara(eu));
     }
 
     private static EsquentaVisivel? Esquentando(Sala sala)

@@ -168,6 +168,9 @@ class ApiBaralho {
   Future<VisaoDaSala> retomar(String codigo, String token) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/retomar', token);
 
+  Future<VisaoDaSala> votarNoMico(String codigo, String token, int opcao) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/mico', token, corpo: {'opcao': opcao});
+
   /// Selfie de reação de quem foi pego na carta: vai para o mural da noite.
   Future<VisaoDaSala> registrarMomento(String codigo, String token, int rodada, Uint8List foto) async {
     final resposta = await _enviar('PUT', '/api/salas/${_codigo(codigo)}/momentos?rodada=$rodada',
