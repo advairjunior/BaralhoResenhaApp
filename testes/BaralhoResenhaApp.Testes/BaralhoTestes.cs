@@ -152,9 +152,12 @@ public sealed class BaralhoTestes
 
         Assert.InRange(Parte(ModoDeJogo.RegraRelampago), 0.04, 0.20);
         Assert.True(Parte(ModoDeJogo.EuNunca) > Parte(ModoDeJogo.Correio) * 2);
-        Assert.True(Parte(ModoDeJogo.MaisProvavel) > 0.12);
-        // Beba se cedeu espaço para votação, desafios, mímica e os jogos novos, mas segue na mesa.
-        Assert.True(Parte(ModoDeJogo.BebaSe) > 0.05);
+        // A votação é o coração da noite: segue sendo o jogo que mais sai, por mais jogos que entrem.
+        Assert.All(Enum.GetValues<ModoDeJogo>().Where(m => m != ModoDeJogo.MaisProvavel),
+            m => Assert.True(Parte(ModoDeJogo.MaisProvavel) > Parte(m), $"{m} saiu mais que a votação"));
+        // Beba se cedeu espaço para votação, desafios, mímica e os jogos novos, mas segue na mesa
+        // (uns 5%; cada jogo novo dilui um pouco).
+        Assert.True(Parte(ModoDeJogo.BebaSe) > 0.04);
     }
 
     [Fact]
@@ -205,10 +208,10 @@ public sealed class BaralhoTestes
         var outras = cartas.Where(c => c.Modo != ModoDeJogo.Musica).ToList();
         double Parte(Func<Carta, bool> filtro) => outras.Count(filtro) / (double)outras.Count;
         var deVoto = Parte(c => c.Modo is ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.Jurados
-            or ModoDeJogo.Impostor);
+            or ModoDeJogo.Impostor or ModoDeJogo.IssoOuAquilo);
         var desafios = Parte(c => c.Duelo);
         var mimica = Parte(c => c.Modo == ModoDeJogo.ImagemEAcao);
-        Assert.True(deVoto >= 0.35, $"votação, tribunal, jurados e impostor: {deVoto:P0}");
+        Assert.True(deVoto >= 0.35, $"votação, tribunal, jurados, impostor e isso ou aquilo: {deVoto:P0}");
         // Esperado: uns 6,5% (Quem é mais provável pesa 5 de 31, e 40% dele é duelo); cada jogo novo dilui um pouco.
         Assert.True(desafios >= 0.05, $"duelos: {desafios:P0}");
         // Uma em cada 8 cartas (12,5%), com folga para cada jogo novo que entra na mistura.

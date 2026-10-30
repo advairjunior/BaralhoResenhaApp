@@ -98,6 +98,7 @@ const noitesProntas = [
         ModoDeJogo.chutaAi,
         ModoDeJogo.batataQuente,
         ModoDeJogo.issoOuAquilo,
+        ModoDeJogo.quemSouEu,
       },
       zonaSegura: true,
       // Prenda a cada 3 pontos: a graça é pagar, mas sem virar só prenda.
@@ -127,7 +128,7 @@ const noitesProntas = [
     chave: 'tranquila',
     emoji: '💛',
     titulo: 'Noite tranquila',
-    descricao: 'Leve, com elogios, mímica, Correio e Isso ou aquilo. Dá até para jogar sem beber.',
+    descricao: 'Leve, com elogios, mímica, Correio, Isso ou aquilo e Quem sou eu. Dá até para jogar sem beber.',
     configuracao: ConfiguracaoDoJogo(
       nivel: NivelDaCarta.leve,
       modos: {
@@ -137,6 +138,7 @@ const noitesProntas = [
         ModoDeJogo.correio,
         ModoDeJogo.imagemEAcao,
         ModoDeJogo.issoOuAquilo,
+        ModoDeJogo.quemSouEu,
       },
       zonaSegura: true,
     ),

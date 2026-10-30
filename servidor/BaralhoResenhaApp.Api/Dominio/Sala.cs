@@ -107,6 +107,8 @@ public sealed class Rodada
     public int? SegundosDoCronometro => Carta.Modo switch
     {
         ModoDeJogo.ImagemEAcao => 60,
+        // Perguntas de sim ou não até acertar: um minuto e meio.
+        ModoDeJogo.QuemSouEu => 90,
         // Aponta no 3: a contagem é uma só, em todos os celulares.
         ModoDeJogo.MaisProvavel when !Votacao => 3,
         _ => Regex.Match(Texto, @"(\d+) segundos") is { Success: true } achado ? int.Parse(achado.Groups[1].Value) : null
@@ -167,6 +169,7 @@ public sealed class Rodada
         {
             if (Carta.Categoria is not { } categoria) return null;
             if (Carta.Modo == ModoDeJogo.Impostor) return $"Tema: {categoria}";
+            if (Carta.Modo == ModoDeJogo.QuemSouEu) return categoria;
             var palavras = Carta.Texto.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
             return $"{categoria} · {palavras} {(palavras == 1 ? "palavra" : "palavras")}";
         }
@@ -182,6 +185,7 @@ public sealed class Rodada
     public string TextoPara(Guid jogadorId, bool revelada)
     {
         if (Impostor == jogadorId && !revelada) return "🕵️ Você é o impostor!";
+        if (Carta.Modo == ModoDeJogo.QuemSouEu && Alvo == jogadorId && !revelada) return "🙈 Quem é você?";
         return Times.Count == 0 || revelada || Times.Any(t => t.Mimico == jogadorId)
             ? Texto
             : "🎭 Adivinhe a mímica!";
@@ -783,7 +787,7 @@ public sealed partial class Sala
             .OrderBy(j => j.Chamadas).ThenBy(_ => _sorteio.Next()).Take(2).ToList();
         if (carta.Texto.Contains("{jogador}") ||
             carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados or ModoDeJogo.Musica
-                or ModoDeJogo.DuasVerdades or ModoDeJogo.BatataQuente)
+                or ModoDeJogo.DuasVerdades or ModoDeJogo.BatataQuente or ModoDeJogo.QuemSouEu)
             sorteados[0].Chamadas++;
         if (carta.Texto.Contains("{jogador2}") && sorteados.Count == 2) sorteados[1].Chamadas++;
         var texto = carta.Texto
@@ -798,6 +802,7 @@ public sealed partial class Sala
             Texto = texto,
             // No tribunal, o réu é o {jogador} da carta; no correio, quem está na foto.
             Alvo = carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados or ModoDeJogo.DuasVerdades
+                or ModoDeJogo.QuemSouEu
                 ? sorteados[0].Id
                 : null,
             // Elogio e duelo são sempre no celular: a graça é a foto de quem a turma escolheu.

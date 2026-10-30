@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi', 'batataQuente', 'issoOuAquilo'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi', 'batataQuente', 'issoOuAquilo', 'quemSouEu'];
 
 const pagina = async () => {
   const p = await b.newPage();
@@ -203,6 +203,18 @@ for (const [n, lado] of [['Advair', '0'], ['Júlia', '0'], ['Caio', '1'], ['Brun
 p = await abrir(s, 'Júlia');
 await rolar(p, 1050);
 await foto(p, 'isso-ou-aquilo');
+await p.close();
+
+// Quem sou eu?: a turma vê o segredo; a pessoa da vez só vê a categoria.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['QuemSouEu'] }, (r) => r.cartaId === 'qs-021');
+p = await abrir(s, s.nomes[v.rodada.alvo] === 'Júlia' ? 'Caio' : 'Júlia');
+await rolar(p, 650);
+await foto(p, 'quem-sou-eu');
+await p.close();
+p = await abrir(s, s.nomes[v.rodada.alvo]);
+await rolar(p, 650);
+await foto(p, 'quem-sou-eu-vez');
 await p.close();
 
 // Jurados: a média das estrelas, sem dizer quem deu qual nota.

@@ -21,6 +21,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.chutaAi => 'Chuta aí',
         ModoDeJogo.batataQuente => 'Batata quente',
         ModoDeJogo.issoOuAquilo => 'Isso ou aquilo',
+        ModoDeJogo.quemSouEu => 'Quem sou eu?',
       };
 
   String get emoji => switch (this) {
@@ -40,6 +41,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.chutaAi => '🎯',
         ModoDeJogo.batataQuente => '🥔',
         ModoDeJogo.issoOuAquilo => '🤷',
+        ModoDeJogo.quemSouEu => '🙈',
       };
 
   String get explicacao => switch (this) {
@@ -71,6 +73,8 @@ extension VisualDoModo on ModoDeJogo {
             'celular: fala uma e toca em "Falei!". Ninguém sabe quando estoura; quem estiver com ela leva ponto.',
         ModoDeJogo.issoOuAquilo => 'Duas opções ("praia ou montanha?") e cada um escolhe em segredo. Quem ficar '
             'na minoria leva ponto. Precisa de 3 pessoas.',
+        ModoDeJogo.quemSouEu => 'Todo mundo vê quem a pessoa da vez é (um objeto, um bicho, um famoso, '
+            'qualquer coisa), menos ela. Pergunta sim ou não até acertar: acertou, carta na manga; o tempo acabou, ponto.',
       };
 
   Color get cor => switch (this) {
@@ -90,6 +94,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.chutaAi => CoresBaralho.chute,
         ModoDeJogo.batataQuente => CoresBaralho.batata,
         ModoDeJogo.issoOuAquilo => CoresBaralho.issoOuAquilo,
+        ModoDeJogo.quemSouEu => CoresBaralho.quemSouEu,
       };
 }
 

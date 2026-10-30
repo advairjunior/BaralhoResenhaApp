@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades, chutaAi, batataQuente, issoOuAquilo }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades, chutaAi, batataQuente, issoOuAquilo, quemSouEu }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 

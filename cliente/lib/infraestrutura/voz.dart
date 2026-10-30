@@ -34,7 +34,7 @@ final _generoEntreParenteses = RegExp(r'\((a|as|o|os)\)');
 String _semEmoji(String texto) => texto.replaceAll(_emojis, '').replaceAll(_generoEntreParenteses, '').replaceAll(RegExp(r'\s+'), ' ').replaceAll(' .', '.').trim();
 
 /// O que a mesa ouve. Carta com segredo (a palavra da mímica, a do Impostor, a
-/// pergunta do Correio) só é anunciada: o segredo continua só na tela de quem pode ver.
+/// pergunta do Correio, quem é a pessoa no Quem sou eu) só é anunciada: o segredo continua só na tela de quem pode ver.
 String falaDaCarta(VisaoDaSala visao) {
   final rodada = visao.rodada!;
   String nome(String? id) => visao.jogador(id ?? '')?.nome ?? 'alguém';
@@ -44,12 +44,15 @@ String falaDaCarta(VisaoDaSala visao) {
     ModoDeJogo.impostor => '${rodada.dica ?? ''}. Cada um olha o seu celular.',
     ModoDeJogo.correio => 'A pergunta está no celular da turma.',
     ModoDeJogo.batataQuente => '${rodada.texto}. Começa com ${nome(rodada.comABatata)}!',
+    ModoDeJogo.quemSouEu => '${nome(rodada.alvo)}, descubra quem você é! Só vale pergunta de sim ou não.',
     _ => rodada.texto,
   };
   final titulo = switch (rodada) {
     Rodada(jokenpo: true) => 'Pedra, papel e tesoura!',
     Rodada(duelo: true) => 'Duelo!',
     Rodada(modo: ModoDeJogo.correio) => '${rodada.modo.titulo} para ${nome(rodada.alvo)}!',
+    // "Quem sou eu?" já é pergunta: não leva o ponto de exclamação.
+    _ when rodada.modo.titulo.endsWith('?') => rodada.modo.titulo,
     _ => '${rodada.modo.titulo}!',
   };
   return _semEmoji('${personagemDa(rodada.numero).chamada} $titulo $carta');

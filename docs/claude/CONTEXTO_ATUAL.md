@@ -43,7 +43,9 @@ Termine a frase (cada um completa o começo da carta em segredo, a turma vota se
 Duas verdades e uma mentira (a pessoa da vez escreve três frases sobre si e a turma vota na mentira; 3+ pessoas) ·
 Chuta aí (pergunta com resposta em número; mais longe leva, mais perto distribui) ·
 Batata quente (categoria; cada um fala e toca em "Falei!"; o pavio escondido é do servidor e estoura sozinho) ·
-Isso ou aquilo (duas opções, voto secreto; a minoria leva; empate ou unanimidade, ninguém; 3+ pessoas).
+Isso ou aquilo (duas opções, voto secreto; a minoria leva; empate ou unanimidade, ninguém; 3+ pessoas) ·
+Quem sou eu? (todo mundo vê o segredo, menos a pessoa da vez, que só sabe a categoria; pergunta sim ou não
+em 90 s; acertou, carta na manga; o tempo acabou, ponto; quem criou a sala marca).
 
 ## Regras de produto já decididas
 

@@ -63,7 +63,13 @@ public enum ModoDeJogo
     /// Isso ou aquilo: a carta dá duas opções e cada um escolhe em segredo. Quem
     /// ficou na minoria leva ponto; empate ou todo mundo igual, ninguém leva.
     /// </summary>
-    IssoOuAquilo
+    IssoOuAquilo,
+
+    /// <summary>
+    /// Quem sou eu?: a carta é um segredo (objeto, bicho, famoso, personagem…) que todo
+    /// mundo vê, menos a pessoa da vez, que pergunta "sim ou não" até acertar.
+    /// </summary>
+    QuemSouEu
 }
 
 /// <summary>
@@ -105,6 +111,7 @@ public enum NivelDaCarta
 /// <param name="Categoria">
 /// Imagem e Ação: a dica que o mímico pode dizer (Ação, Objeto, Filme…).
 /// Impostor: o tema da palavra, a única coisa que o impostor sabe.
+/// Quem sou eu?: o que a pessoa da vez é (Objeto, Bicho, Famoso…), a primeira pista dela.
 /// </param>
 /// <param name="Duelo">Quem é mais provável: {jogador} contra {jogador2}, a turma vota em quem mandou melhor.</param>
 /// <param name="Isca">Regra-relâmpago: o que o jogo gera a cada carta para a regra acontecer.</param>
@@ -220,6 +227,7 @@ public sealed record ConfiguracaoDoJogo(
         [ModoDeJogo.EuNunca, ModoDeJogo.MaisProvavel, ModoDeJogo.BebaSe, ModoDeJogo.RegraRelampago,
             ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados,
             ModoDeJogo.Musica, ModoDeJogo.Impostor, ModoDeJogo.TermineAFrase, ModoDeJogo.DuasVerdades,
-            ModoDeJogo.ChutaAi, ModoDeJogo.BatataQuente, ModoDeJogo.IssoOuAquilo],
+            ModoDeJogo.ChutaAi, ModoDeJogo.BatataQuente, ModoDeJogo.IssoOuAquilo,
+            ModoDeJogo.QuemSouEu],
         ZonaSegura: true);
 }

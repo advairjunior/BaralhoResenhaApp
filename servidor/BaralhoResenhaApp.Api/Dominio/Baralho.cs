@@ -66,6 +66,8 @@ public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = 
         [ModoDeJogo.BatataQuente] = 1,
         // Um toque e a revelação: rápido como o Eu Nunca, mas com menos cartas.
         [ModoDeJogo.IssoOuAquilo] = 2,
+        // Um minuto e meio de perguntas com a mesa inteira olhando: dos mais pedidos.
+        [ModoDeJogo.QuemSouEu] = 2,
     };
 
     /// <summary>

@@ -115,6 +115,9 @@ class ApiBaralho {
       _visao('POST', '/api/salas/${_codigo(codigo)}/mimica', token,
           corpo: {'rodada': rodada, 'vencedor': vencedor});
 
+  Future<VisaoDaSala> resultadoDoQuemSouEu(String codigo, String token, int rodada, {required bool acertou}) =>
+      _visao('POST', '/api/salas/${_codigo(codigo)}/quem-sou-eu', token, corpo: {'rodada': rodada, 'acertou': acertou});
+
   /// Cronômetro da carta: quem criou a sala dá o valendo (de novo, recomeça).
   Future<VisaoDaSala> iniciarCronometro(String codigo, String token, int rodada) =>
       _visao('POST', '/api/salas/${_codigo(codigo)}/cronometro', token, corpo: {'rodada': rodada});

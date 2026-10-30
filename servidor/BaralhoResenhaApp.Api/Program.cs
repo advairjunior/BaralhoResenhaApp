@@ -174,6 +174,13 @@ app.MapPost("/api/salas/{codigo}/vacilo", (
     Agir(codigo, http, salas, notificador,
         (sala, token) => sala.MarcarVacilo(token, requisicao.Rodada, requisicao.JogadorId)));
 
+// Quem sou eu?: quem criou a sala marca se a pessoa da vez acertou quem era.
+app.MapPost("/api/salas/{codigo}/quem-sou-eu", (
+    string codigo, ResultadoDoQuemSouEu requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador,
+        (sala, token) => sala.ResultadoDoQuemSouEu(token, requisicao.Rodada, requisicao.Acertou)));
+
 app.MapPost("/api/salas/{codigo}/mimica", (
     string codigo, ResultadoDaMimica requisicao, HttpRequest http,
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
@@ -348,6 +355,7 @@ public sealed record EntradaNaSala(string Codigo, string Token);
 public sealed record ResponderCarta(int Rodada, string Resposta);
 public sealed record AcaoNaRodada(int Rodada);
 public sealed record VotoNoMico(int Opcao);
+public sealed record ResultadoDoQuemSouEu(int Rodada, bool Acertou);
 public sealed record HistoriaContada(int Rodada, Guid JogadorId);
 /// <param name="Vistas">Cartas das noites anteriores, guardadas no celular de quem criou a sala.</param>
 public sealed record ComecarNoite(IReadOnlyList<string>? Vistas);

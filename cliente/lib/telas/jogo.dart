@@ -12,6 +12,7 @@ import 'controles_do_anfitriao.dart';
 import 'cronometro.dart';
 import 'imagem_e_acao.dart';
 import 'isso_ou_aquilo.dart';
+import 'quem_sou_eu.dart';
 import 'jokenpo.dart';
 import 'correio.dart';
 import 'termine_a_frase.dart';
@@ -122,10 +123,11 @@ class Jogo extends StatelessWidget {
                 _Reacoes(rodada: rodada, acoes: acoes),
                 DicaDePrimeiraVez(key: ValueKey('dica-${rodada.numero}'), visao: visao, rodada: rodada),
                 const SizedBox(height: EspacoBaralho.base),
-                // A mímica e o aponta no 3 têm a contagem no painel deles.
+                // A mímica, o Quem sou eu e o aponta no 3 têm a contagem no painel deles.
                 if (rodada.cronometroSegundos != null &&
                     rodada.revelacao == null &&
                     rodada.modo != ModoDeJogo.imagemEAcao &&
+                    rodada.modo != ModoDeJogo.quemSouEu &&
                     !(rodada.modo == ModoDeJogo.maisProvavel && !rodada.votacao))
                   Cronometro(
                     key: ValueKey('cronometro-${rodada.numero}'),
@@ -396,6 +398,7 @@ class _AreaDeAcao extends StatelessWidget {
             ModoDeJogo.chutaAi => RevelacaoDosChutes(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.batataQuente => RevelacaoDaBatata(visao: visao, revelacao: revelacao),
             ModoDeJogo.issoOuAquilo => RevelacaoDasEscolhas(visao: visao, rodada: rodada, revelacao: revelacao),
+            ModoDeJogo.quemSouEu => RevelacaoDoQuemSouEu(visao: visao, rodada: rodada, revelacao: revelacao),
             _ => _RevelacaoMaisProvavel(visao: visao, revelacao: revelacao),
           },
           MomentosDaRodada(visao: visao, rodada: rodada, acoes: acoes),
@@ -515,6 +518,7 @@ class _AreaDeAcao extends StatelessWidget {
               : VotarNaMentira(rodada: rodada, acoes: acoes),
         ),
       ModoDeJogo.batataQuente => PainelDaBatata(visao: visao, rodada: rodada, acoes: acoes),
+      ModoDeJogo.quemSouEu => PainelDoQuemSouEu(visao: visao, rodada: rodada, acoes: acoes),
       ModoDeJogo.issoOuAquilo => _Respondendo(
           visao: visao,
           rodada: rodada,

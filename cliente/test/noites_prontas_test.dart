@@ -23,7 +23,7 @@ void main() {
         // Noite de jogos não tem álcool: entra tudo, menos o que é feito para beber.
         'modos': [
           'MaisProvavel', 'RegraRelampago', 'Tribunal', 'Elogios', 'Correio', 'ImagemEAcao', 'Jurados', 'Musica',
-          'Impostor', 'TermineAFrase', 'DuasVerdades', 'ChutaAi', 'BatataQuente', 'IssoOuAquilo',
+          'Impostor', 'TermineAFrase', 'DuasVerdades', 'ChutaAi', 'BatataQuente', 'IssoOuAquilo', 'QuemSouEu',
         ],
         'zonaSegura': true,
         'esquentar': false,

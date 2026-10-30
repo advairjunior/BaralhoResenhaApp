@@ -136,6 +136,13 @@ ComoJoga comoJoga(Rodada rodada) {
         'Na revelação aparece quem escolheu cada lado. Quem ficou na minoria leva 1 ponto.',
         'Empate ou todo mundo do mesmo lado: ninguém leva.',
       ]),
+    Rodada(modo: ModoDeJogo.quemSouEu) => ('quemSouEu', ModoDeJogo.quemSouEu.titulo, [
+        'Todo mundo vê no celular quem a pessoa da vez é, menos ela. Pode ser qualquer coisa: '
+            'objeto, bicho, comida, famoso, personagem, lugar…',
+        'A pessoa da vez só sabe a categoria. Ela pergunta em voz alta e a turma só responde sim ou não.',
+        'Quem criou a sala dá o "Valendo!": são 90 segundos.',
+        'Acertou? Ganha uma carta na manga. O tempo acabou? Leva 1 ponto.',
+      ]),
     Rodada(modo: ModoDeJogo.imagemEAcao) => ('mimica', ModoDeJogo.imagemEAcao.titulo, [
         'Só quem faz a mímica vê a palavra. Dá para dizer a dica: a categoria e o número de palavras.',
         'Não vale falar, soletrar nem apontar para objetos.',
