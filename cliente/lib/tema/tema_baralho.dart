@@ -34,6 +34,7 @@ abstract final class CoresBaralho {
   static const issoOuAquilo = Color(0xFFEC4899);
   static const quemSouEu = Color(0xFF06B6D4);
   static const palavraProibida = Color(0xFFB45309);
+  static const quemEscreveu = Color(0xFF7C3AED);
 }
 
 abstract final class EspacoBaralho {

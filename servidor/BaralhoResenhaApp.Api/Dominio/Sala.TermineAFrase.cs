@@ -16,24 +16,32 @@ public sealed partial class Sala
     private void EscreverFrase(Rodada rodada, Jogador jogador, string resposta)
     {
         var frase = Regex.Replace(resposta ?? string.Empty, @"\s+", " ").Trim();
+        var quemEscreveu = rodada.Carta.Modo == ModoDeJogo.QuemEscreveu;
         if (frase.Length == 0)
-            throw new AcaoNaoPermitidaException("Escreva o fim da frase.");
+            throw new AcaoNaoPermitidaException(quemEscreveu ? "Escreva sua resposta." : "Escreva o fim da frase.");
         // Emoji conta como uma letra: é o que a pessoa vê na tela.
-        if (new StringInfo(frase).LengthInTextElements > TamanhoDaFrase)
-            throw new AcaoNaoPermitidaException($"Frase curta: até {TamanhoDaFrase} letras.");
+        var limite = quemEscreveu ? TamanhoDaResposta : TamanhoDaFrase;
+        if (new StringInfo(frase).LengthInTextElements > limite)
+            throw new AcaoNaoPermitidaException(
+                quemEscreveu ? $"Resposta curta: até {limite} letras." : $"Frase curta: até {limite} letras.");
         rodada.Frases[jogador.Id] = frase;
         ComecarVotacaoSeTodosEscreveram(rodada);
     }
 
     private void ComecarVotacaoSeTodosEscreveram(Rodada rodada)
     {
-        if (rodada.Escrevendo && rodada.Frases.Count >= 2 && NaMesa.All(j => rodada.Frases.ContainsKey(j.Id)))
+        var minimo = rodada.Carta.Modo == ModoDeJogo.QuemEscreveu ? MinimoDeRespostas : 2;
+        if (rodada.Escrevendo && rodada.Frases.Count >= minimo && NaMesa.All(j => rodada.Frases.ContainsKey(j.Id)))
             ComecarVotacaoDasFrases(rodada);
     }
 
     /// <summary>Embaralha para a ordem não entregar ninguém.</summary>
-    private void ComecarVotacaoDasFrases(Rodada rodada) =>
+    private void ComecarVotacaoDasFrases(Rodada rodada)
+    {
         rodada.OrdemDasFrases = rodada.Frases.Keys.OrderBy(_ => _sorteio.Next()).ToList();
+        // Quem escreveu?: uma resposta vai para o centro.
+        if (rodada.Carta.Modo == ModoDeJogo.QuemEscreveu) rodada.FraseEmJogo = _sorteio.Next(rodada.OrdemDasFrases.Count);
+    }
 
     private static void ValidarVotoNaFrase(Rodada rodada, Jogador jogador, string resposta)
     {

@@ -70,6 +70,8 @@ public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = 
         [ModoDeJogo.QuemSouEu] = 2,
         // A mímica falada: rende como a mímica, mas é mais rápida de entender.
         [ModoDeJogo.PalavraProibida] = 2,
+        // Escrever e votar demora, como o Termine a frase.
+        [ModoDeJogo.QuemEscreveu] = 1,
     };
 
     /// <summary>
@@ -99,7 +101,7 @@ public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = 
             // Votação e tribunal precisam de gente para votar.
             .Where(modo => modo is not (ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.ImagemEAcao or ModoDeJogo.PalavraProibida
                     or ModoDeJogo.Jurados or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades
-                    or ModoDeJogo.IssoOuAquilo) ||
+                    or ModoDeJogo.IssoOuAquilo or ModoDeJogo.QuemEscreveu) ||
                 quantidadeDeJogadores >= 3)
             // Com menos de três escrevendo, todo mundo adivinha quem escreveu.
             .Where(modo => modo != ModoDeJogo.Correio || quantidadeDeJogadores >= 4)

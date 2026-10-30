@@ -212,7 +212,10 @@ public sealed class Rodada
     /// <summary>Termine a frase: de quem é cada frase, na ordem da votação; nulo enquanto escrevem.</summary>
     public List<Guid>? OrdemDasFrases { get; set; }
 
-    public bool Escrevendo => Carta.Modo == ModoDeJogo.TermineAFrase && OrdemDasFrases is null;
+    public bool Escrevendo => Carta.Modo is ModoDeJogo.TermineAFrase or ModoDeJogo.QuemEscreveu && OrdemDasFrases is null;
+
+    /// <summary>Quem escreveu?: qual das respostas (na ordem da votação) a turma tenta adivinhar o autor.</summary>
+    public int? FraseEmJogo { get; set; }
 
     /// <summary>Duas verdades e uma mentira: as três frases da pessoa da vez; vazio até ela escrever.</summary>
     public IReadOnlyList<string> Afirmacoes { get; set; } = [];
@@ -235,7 +238,7 @@ public sealed class Rodada
     public bool PedeResposta =>
         Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.Tribunal or ModoDeJogo.Correio
             or ModoDeJogo.Jurados or ModoDeJogo.Impostor or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades
-            or ModoDeJogo.ChutaAi or ModoDeJogo.IssoOuAquilo ||
+            or ModoDeJogo.ChutaAi or ModoDeJogo.IssoOuAquilo or ModoDeJogo.QuemEscreveu ||
         (Carta.Modo == ModoDeJogo.MaisProvavel && Votacao);
 }
 
@@ -577,6 +580,7 @@ public sealed partial class Sala
                 return;
             }
             if (rodada.Carta.Modo == ModoDeJogo.TermineAFrase) ValidarVotoNaFrase(rodada, jogador, resposta);
+            if (rodada.Carta.Modo == ModoDeJogo.QuemEscreveu) ValidarVotoNoAutor(jogador, resposta);
             if (rodada.Carta.Modo == ModoDeJogo.DuasVerdades) ValidarVotoNaMentira(rodada, jogador, resposta);
             if (rodada.Carta.Modo == ModoDeJogo.Impostor) ValidarVotoNoImpostor(jogador, resposta);
             if (rodada.Carta.Modo == ModoDeJogo.ChutaAi) resposta = ValidarChute(resposta);
@@ -616,6 +620,9 @@ public sealed partial class Sala
             // Termine a frase: "revelar" durante a escrita passa para a votação.
             if (Rodada.Escrevendo)
             {
+                if (Rodada.Carta.Modo == ModoDeJogo.QuemEscreveu && Rodada.Frases.Count < MinimoDeRespostas)
+                    throw new AcaoNaoPermitidaException(
+                        "Espere pelo menos 3 respostas: com menos, fica fácil saber quem escreveu.");
                 if (Rodada.Frases.Count < 2)
                     throw new AcaoNaoPermitidaException(
                         "Espere pelo menos 2 frases: com uma só, todo mundo sabe quem escreveu.");
@@ -893,6 +900,10 @@ public sealed partial class Sala
         else if (rodada.Carta.Modo == ModoDeJogo.ChutaAi)
         {
             revelacao = RevelarChutes(rodada, respostas);
+        }
+        else if (rodada.Carta.Modo == ModoDeJogo.QuemEscreveu)
+        {
+            revelacao = RevelarQuemEscreveu(rodada, respostas);
         }
         else if (rodada.Carta.Modo == ModoDeJogo.IssoOuAquilo)
         {

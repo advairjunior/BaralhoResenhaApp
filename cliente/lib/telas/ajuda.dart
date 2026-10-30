@@ -152,6 +152,12 @@ ComoJoga comoJoga(Rodada rodada) {
           'A turma toda tenta adivinhar. Ninguém acertou no tempo? Quem explicou leva 1 ponto.',
         'Quem criou a sala dá o "Valendo!" no cronômetro de 60 segundos e marca quem acertou.',
       ]),
+    Rodada(modo: ModoDeJogo.quemEscreveu) => ('quemEscreveu', ModoDeJogo.quemEscreveu.titulo, [
+        'A carta faz uma pergunta pessoal. Cada um responde no celular, em segredo.',
+        'Quando todo mundo escreve, uma das respostas vai para o centro, sem autor. As outras aparecem embaixo e ninguém fica sabendo de quem são.',
+        'Todo mundo vota em quem escreveu a do centro, até quem escreveu, para não se entregar.',
+        'Errou? Leva 1 ponto. Ninguém descobriu? Quem escreveu escapou: ganha uma carta na manga e distribui goles.',
+      ]),
     Rodada(modo: ModoDeJogo.imagemEAcao) => ('mimica', ModoDeJogo.imagemEAcao.titulo, [
         'Só quem faz a mímica vê a palavra. Dá para dizer a dica: a categoria e o número de palavras.',
         'Não vale falar, soletrar nem apontar para objetos.',

@@ -61,6 +61,8 @@ _TemaDaCarta _temaDo(ModoDeJogo modo) => switch (modo) {
         const _TemaDaCarta(moldura: Color(0xFF0891B2), papel: Color(0xFFECFEFF), titulo: Color(0xFF0E7490)),
       ModoDeJogo.palavraProibida =>
         const _TemaDaCarta(moldura: Color(0xFFB45309), papel: Color(0xFFFFF8EB), titulo: Color(0xFF92400E)),
+      ModoDeJogo.quemEscreveu =>
+        const _TemaDaCarta(moldura: Color(0xFF6D28D9), papel: Color(0xFFF5F0FF), titulo: Color(0xFF5B21B6)),
     };
 
 /// O que vai em cima do título: o jeito de jogar esta carta.
@@ -83,6 +85,7 @@ String? _jeitoDaCarta(Rodada rodada) => switch (rodada) {
       Rodada(modo: ModoDeJogo.issoOuAquilo) => '🤷 A MINORIA LEVA',
       Rodada(modo: ModoDeJogo.quemSouEu, :final dica?) => '🙈 ${dica.toUpperCase()} · SÓ SIM OU NÃO',
       Rodada(modo: ModoDeJogo.palavraProibida) => '🚫 EXPLIQUE SEM DIZER AS PROIBIDAS',
+      Rodada(modo: ModoDeJogo.quemEscreveu) => '🖊️ RESPOSTA SECRETA · ADIVINHE O AUTOR',
       _ => null,
     };
 

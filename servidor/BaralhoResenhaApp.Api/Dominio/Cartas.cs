@@ -75,7 +75,13 @@ public enum ModoDeJogo
     /// Palavra proibida: como a mímica, só que falando. Quem explica vê a palavra e as
     /// proibidas; os times seguem o Imagem e Ação.
     /// </summary>
-    PalavraProibida
+    PalavraProibida,
+
+    /// <summary>
+    /// Quem escreveu?: pergunta pessoal; cada um responde em segredo, uma resposta vai
+    /// para o centro e a turma vota em quem escreveu.
+    /// </summary>
+    QuemEscreveu
 }
 
 /// <summary>
@@ -236,6 +242,6 @@ public sealed record ConfiguracaoDoJogo(
             ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados,
             ModoDeJogo.Musica, ModoDeJogo.Impostor, ModoDeJogo.TermineAFrase, ModoDeJogo.DuasVerdades,
             ModoDeJogo.ChutaAi, ModoDeJogo.BatataQuente, ModoDeJogo.IssoOuAquilo,
-            ModoDeJogo.QuemSouEu, ModoDeJogo.PalavraProibida],
+            ModoDeJogo.QuemSouEu, ModoDeJogo.PalavraProibida, ModoDeJogo.QuemEscreveu],
         ZonaSegura: true);
 }

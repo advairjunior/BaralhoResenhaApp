@@ -55,7 +55,8 @@ public sealed record RodadaVisivel(
     IReadOnlyDictionary<Guid, IReadOnlyList<string>> Prendas,
     string? PrendaParaDar,
     IReadOnlyList<string> Opcoes,
-    IReadOnlyList<string> Proibidas);
+    IReadOnlyList<string> Proibidas,
+    int? FraseEmJogo);
 
 /// <summary>Esquenta sozinho: em que nível a noite está e quando sobe.</summary>
 /// <param name="SobeEm">Cartas até subir; nulo quando já chegou ao limite.</param>
@@ -158,7 +159,8 @@ public sealed record VisaoDaSala(
                     sala.PrendasDaCarta(rodada),
                     sala.PrendaParaDar(rodada),
                     rodada.Carta.Opcoes ?? [],
-                    rodada.ProibidasPara(eu.Id, sala.Fase == FaseDaSala.Revelada)),
+                    rodada.ProibidasPara(eu.Id, sala.Fase == FaseDaSala.Revelada),
+                    rodada.FraseEmJogo),
             sala.Regra is { } regra ? regra with { PodemVacilar = sala.QuemPodeVacilar(regra) } : null,
             sala.Momentos.Select(m => new MomentoVisivel(
                 m.Id, m.JogadorId, m.NomeDoJogador, m.Rodada, m.Texto, Endereco(m.Foto))).ToList(),

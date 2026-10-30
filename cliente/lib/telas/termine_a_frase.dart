@@ -9,7 +9,10 @@ import 'visual.dart';
 /// Dá para uma piada, não para um textão (igual ao servidor).
 const tamanhoDaFrase = 40;
 
-/// Cada um completa a frase da carta em segredo.
+/// Quem escreveu?: cabe uma história curta (igual ao servidor).
+const tamanhoDaResposta = 60;
+
+/// Cada um completa a frase da carta em segredo (no Quem escreveu?, responde a pergunta).
 class EscreverFrase extends StatefulWidget {
   const EscreverFrase({super.key, required this.rodada, required this.acoes});
 
@@ -23,6 +26,8 @@ class EscreverFrase extends StatefulWidget {
 class _EscreverFraseState extends State<EscreverFrase> {
   late final _frase = TextEditingController(text: widget.rodada.minhaResposta ?? '');
 
+  bool get _quemEscreveu => widget.rodada.modo == ModoDeJogo.quemEscreveu;
+
   @override
   void dispose() {
     _frase.dispose();
@@ -32,7 +37,7 @@ class _EscreverFraseState extends State<EscreverFrase> {
   void _enviar() {
     final texto = _frase.text.trim();
     if (texto.isEmpty) {
-      avisar(context, 'Escreva o fim da frase.');
+      avisar(context, _quemEscreveu ? 'Escreva sua resposta.' : 'Escreva o fim da frase.');
       return;
     }
     FocusScope.of(context).unfocus();
@@ -45,31 +50,35 @@ class _EscreverFraseState extends State<EscreverFrase> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          '🔒 Ninguém sabe quem escreveu o quê. Só o autor da mais votada aparece.',
+        Text(
+          _quemEscreveu
+              ? '🔒 Uma resposta vai para o centro e a turma tenta adivinhar de quem é. As outras ficam anônimas.'
+              : '🔒 Ninguém sabe quem escreveu o quê. Só o autor da mais votada aparece.',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 13, color: CoresBaralho.textoSecundario, height: 1.4),
+          style: const TextStyle(fontSize: 13, color: CoresBaralho.textoSecundario, height: 1.4),
         ),
         const SizedBox(height: EspacoBaralho.base),
         TextField(
           key: const Key('frase'),
           controller: _frase,
-          maxLength: tamanhoDaFrase,
+          maxLength: _quemEscreveu ? tamanhoDaResposta : tamanhoDaFrase,
           textAlign: TextAlign.center,
           textInputAction: TextInputAction.send,
           onSubmitted: (_) => _enviar(),
           style: const TextStyle(fontSize: 20),
-          decoration: const InputDecoration(hintText: '…complete aqui'),
+          decoration: InputDecoration(hintText: _quemEscreveu ? 'Sua resposta' : '…complete aqui'),
         ),
         const SizedBox(height: EspacoBaralho.pequeno),
         FilledButton(
           onPressed: _enviar,
-          child: Text(enviada == null ? 'Enviar frase' : 'Trocar frase'),
+          child: Text(_quemEscreveu
+              ? (enviada == null ? 'Enviar resposta' : 'Trocar resposta')
+              : (enviada == null ? 'Enviar frase' : 'Trocar frase')),
         ),
         if (enviada != null)
           Padding(
             padding: const EdgeInsets.only(top: EspacoBaralho.pequeno),
-            child: Text('Sua frase: "$enviada" ✓',
+            child: Text('${_quemEscreveu ? 'Sua resposta' : 'Sua frase'}: "$enviada" ✓',
                 textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoApagado)),
           ),
       ],

@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi', 'batataQuente', 'issoOuAquilo', 'quemSouEu', 'palavraProibida'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi', 'batataQuente', 'issoOuAquilo', 'quemSouEu', 'palavraProibida', 'quemEscreveu'];
 
 const pagina = async () => {
   const p = await b.newPage();
@@ -223,6 +223,16 @@ v = await comecar(s, { nivel: 'Leve', modos: ['PalavraProibida'] }, (r) => r.car
 p = await abrir(s, s.nomes[v.rodada.times[0].mimico]);
 await rolar(p, 650);
 await foto(p, 'palavra-proibida');
+await p.close();
+
+// Quem escreveu?: a resposta do centro e a votação em quem escreveu.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['QuemEscreveu'] }, (r) => r.cartaId === 'qe-001');
+for (const [n, resposta] of [['Advair', 'Formiga na Tailândia'], ['Júlia', 'Jacaré no Pantanal'], ['Caio', 'Escargot'], ['Bruna', 'Pizza de banana com canela']])
+  await api('POST', `${s.sala}/respostas`, s.turma[n], { rodada: v.rodada.numero, resposta });
+p = await abrir(s, 'Caio');
+await rolar(p, 650);
+await foto(p, 'quem-escreveu');
 await p.close();
 
 // Jurados: a média das estrelas, sem dizer quem deu qual nota.

@@ -13,6 +13,7 @@ import 'cronometro.dart';
 import 'imagem_e_acao.dart';
 import 'isso_ou_aquilo.dart';
 import 'quem_sou_eu.dart';
+import 'quem_escreveu.dart';
 import 'jokenpo.dart';
 import 'correio.dart';
 import 'termine_a_frase.dart';
@@ -401,6 +402,7 @@ class _AreaDeAcao extends StatelessWidget {
             ModoDeJogo.batataQuente => RevelacaoDaBatata(visao: visao, revelacao: revelacao),
             ModoDeJogo.issoOuAquilo => RevelacaoDasEscolhas(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.quemSouEu => RevelacaoDoQuemSouEu(visao: visao, rodada: rodada, revelacao: revelacao),
+            ModoDeJogo.quemEscreveu => RevelacaoDoQuemEscreveu(visao: visao, revelacao: revelacao),
             _ => _RevelacaoMaisProvavel(visao: visao, revelacao: revelacao),
           },
           MomentosDaRodada(visao: visao, rodada: rodada, acoes: acoes),
@@ -521,6 +523,14 @@ class _AreaDeAcao extends StatelessWidget {
         ),
       ModoDeJogo.batataQuente => PainelDaBatata(visao: visao, rodada: rodada, acoes: acoes),
       ModoDeJogo.quemSouEu => PainelDoQuemSouEu(visao: visao, rodada: rodada, acoes: acoes),
+      ModoDeJogo.quemEscreveu => _Respondendo(
+          visao: visao,
+          rodada: rodada,
+          acoes: acoes,
+          opcoes: rodada.escrevendo
+              ? EscreverFrase(key: ValueKey('escrever-resposta-${rodada.numero}'), rodada: rodada, acoes: acoes)
+              : VotarNoAutor(visao: visao, rodada: rodada, acoes: acoes),
+        ),
       ModoDeJogo.issoOuAquilo => _Respondendo(
           visao: visao,
           rodada: rodada,
@@ -619,7 +629,8 @@ class _Respondendo extends StatelessWidget {
     final faltam = votantes.where((j) => !j.respondeu).toList();
     final souReu = (_ficaDeFora(rodada) && visao.euId == rodada.alvo) || rodada.duelistas.contains(visao.euId);
     final correio = rodada.modo == ModoDeJogo.correio;
-    final frase = rodada.modo == ModoDeJogo.termineAFrase;
+    final quemEscreveu = rodada.modo == ModoDeJogo.quemEscreveu;
+    final frase = rodada.modo == ModoDeJogo.termineAFrase || quemEscreveu;
     // Escrevendo, "revelar" leva para a votação; com uma frase só, todo mundo sabe quem escreveu.
     final escrevendo = correio || rodada.escrevendo;
     return Column(
@@ -640,10 +651,10 @@ class _Respondendo extends StatelessWidget {
                   ? (rodada.minhaResposta == null ? 'Escreva em segredo:' : 'Bilhete guardado. Dá para trocar até revelar.')
                   : frase && rodada.escrevendo
                   ? (rodada.minhaResposta == null
-                      ? 'Complete em segredo:'
-                      : 'Frase guardada. Dá para trocar até todo mundo escrever.')
+                      ? (quemEscreveu ? 'Responda em segredo:' : 'Complete em segredo:')
+                      : '${quemEscreveu ? 'Resposta guardada' : 'Frase guardada'}. Dá para trocar até todo mundo escrever.')
                   : frase && rodada.minhaResposta == null
-                  ? 'Vote em segredo na melhor:'
+                  ? (quemEscreveu ? 'Vote em segredo em quem escreveu:' : 'Vote em segredo na melhor:')
                   : rodada.minhaResposta == null
                   ? switch (rodada.modo) {
                       ModoDeJogo.euNunca => 'Responda em segredo:',
@@ -687,7 +698,7 @@ class _Respondendo extends StatelessWidget {
           Expanded(
             child: TextButton(
               // No correio, com um bilhete só todo mundo sabe quem escreveu.
-              onPressed: rodada.respostas >= (escrevendo ? 2 : 1) ? acoes.revelar : null,
+              onPressed: rodada.respostas >= (quemEscreveu && rodada.escrevendo ? 3 : escrevendo ? 2 : 1) ? acoes.revelar : null,
               child: Text(frase && rodada.escrevendo ? 'Ir para a votação' : 'Revelar agora'),
             ),
           ),

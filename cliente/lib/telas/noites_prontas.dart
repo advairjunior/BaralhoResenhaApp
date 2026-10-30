@@ -100,6 +100,7 @@ const noitesProntas = [
         ModoDeJogo.issoOuAquilo,
         ModoDeJogo.quemSouEu,
         ModoDeJogo.palavraProibida,
+        ModoDeJogo.quemEscreveu,
       },
       zonaSegura: true,
       // Prenda a cada 3 pontos: a graça é pagar, mas sem virar só prenda.

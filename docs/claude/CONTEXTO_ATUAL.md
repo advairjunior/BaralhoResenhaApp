@@ -47,7 +47,9 @@ Isso ou aquilo (duas opções, voto secreto; a minoria leva; empate ou unanimida
 Quem sou eu? (todo mundo vê o segredo, menos a pessoa da vez, que só sabe a categoria; pergunta sim ou não
 em 90 s; acertou, carta na manga; o tempo acabou, ponto; quem criou a sala marca) ·
 Palavra proibida (a mímica falada: quem explica vê a palavra e 4 proibidas; mesmos times, 60 s e
-resultado da mímica, mas não conta para o prêmio de artista da mímica; 3+ pessoas).
+resultado da mímica, mas não conta para o prêmio de artista da mímica; 3+ pessoas) ·
+Quem escreveu? (pergunta pessoal; cada um responde em segredo, uma resposta vai para o centro e todos votam
+no autor, até ele; errou, ponto; ninguém acertou, o autor escapa com carta na manga; 3+ pessoas).
 
 ## Regras de produto já decididas
 
@@ -141,3 +143,7 @@ que ele escrever. Quando ele avisar que terminou, ler as marcações e aplicar e
   - 🛑 Stop / Adedonha: sai uma letra e umas categorias, cada um escreve no celular, o primeiro
     aperta STOP para todos; na revelação a turma derruba resposta forçada no voto e resposta
     repetida não vale. Esforço médio (o grosso é a votação para derrubar).
+  - ⚡ Reflexo (2026-10-30, ficou para depois quando entraram Quem sou eu, Isso ou aquilo, Palavra
+    proibida e Quem escreveu): todos os celulares mostram "Espera…" e ficam verdes ao mesmo tempo num
+    instante sorteado; quem toca por último (ou antes do verde) leva ponto. Cuidado técnico: medir o
+    tempo em cada celular, a partir de um horário marcado pelo servidor, para a internet não decidir.
