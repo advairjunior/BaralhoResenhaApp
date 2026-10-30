@@ -58,6 +58,15 @@ Batata quente (categoria; cada um fala e toca em "Falei!"; o pavio escondido é 
 - **Cronômetro sincronizado:** o servidor guarda o fim; cada celular conta a partir do que falta.
 - **Cartas na manga:** cada carta da mesa anota uma conta por pessoa (`ContaDaCarta`: pontos e goles); Escudo, Passa a bola, Devolve, Batata quente e Dobra mexem nessa conta. Mão secreta, até 3.
 - **Noites prontas:** presets só no app (`noites_prontas.dart`), sem mudança no servidor.
+  A Noite das brincadeiras é a noite de jogos: sala sem álcool, cofrinho de 3 e todos os jogos menos
+  Eu Nunca, Beba se e Casais em Jogo (decidido pelo proprietário em 2026-10-30).
+- **Sala sem álcool** (`ConfiguracaoDoJogo.SemAlcool`, `Sala.SemAlcool.cs`): o cofrinho cheio (ou a
+  dose) vira prenda, sorteada por nível de `Dados/prendas.json` e guardada na rodada; no elogio, quem a
+  turma escolheu passa uma prenda. `Goles` passa a contar prendas, e o "sem álcool" individual não vale
+  (`SoPontos`). Carta que fala de bebida não sai; na regra, "bebeu" vira "leva ponto"
+  (`Baralho.SemBebida`). No fim, o 🤡 Mico da noite (`Sala.Mico.cs`): quem tem mais pontos paga, a
+  turma vota entre três micos sem ver a parcial, empate decide na sorte. Textos fixos do app com
+  "gole" passam por `semAlcoolNoTexto`/`paraASala` (`bebida.dart`).
 - **Mural não fica no servidor:** cada um salva as fotos no fim.
 - **Comando da sala:** quem está no comando passa para outro (menu ou sala de espera). Celular sem
   consultar a sala por 90 s (`Sala.TempoSemSinal`) perde o comando para o próximo da mesa que está aí;
