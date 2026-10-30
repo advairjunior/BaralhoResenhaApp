@@ -9,60 +9,89 @@ import 'visual.dart';
 /// Proporção de carta de baralho de verdade (63 × 88 mm).
 const proporcaoDaCarta = 63 / 88;
 
-/// Papel e tinta da carta: sempre claros, como carta impressa, mesmo com o
-/// app escuro.
-const _papel = Color(0xFFFFF8EE);
+/// Tinta da carta: o texto é sempre escuro sobre papel claro, como carta impressa,
+/// mesmo com o app escuro.
 const _tinta = Color(0xFF241812);
 
-/// O visual de cada jogo: a cor da moldura (o "naipe"), a cor do papel e o
-/// emoji que se repete nos cantos e no fundo.
-class _TemaDaCarta {
-  const _TemaDaCarta({required this.moldura, required this.papel, required this.titulo});
+/// O desenho que cobre o papel de cada jogo. É o que faz uma carta de Chuta aí
+/// (um alvo) não parecer uma de Eu Nunca (bolinhas), mesmo de longe.
+enum _Estampa { bolinhas, listras, xadrez, ondas, zigueZague, alvo, pautado, envelope, alerta, dividido, bolhas, confete, simbolo }
 
-  final Color moldura;
+/// O visual de cada jogo: a cor do naipe (faixa do topo e estampa), o papel e o desenho do papel.
+class _TemaDaCarta {
+  const _TemaDaCarta({
+    required this.cor,
+    required this.papel,
+    required this.estampa,
+    this.simbolo,
+    this.corDoTitulo = Colors.white,
+  });
+
+  final Color cor;
   final Color papel;
-  final Color titulo;
+  final _Estampa estampa;
+
+  /// Na estampa de símbolo: o que se repete no papel (?, ♪, ★…).
+  final String? simbolo;
+
+  /// Texto da faixa do topo: branco, menos na regra-relâmpago (amarelo no preto).
+  final Color corDoTitulo;
+
+  /// Tom mais escuro do naipe, para o degradê da faixa e os selos.
+  Color get escura => Color.lerp(cor, Colors.black, 0.28)!;
 }
 
 _TemaDaCarta _temaDo(ModoDeJogo modo) => switch (modo) {
       ModoDeJogo.euNunca =>
-        const _TemaDaCarta(moldura: Color(0xFF7446E8), papel: Color(0xFFF7F1FF), titulo: Color(0xFF5A2FC9)),
+        const _TemaDaCarta(cor: Color(0xFF7C3AED), papel: Color(0xFFF6F0FF), estampa: _Estampa.bolinhas),
       ModoDeJogo.maisProvavel =>
-        const _TemaDaCarta(moldura: Color(0xFF2F74E0), papel: Color(0xFFEFF5FF), titulo: Color(0xFF1F57B0)),
+        const _TemaDaCarta(cor: Color(0xFF2563EB), papel: Color(0xFFEFF5FF), estampa: _Estampa.listras),
       ModoDeJogo.bebaSe =>
-        const _TemaDaCarta(moldura: Color(0xFFE88A00), papel: _papel, titulo: Color(0xFFA85F00)),
-      ModoDeJogo.regraRelampago =>
-        const _TemaDaCarta(moldura: Color(0xFF1C1A16), papel: Color(0xFFFFE45C), titulo: Color(0xFF1C1A16)),
+        const _TemaDaCarta(cor: Color(0xFFD97706), papel: Color(0xFFFFF7E6), estampa: _Estampa.bolhas),
+      ModoDeJogo.regraRelampago => const _TemaDaCarta(
+          cor: Color(0xFF1C1A16),
+          papel: Color(0xFFFFE45C),
+          estampa: _Estampa.zigueZague,
+          corDoTitulo: Color(0xFFFFE45C),
+        ),
       ModoDeJogo.tribunal =>
-        const _TemaDaCarta(moldura: Color(0xFF0E8C7E), papel: Color(0xFFEDFAF7), titulo: Color(0xFF0A6B60)),
+        const _TemaDaCarta(cor: Color(0xFF0F766E), papel: Color(0xFFEDFAF7), estampa: _Estampa.xadrez),
       ModoDeJogo.elogios =>
-        const _TemaDaCarta(moldura: Color(0xFFE0A100), papel: Color(0xFFFFFAE8), titulo: Color(0xFF9A6A00)),
+        const _TemaDaCarta(cor: Color(0xFFE11D48), papel: Color(0xFFFFF1F3), estampa: _Estampa.simbolo, simbolo: '♥'),
       ModoDeJogo.correio =>
-        const _TemaDaCarta(moldura: Color(0xFFD9452A), papel: Color(0xFFFFF3EC), titulo: Color(0xFFA8321C)),
+        const _TemaDaCarta(cor: Color(0xFFE4572E), papel: Color(0xFFFFF6EF), estampa: _Estampa.envelope),
       ModoDeJogo.imagemEAcao =>
-        const _TemaDaCarta(moldura: Color(0xFF1B8A5A), papel: Color(0xFFEEFBF4), titulo: Color(0xFF13693F)),
+        const _TemaDaCarta(cor: Color(0xFF16A34A), papel: Color(0xFFEEFBF3), estampa: _Estampa.confete),
       ModoDeJogo.jurados =>
-        const _TemaDaCarta(moldura: Color(0xFFA21CAF), papel: Color(0xFFFDF2FF), titulo: Color(0xFF86198F)),
+        const _TemaDaCarta(cor: Color(0xFFC026D3), papel: Color(0xFFFDF2FF), estampa: _Estampa.simbolo, simbolo: '★'),
       ModoDeJogo.musica =>
-        const _TemaDaCarta(moldura: Color(0xFF0284C7), papel: Color(0xFFEFF9FF), titulo: Color(0xFF0369A1)),
+        const _TemaDaCarta(cor: Color(0xFF0284C7), papel: Color(0xFFEFF9FF), estampa: _Estampa.simbolo, simbolo: '♪'),
       ModoDeJogo.impostor =>
-        const _TemaDaCarta(moldura: Color(0xFF334155), papel: Color(0xFFF1F5F9), titulo: Color(0xFF1E293B)),
+        const _TemaDaCarta(cor: Color(0xFF334155), papel: Color(0xFFF1F5F9), estampa: _Estampa.ondas),
       ModoDeJogo.termineAFrase =>
-        const _TemaDaCarta(moldura: Color(0xFF4D7C0F), papel: Color(0xFFF7FDEB), titulo: Color(0xFF3F6212)),
+        const _TemaDaCarta(cor: Color(0xFF65A30D), papel: Color(0xFFF8FDEE), estampa: _Estampa.pautado),
       ModoDeJogo.duasVerdades =>
-        const _TemaDaCarta(moldura: Color(0xFFC2410C), papel: Color(0xFFFFF5ED), titulo: Color(0xFF9A3412)),
+        const _TemaDaCarta(cor: Color(0xFFEA580C), papel: Color(0xFFFFF5ED), estampa: _Estampa.zigueZague),
       ModoDeJogo.chutaAi =>
-        const _TemaDaCarta(moldura: Color(0xFF4F46E5), papel: Color(0xFFF0F1FF), titulo: Color(0xFF3730A3)),
+        const _TemaDaCarta(cor: Color(0xFF4338CA), papel: Color(0xFFF0F1FF), estampa: _Estampa.alvo),
       ModoDeJogo.batataQuente =>
-        const _TemaDaCarta(moldura: Color(0xFFB91C1C), papel: Color(0xFFFFF1F0), titulo: Color(0xFF991B1B)),
+        const _TemaDaCarta(cor: Color(0xFF92400E), papel: Color(0xFFFFF4E5), estampa: _Estampa.bolinhas),
       ModoDeJogo.issoOuAquilo =>
-        const _TemaDaCarta(moldura: Color(0xFFDB2777), papel: Color(0xFFFFF0F7), titulo: Color(0xFFBE185D)),
+        const _TemaDaCarta(cor: Color(0xFFDB2777), papel: Color(0xFFFFF0F7), estampa: _Estampa.dividido),
       ModoDeJogo.quemSouEu =>
-        const _TemaDaCarta(moldura: Color(0xFF0891B2), papel: Color(0xFFECFEFF), titulo: Color(0xFF0E7490)),
+        const _TemaDaCarta(cor: Color(0xFF0891B2), papel: Color(0xFFECFEFF), estampa: _Estampa.simbolo, simbolo: '?'),
       ModoDeJogo.palavraProibida =>
-        const _TemaDaCarta(moldura: Color(0xFFB45309), papel: Color(0xFFFFF8EB), titulo: Color(0xFF92400E)),
+        const _TemaDaCarta(cor: Color(0xFFB91C1C), papel: Color(0xFFFFF5F5), estampa: _Estampa.alerta),
       ModoDeJogo.quemEscreveu =>
-        const _TemaDaCarta(moldura: Color(0xFF6D28D9), papel: Color(0xFFF5F0FF), titulo: Color(0xFF5B21B6)),
+        const _TemaDaCarta(cor: Color(0xFF1E3A8A), papel: Color(0xFFF2F5FF), estampa: _Estampa.simbolo, simbolo: '“'),
+    };
+
+/// O selo do nível no rodapé: do verde tranquilo ao preto em brasa.
+Color _corDoNivel(NivelDaCarta nivel) => switch (nivel) {
+      NivelDaCarta.leve => const Color(0xFF16A34A),
+      NivelDaCarta.resenha => const Color(0xFFD97706),
+      NivelDaCarta.picante => const Color(0xFFDC2626),
+      NivelDaCarta.original => const Color(0xFF1A0A06),
     };
 
 /// O que vai em cima do título: o jeito de jogar esta carta.
@@ -179,7 +208,10 @@ class FrenteDaCarta extends StatelessWidget {
   Widget build(BuildContext context) {
     final tema = _temaDo(rodada.modo);
     final calor = _calorDo(rodada.nivel);
-    final cantos = '${rodada.modo.emoji}\n${rodada.nivel.emoji}';
+    final jeito = _jeitoDaCarta(rodada);
+    // No duelo e no pedra, papel e tesoura, o selo é o próprio jogo: vai para a faixa.
+    final titulo = rodada.jokenpo || rodada.duelo ? jeito! : '${rodada.modo.emoji}  ${rodada.modo.titulo}';
+    final selo = rodada.jokenpo || rodada.duelo ? null : jeito;
     return Container(
       key: const Key('frente-da-carta'),
       padding: EdgeInsets.all(calor == null ? 0 : 5),
@@ -189,95 +221,70 @@ class FrenteDaCarta extends StatelessWidget {
         color: calor == null ? tema.papel : null,
         boxShadow: [
           BoxShadow(
-            color: (calor == null ? tema.moldura : const Color(0xFFE5243B)).withValues(alpha: 0.35),
+            color: (calor == null ? tema.cor : const Color(0xFFE5243B)).withValues(alpha: 0.4),
             blurRadius: 28,
             offset: const Offset(0, 12),
           ),
         ],
       ),
-      child: Container(
-        decoration: BoxDecoration(color: tema.papel, borderRadius: BorderRadius.circular(18)),
-        padding: const EdgeInsets.all(10),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: tema.moldura, width: 2.5),
-          ),
-          child: Stack(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(calor == null ? 22 : 18),
+        child: ColoredBox(
+          color: tema.papel,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // O "naipe" grande e apagado ao fundo.
-              Positioned.fill(
-                child: Center(
-                  child: Opacity(
-                    opacity: 0.08,
-                    child: Text(rodada.modo.emoji, style: const TextStyle(fontSize: 190)),
+              _Faixa(tema: tema, titulo: titulo),
+              Expanded(
+                child: CustomPaint(
+                  painter: _PintorDaEstampa(tema),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(22, 14, 22, 8),
+                    child: Column(
+                      children: [
+                        if (selo != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: tema.papel,
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(color: tema.cor.withValues(alpha: 0.55)),
+                            ),
+                            child: Text(
+                              selo,
+                              key: const Key('jeito-de-votar'),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: tema.escura),
+                            ),
+                          ),
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              rodada.texto,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: _tamanhoDoTexto,
+                                fontWeight: FontWeight.w700,
+                                height: 1.25,
+                                color: _tinta,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (rodada.modo == ModoDeJogo.regraRelampago)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: EspacoBaralho.pequeno),
+                            // Quantas vezes faltam aparece na caixa da regra, embaixo.
+                            child: Text(rodada.vezDaRegra ? 'A regra continua valendo' : 'Vale pelas próximas cartas',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _tinta)),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              Positioned(top: 8, left: 10, child: _Canto(texto: cantos)),
-              Positioned(
-                bottom: 8,
-                right: 10,
-                child: Transform.rotate(angle: pi, child: _Canto(texto: cantos)),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(44, 16, 44, 16),
-                child: Column(
-                  children: [
-                    if (_jeitoDaCarta(rodada) case final jeito?)
-                      Text(
-                        jeito,
-                        key: const Key('jeito-de-votar'),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: tema.titulo),
-                      ),
-                    // No duelo, o selo já diz o jogo: o título repetiria.
-                    if (!rodada.duelo)
-                    Text(
-                      rodada.modo.titulo.toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 2,
-                        color: tema.titulo,
-                      ),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          rodada.texto,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: _tamanhoDoTexto,
-                            fontWeight: FontWeight.w600,
-                            height: 1.25,
-                            color: _tinta,
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (rodada.modo == ModoDeJogo.regraRelampago)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: EspacoBaralho.pequeno),
-                        // Quantas vezes faltam aparece na caixa da regra, embaixo.
-                        child: Text(rodada.vezDaRegra ? 'A regra continua valendo' : 'Vale pelas próximas cartas',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _tinta)),
-                      ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: tema.moldura.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        '${rodada.nivel.emoji} ${rodada.nivel.titulo}',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: tema.titulo),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _Rodape(tema: tema, nivel: rodada.nivel),
             ],
           ),
         ),
@@ -286,15 +293,220 @@ class FrenteDaCarta extends StatelessWidget {
   }
 }
 
-/// Índice do canto, como num baralho: o naipe (jogo) em cima do nível.
-class _Canto extends StatelessWidget {
-  const _Canto({required this.texto});
+/// A faixa do topo, na cor do jogo: o emoji e o nome, grandes, para reconhecer o
+/// jogo do outro lado da mesa.
+class _Faixa extends StatelessWidget {
+  const _Faixa({required this.tema, required this.titulo});
 
-  final String texto;
+  final _TemaDaCarta tema;
+  final String titulo;
 
   @override
-  Widget build(BuildContext context) =>
-      Text(texto, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, height: 1.15));
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [tema.cor, tema.escura],
+        ),
+      ),
+      child: Text(
+        titulo.toUpperCase(),
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        style: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.4,
+          height: 1.2,
+          color: tema.corDoTitulo,
+          shadows: const [Shadow(color: Color(0x40000000), blurRadius: 6, offset: Offset(0, 2))],
+        ),
+      ),
+    );
+  }
+}
+
+/// O rodapé: o selo do nível, cheio, na cor do calor da carta.
+class _Rodape extends StatelessWidget {
+  const _Rodape({required this.tema, required this.nivel});
+
+  final _TemaDaCarta tema;
+  final NivelDaCarta nivel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14, top: 4),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+          decoration: BoxDecoration(color: _corDoNivel(nivel), borderRadius: BorderRadius.circular(999)),
+          child: Text(
+            '${nivel.emoji} ${nivel.titulo.toUpperCase()}',
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 1.2, color: Colors.white),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Desenha a estampa do jogo no papel, bem clarinha, para o texto continuar
+/// fácil de ler.
+class _PintorDaEstampa extends CustomPainter {
+  _PintorDaEstampa(this.tema);
+
+  final _TemaDaCarta tema;
+
+  @override
+  void paint(Canvas canvas, Size tamanho) {
+    final regra = tema.estampa == _Estampa.zigueZague && tema.cor == const Color(0xFF1C1A16);
+    final tinta = Paint()
+      ..color = tema.cor.withValues(alpha: regra ? 0.12 : 0.09)
+      ..style = PaintingStyle.fill;
+    final traco = Paint()
+      ..color = tema.cor.withValues(alpha: regra ? 0.14 : 0.11)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    final w = tamanho.width;
+    final h = tamanho.height;
+    switch (tema.estampa) {
+      case _Estampa.bolinhas:
+        for (var y = 10.0, linha = 0; y < h; y += 26, linha++) {
+          for (var x = linha.isEven ? 10.0 : 23.0; x < w; x += 26) {
+            canvas.drawCircle(Offset(x, y), 5, tinta);
+          }
+        }
+      case _Estampa.listras:
+        traco.strokeWidth = 7;
+        for (var x = -h; x < w; x += 24) {
+          canvas.drawLine(Offset(x, h), Offset(x + h, 0), traco);
+        }
+      case _Estampa.xadrez:
+        for (var y = 0.0, linha = 0; y < h; y += 22, linha++) {
+          for (var x = linha.isEven ? 0.0 : 22.0; x < w; x += 44) {
+            canvas.drawRect(Rect.fromLTWH(x, y, 22, 22), tinta);
+          }
+        }
+      case _Estampa.ondas:
+        for (var y = 14.0; y < h; y += 26) {
+          final onda = Path()..moveTo(0, y);
+          for (var x = 0.0; x < w; x += 28) {
+            onda.quadraticBezierTo(x + 7, y - 8, x + 14, y);
+            onda.quadraticBezierTo(x + 21, y + 8, x + 28, y);
+          }
+          canvas.drawPath(onda, traco);
+        }
+      case _Estampa.zigueZague:
+        traco.strokeWidth = 3;
+        for (var y = 14.0; y < h; y += 24) {
+          final raio = Path()..moveTo(0, y);
+          for (var x = 0.0; x < w; x += 20) {
+            raio.lineTo(x + 10, y - 8);
+            raio.lineTo(x + 20, y);
+          }
+          canvas.drawPath(raio, traco);
+        }
+      case _Estampa.alvo:
+        final centro = Offset(w / 2, h / 2);
+        traco.strokeWidth = 10;
+        for (var r = 26.0; r < max(w, h); r += 30) {
+          canvas.drawCircle(centro, r, traco);
+        }
+      case _Estampa.pautado:
+        traco.strokeWidth = 1.5;
+        for (var y = 24.0; y < h; y += 24) {
+          canvas.drawLine(Offset(0, y), Offset(w, y), traco);
+        }
+        canvas.drawLine(const Offset(28, 0), Offset(28, h),
+            Paint()
+              ..color = const Color(0xFFE11D48).withValues(alpha: 0.18)
+              ..strokeWidth = 2);
+      case _Estampa.envelope:
+        // A borda listrada de carta por avião: vermelho e azul.
+        const faixa = 9.0;
+        final azul = Paint()..color = const Color(0xFF2563EB).withValues(alpha: 0.22);
+        final vermelho = Paint()..color = tema.cor.withValues(alpha: 0.26);
+        var i = 0;
+        for (var x = -20.0; x < w + 20; x += 18, i++) {
+          final pincel = i.isEven ? vermelho : azul;
+          canvas.drawPath(
+              Path()
+                ..moveTo(x, 0)
+                ..lineTo(x + 9, 0)
+                ..lineTo(x + 9 - faixa, faixa)
+                ..lineTo(x - faixa, faixa)
+                ..close(),
+              pincel);
+          canvas.drawPath(
+              Path()
+                ..moveTo(x, h)
+                ..lineTo(x + 9, h)
+                ..lineTo(x + 9 + faixa, h - faixa)
+                ..lineTo(x + faixa, h - faixa)
+                ..close(),
+              pincel);
+        }
+      case _Estampa.alerta:
+        traco
+          ..strokeWidth = 12
+          ..color = tema.cor.withValues(alpha: 0.08);
+        for (var x = -h; x < w; x += 34) {
+          canvas.drawLine(Offset(x, 0), Offset(x + h, h), traco);
+        }
+      case _Estampa.dividido:
+        canvas.drawPath(
+            Path()
+              ..moveTo(0, 0)
+              ..lineTo(w, 0)
+              ..lineTo(0, h)
+              ..close(),
+            Paint()..color = tema.cor.withValues(alpha: 0.10));
+        canvas.drawPath(
+            Path()
+              ..moveTo(w, 0)
+              ..lineTo(w, h)
+              ..lineTo(0, h)
+              ..close(),
+            Paint()..color = const Color(0xFF7C3AED).withValues(alpha: 0.08));
+      case _Estampa.bolhas:
+        final sorte = Random(7);
+        for (var i = 0; i < 26; i++) {
+          canvas.drawCircle(Offset(sorte.nextDouble() * w, sorte.nextDouble() * h), 4 + sorte.nextDouble() * 12,
+              traco..strokeWidth = 2);
+        }
+      case _Estampa.confete:
+        final sorte = Random(3);
+        const cores = [Color(0xFF16A34A), Color(0xFFF59E0B), Color(0xFF2563EB), Color(0xFFE11D48)];
+        for (var i = 0; i < 46; i++) {
+          canvas.save();
+          canvas.translate(sorte.nextDouble() * w, sorte.nextDouble() * h);
+          canvas.rotate(sorte.nextDouble() * pi);
+          canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-5, -2, 10, 4), const Radius.circular(2)),
+              Paint()..color = cores[i % cores.length].withValues(alpha: 0.18));
+          canvas.restore();
+        }
+      case _Estampa.simbolo:
+        final pincel = TextPainter(
+          text: TextSpan(
+            text: tema.simbolo ?? '•',
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: tema.cor.withValues(alpha: 0.11)),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        for (var y = 0.0, linha = 0; y < h; y += 44, linha++) {
+          for (var x = linha.isEven ? 6.0 : 30.0; x < w; x += 48) {
+            pincel.paint(canvas, Offset(x, y));
+          }
+        }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_PintorDaEstampa antigo) => antigo.tema != tema;
 }
 
 /// As costas, iguais para todas as cartas: ninguém adivinha o que vem.
@@ -316,19 +528,49 @@ class CostasDaCarta extends StatelessWidget {
           border: Border.all(color: CoresBaralho.ambar.withValues(alpha: 0.5)),
           gradient: const RadialGradient(colors: [Color(0xFF5A3510), Color(0xFF2A1A0E)]),
         ),
-        child: const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('🃏', style: TextStyle(fontSize: 72)),
-              SizedBox(height: EspacoBaralho.pequeno),
-              Text('Baralho da\nResenha',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: CoresBaralho.ambar, height: 1.1)),
-            ],
+        child: CustomPaint(
+          painter: _PintorDasCostas(),
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2A1A0E),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: CoresBaralho.ambar, width: 2),
+              ),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('🃏', style: TextStyle(fontSize: 64)),
+                  SizedBox(height: EspacoBaralho.pequeno),
+                  Text('Baralho da\nResenha',
+                      textAlign: TextAlign.center,
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: CoresBaralho.ambar, height: 1.1)),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+/// A trama de losangos das costas, como nos baralhos de verdade.
+class _PintorDasCostas extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size tamanho) {
+    final linha = Paint()
+      ..color = CoresBaralho.ambar.withValues(alpha: 0.16)
+      ..strokeWidth = 1.5;
+    final diagonal = tamanho.width + tamanho.height;
+    for (var x = -tamanho.height; x < diagonal; x += 22) {
+      canvas.drawLine(Offset(x, 0), Offset(x + tamanho.height, tamanho.height), linha);
+      canvas.drawLine(Offset(x, tamanho.height), Offset(x + tamanho.height, 0), linha);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_PintorDasCostas antigo) => false;
 }

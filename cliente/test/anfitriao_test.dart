@@ -106,7 +106,7 @@ void main() {
       );
     await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
 
-    expect(find.text('RODADA DE ELOGIOS'), findsOneWidget);
+    expect(find.textContaining('RODADA DE ELOGIOS'), findsOneWidget);
     expect(find.text('NINGUÉM BEBE, TODO MUNDO SE ACHA'), findsOneWidget);
     expect(find.textContaining('Me pegou'), findsNothing);
     await rolarAte(tester, find.text('Pronto! Próxima carta'));
