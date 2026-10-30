@@ -380,7 +380,10 @@ class _AreaDeAcao extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          switch (rodada.modo) {
+          // A revelação sobe com um "fade", em vez de aparecer de supetão.
+          EntradaDaRevelacao(
+            key: ValueKey('revelacao-${rodada.numero}'),
+            child: switch (rodada.modo) {
             ModoDeJogo.euNunca => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 if (revelacao.contadores.isNotEmpty)
                   _FilaDeHistorias(visao: visao, rodada: rodada, revelacao: revelacao, acoes: acoes),
@@ -405,6 +408,7 @@ class _AreaDeAcao extends StatelessWidget {
             ModoDeJogo.quemEscreveu => RevelacaoDoQuemEscreveu(visao: visao, revelacao: revelacao),
             _ => _RevelacaoMaisProvavel(visao: visao, revelacao: revelacao),
           },
+          ),
           MomentosDaRodada(visao: visao, rodada: rodada, acoes: acoes),
           const SizedBox(height: EspacoBaralho.grande),
           ProximaCarta(visao: visao, aoTocar: acoes.proxima),
@@ -1560,4 +1564,26 @@ Future<void> _confirmarTirarDaSala(BuildContext context, Jogador jogador, AcoesD
   if (tirar != true || !context.mounted) return;
   Navigator.pop(context);
   await acoes.tirarDaSala(jogador.id);
+}
+
+/// A revelação entra subindo e aparecendo, uma vez por carta.
+class EntradaDaRevelacao extends StatelessWidget {
+  const EntradaDaRevelacao({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.of(context).disableAnimations) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOutCubic,
+      builder: (context, t, filho) => Opacity(
+        opacity: t,
+        child: Transform.translate(offset: Offset(0, 24 * (1 - t)), child: filho),
+      ),
+      child: child,
+    );
+  }
 }

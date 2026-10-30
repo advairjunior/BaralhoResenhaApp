@@ -19,7 +19,7 @@ dependencies:
   share_plus: ^13.3.1
   shared_preferences: ^2.5.3
   web: ^1.1.1
-
+  flutter_tilt: ^4.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -28,6 +28,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Ilustrações 3D de cada jogo (Fluent Emoji, da Microsoft, licença MIT): iguais em qualquer celular.
+  assets:
+    - assets/cartas/
   fonts:
     - family: Poppins
       fonts:
@@ -37,3 +40,7 @@ flutter:
           weight: 500
         - asset: assets/fontes/Poppins-SemiBold.ttf
           weight: 600
+    # Só no nome do jogo, na faixa da carta: letra de caixa de jogo.
+    - family: LilitaOne
+      fonts:
+        - asset: assets/fontes/LilitaOne-Regular.ttf

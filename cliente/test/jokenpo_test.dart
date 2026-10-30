@@ -44,7 +44,7 @@ void main() {
         ..respostas['POST /api/salas/ABCD/respostas'] = _jokenpo(minhaResposta: 'pedra');
       await abrirApp(tester, servidor, rota: '/sala/ABCD', guardado: _logado);
 
-      expect(find.text('✊✋✌️ PEDRA, PAPEL E TESOURA'), findsOneWidget);
+      expect(find.text('PEDRA, PAPEL E TESOURA'), findsOneWidget);
       await rolarAte(tester, find.byKey(const Key('jogar-pedra')));
       await tester.tap(find.byKey(const Key('jogar-pedra')));
       await tester.pumpAndSettle();

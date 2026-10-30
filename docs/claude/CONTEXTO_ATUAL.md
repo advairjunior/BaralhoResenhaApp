@@ -70,6 +70,12 @@ no autor, até ele; errou, ponto; ninguém acertou, o autor escapa com carta na 
 - **Casais em Jogo saiu do app** em 2026-10-30, a pedido do proprietário (ninguém jogava): sem jogo,
   sem marcar par na sala de espera, sem prêmios de casal; saíram também as cartas que pediam casal
   na mesa (bs-039, bs-040, rr-022, rr-024).
+- **Visual das cartas** (`carta_de_baralho.dart`): cada jogo tem cor, estampa desenhada no papel
+  (`_PintorDaEstampa`) e ilustração 3D num medalhão sobre a faixa do título. As ilustrações são do
+  Fluent Emoji da Microsoft (MIT, `cliente/assets/cartas/`, licença junto); o título usa a Lilita One
+  (OFL, `assets/fontes/`). A carta inclina com o mouse e com o giroscópio (`flutter_tilt`), nunca com
+  o toque, que fica com a rolagem; ao pousar, balança e uma faixa de luz atravessa. Animação só com
+  `AnimationController`/`TweenAnimationBuilder`: o `flutter_animate` deixava timer pendente nos testes.
 - **Sala sem álcool** (`ConfiguracaoDoJogo.SemAlcool`, `Sala.SemAlcool.cs`): o cofrinho cheio (ou a
   dose) vira prenda, sorteada por nível de `Dados/prendas.json` e guardada na rodada; no elogio, quem a
   turma escolheu passa uma prenda. `Goles` passa a contar prendas, e o "sem álcool" individual não vale

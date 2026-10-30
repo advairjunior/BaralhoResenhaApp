@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tilt/flutter_tilt.dart';
 
 import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
@@ -127,7 +129,18 @@ Gradient? _calorDo(NivelDaCarta nivel) => switch (nivel) {
       _ => null,
     };
 
-/// A carta da rodada, dada com a virada do baralho: começa de costas e vira.
+/// A ilustração 3D do jogo (Fluent Emoji, da Microsoft): a mesma em qualquer celular.
+String _ilustracaoDa(Rodada rodada) => switch (rodada) {
+      Rodada(jokenpo: true) => 'assets/cartas/jokenpo.png',
+      Rodada(duelo: true) => 'assets/cartas/duelo.png',
+      _ => 'assets/cartas/${rodada.modo.name}.png',
+    };
+
+/// Tira o emoji da frente do selo ("⚔️ DUELO" vira "DUELO"): na faixa, o desenho é o medalhão.
+String _semEmojiNaFrente(String texto) => texto.replaceFirst(RegExp(r'^[^A-Za-zÀ-ÿ0-9]+'), '');
+
+/// A carta da rodada, dada com a virada do baralho: começa de costas, vira, pousa
+/// balançando (a luz passa por ela) e depois acompanha o celular inclinado.
 class CartaQueVira extends StatefulWidget {
   const CartaQueVira({super.key, required this.rodada});
 
@@ -137,15 +150,28 @@ class CartaQueVira extends StatefulWidget {
   State<CartaQueVira> createState() => _CartaQueViraState();
 }
 
-class _CartaQueViraState extends State<CartaQueVira> with SingleTickerProviderStateMixin {
+class _CartaQueViraState extends State<CartaQueVira> with TickerProviderStateMixin {
   late final _virada = AnimationController(vsync: this, duration: const Duration(milliseconds: 650));
+
+  /// O pouso: a carta balança e uma faixa de luz atravessa de um canto ao outro.
+  late final _pouso = AnimationController(vsync: this, duration: const Duration(milliseconds: 1300));
+
+  @override
+  void initState() {
+    super.initState();
+    _virada.addStatusListener((status) {
+      if (status == AnimationStatus.completed && !_semMovimento) _pouso.forward();
+    });
+  }
+
+  bool get _semMovimento => MediaQuery.of(context).disableAnimations;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_virada.isAnimating || _virada.isCompleted) return;
     // Quem pediu menos movimento recebe a carta já virada.
-    if (MediaQuery.of(context).disableAnimations) {
+    if (_semMovimento) {
       _virada.value = 1;
     } else {
       _virada.forward();
@@ -155,33 +181,58 @@ class _CartaQueViraState extends State<CartaQueVira> with SingleTickerProviderSt
   @override
   void dispose() {
     _virada.dispose();
+    _pouso.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final tema = _temaDo(widget.rodada.modo);
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 340),
         child: AspectRatio(
           aspectRatio: proporcaoDaCarta,
           child: AnimatedBuilder(
-            animation: _virada,
+            animation: Listenable.merge([_virada, _pouso]),
             builder: (context, _) {
               final angulo = pi * (1 - Curves.easeOutBack.transform(_virada.value).clamp(0.0, 1.0));
               final deCostas = angulo > pi / 2;
+              // Balanço amortecido: começa forte e assenta.
+              final t = _pouso.value;
+              final balanco = _pouso.isAnimating ? 0.07 * sin(t * 3 * pi) * (1 - t) : 0.0;
               return Transform(
                 alignment: Alignment.center,
                 transform: Matrix4.identity()
                   ..setEntry(3, 2, 0.0012)
-                  ..rotateY(angulo),
+                  ..rotateY(angulo + balanco)
+                  ..rotateX(balanco / 2),
                 child: deCostas
                     ? Transform(
                         alignment: Alignment.center,
                         transform: Matrix4.identity()..rotateY(pi),
                         child: const CostasDaCarta(),
                       )
-                    : FrenteDaCarta(rodada: widget.rodada),
+                    : Tilt.base(
+                        borderRadius: BorderRadius.circular(22),
+                        // O toque fica com a rolagem da tela: a carta ocupa quase o celular inteiro.
+                        // Inclina com o mouse e, no navegador do celular, com o giroscópio.
+                        tiltConfig: const TiltConfig(
+                          angle: 9,
+                          enableGestureTouch: false,
+                          enableGestureSensors: kIsWeb,
+                          leaveDuration: Duration(milliseconds: 600),
+                        ),
+                        lightConfig: const LightConfig(maxIntensity: 0.14),
+                        shadowConfig: ShadowBaseConfig(color: tema.cor, maxIntensity: 0.45, maxBlurRadius: 34),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            FrenteDaCarta(rodada: widget.rodada, comSombra: false),
+                            if (_pouso.isAnimating) _FaixaDeLuz(progresso: t),
+                          ],
+                        ),
+                      ),
               );
             },
           ),
@@ -191,17 +242,47 @@ class _CartaQueViraState extends State<CartaQueVira> with SingleTickerProviderSt
   }
 }
 
+/// A luz que atravessa a carta quando ela pousa, como reflexo em carta plastificada.
+class _FaixaDeLuz extends StatelessWidget {
+  const _FaixaDeLuz({required this.progresso});
+
+  final double progresso;
+
+  @override
+  Widget build(BuildContext context) {
+    final centro = -2.2 + 4.4 * Curves.easeInOut.transform(progresso);
+    return IgnorePointer(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment(centro - 1, -1),
+              end: Alignment(centro + 1, 1),
+              colors: const [Color(0x00FFFFFF), Color(0x4DFFFFFF), Color(0x00FFFFFF)],
+              stops: const [0.35, 0.5, 0.65],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class FrenteDaCarta extends StatelessWidget {
-  const FrenteDaCarta({super.key, required this.rodada});
+  const FrenteDaCarta({super.key, required this.rodada, this.comSombra = true});
 
   final Rodada rodada;
 
+  /// Na carta da mesa, quem desenha a sombra é a inclinação (ela acompanha o ângulo).
+  final bool comSombra;
+
   double get _tamanhoDoTexto {
     final letras = rodada.texto.length;
-    if (letras > 120) return 21;
-    if (letras > 80) return 24;
-    if (letras > 50) return 27;
-    return 30;
+    if (letras > 120) return 20;
+    if (letras > 80) return 23;
+    if (letras > 50) return 26;
+    return 29;
   }
 
   @override
@@ -210,8 +291,9 @@ class FrenteDaCarta extends StatelessWidget {
     final calor = _calorDo(rodada.nivel);
     final jeito = _jeitoDaCarta(rodada);
     // No duelo e no pedra, papel e tesoura, o selo é o próprio jogo: vai para a faixa.
-    final titulo = rodada.jokenpo || rodada.duelo ? jeito! : '${rodada.modo.emoji}  ${rodada.modo.titulo}';
-    final selo = rodada.jokenpo || rodada.duelo ? null : jeito;
+    final especial = rodada.jokenpo || rodada.duelo;
+    final titulo = especial ? _semEmojiNaFrente(jeito!) : rodada.modo.titulo;
+    final selo = especial ? null : jeito;
     return Container(
       key: const Key('frente-da-carta'),
       padding: EdgeInsets.all(calor == null ? 0 : 5),
@@ -220,11 +302,12 @@ class FrenteDaCarta extends StatelessWidget {
         gradient: calor,
         color: calor == null ? tema.papel : null,
         boxShadow: [
-          BoxShadow(
-            color: (calor == null ? tema.cor : const Color(0xFFE5243B)).withValues(alpha: 0.4),
-            blurRadius: 28,
-            offset: const Offset(0, 12),
-          ),
+          if (comSombra)
+            BoxShadow(
+              color: (calor == null ? tema.cor : const Color(0xFFE5243B)).withValues(alpha: 0.4),
+              blurRadius: 28,
+              offset: const Offset(0, 12),
+            ),
         ],
       ),
       child: ClipRRect(
@@ -238,49 +321,61 @@ class FrenteDaCarta extends StatelessWidget {
               Expanded(
                 child: CustomPaint(
                   painter: _PintorDaEstampa(tema),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(22, 14, 22, 8),
-                    child: Column(
-                      children: [
-                        if (selo != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: tema.papel,
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(color: tema.cor.withValues(alpha: 0.55)),
-                            ),
-                            child: Text(
-                              selo,
-                              key: const Key('jeito-de-votar'),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: tema.escura),
-                            ),
-                          ),
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              rodada.texto,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: _tamanhoDoTexto,
-                                fontWeight: FontWeight.w700,
-                                height: 1.25,
-                                color: _tinta,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(22, 46, 22, 8),
+                        child: Column(
+                          children: [
+                            if (selo != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: tema.papel,
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(color: tema.cor.withValues(alpha: 0.55)),
+                                ),
+                                child: Text(
+                                  selo,
+                                  key: const Key('jeito-de-votar'),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: tema.escura),
+                                ),
+                              ),
+                            Expanded(
+                              child: Center(
+                                child: Text(
+                                  rodada.texto,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: _tamanhoDoTexto,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.25,
+                                    color: _tinta,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            if (rodada.modo == ModoDeJogo.regraRelampago)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: EspacoBaralho.pequeno),
+                                // Quantas vezes faltam aparece na caixa da regra, embaixo.
+                                child: Text(rodada.vezDaRegra ? 'A regra continua valendo' : 'Vale pelas próximas cartas',
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _tinta)),
+                              ),
+                          ],
                         ),
-                        if (rodada.modo == ModoDeJogo.regraRelampago)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: EspacoBaralho.pequeno),
-                            // Quantas vezes faltam aparece na caixa da regra, embaixo.
-                            child: Text(rodada.vezDaRegra ? 'A regra continua valendo' : 'Vale pelas próximas cartas',
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _tinta)),
-                          ),
-                      ],
-                    ),
+                      ),
+                      // O medalhão com a ilustração, metade sobre a faixa, como um selo.
+                      Positioned(
+                        top: -34,
+                        left: 0,
+                        right: 0,
+                        child: Center(child: _Medalhao(tema: tema, imagem: _ilustracaoDa(rodada))),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -293,8 +388,40 @@ class FrenteDaCarta extends StatelessWidget {
   }
 }
 
-/// A faixa do topo, na cor do jogo: o emoji e o nome, grandes, para reconhecer o
-/// jogo do outro lado da mesa.
+/// O selo redondo com a ilustração 3D do jogo. Entra com um "pop" quando a carta aparece.
+class _Medalhao extends StatelessWidget {
+  const _Medalhao({required this.tema, required this.imagem});
+
+  final _TemaDaCarta tema;
+  final String imagem;
+
+  @override
+  Widget build(BuildContext context) {
+    final medalhao = Container(
+      width: 72,
+      height: 72,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: tema.papel,
+        border: Border.all(color: tema.cor, width: 3),
+        boxShadow: [BoxShadow(color: tema.escura.withValues(alpha: 0.35), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      child: Image.asset(imagem, filterQuality: FilterQuality.medium),
+    );
+    if (MediaQuery.of(context).disableAnimations) return medalhao;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.4, end: 1),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.elasticOut,
+      builder: (context, escala, filho) => Transform.scale(scale: escala, child: filho),
+      child: medalhao,
+    );
+  }
+}
+
+/// A faixa do topo, na cor do jogo: o nome grande, em letra de caixa de jogo,
+/// para reconhecer o jogo do outro lado da mesa. Embaixo dela pousa o medalhão.
 class _Faixa extends StatelessWidget {
   const _Faixa({required this.tema, required this.titulo});
 
@@ -304,7 +431,7 @@ class _Faixa extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 40),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -317,12 +444,12 @@ class _Faixa extends StatelessWidget {
         textAlign: TextAlign.center,
         maxLines: 2,
         style: TextStyle(
-          fontSize: 17,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 1.4,
-          height: 1.2,
+          fontFamily: 'LilitaOne',
+          fontSize: 23,
+          letterSpacing: 1.2,
+          height: 1.1,
           color: tema.corDoTitulo,
-          shadows: const [Shadow(color: Color(0x40000000), blurRadius: 6, offset: Offset(0, 2))],
+          shadows: const [Shadow(color: Color(0x55000000), blurRadius: 0, offset: Offset(0, 2))],
         ),
       ),
     );
