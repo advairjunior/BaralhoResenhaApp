@@ -266,6 +266,31 @@ await rolar(p, 900);
 await foto(p, 'mao');
 await p.close();
 
+// Sala sem álcool: a prenda de quem a carta pegou, na tela de todo mundo.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['EuNunca'], ritmo: 'Raiz', semAlcool: true });
+await api('POST', `${s.sala}/respostas`, s.turma.Caio, { rodada: v.rodada.numero, resposta: 'ja' });
+for (const n of ['Advair', 'Júlia', 'Bruna']) await api('POST', `${s.sala}/respostas`, s.turma[n], { rodada: v.rodada.numero, resposta: 'nunca' });
+p = await abrir(s, 'Júlia');
+await rolar(p, 650);
+await foto(p, 'prenda');
+await p.close();
+
+// Mico da noite: a turma vota no mico de quem fechou com mais pontos.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['EuNunca'], semAlcool: true });
+for (let i = 0; i < 3; i++) {
+  await api('POST', `${s.sala}/respostas`, s.turma.Caio, { rodada: v.rodada.numero, resposta: 'ja' });
+  for (const n of ['Advair', 'Júlia', 'Bruna']) await api('POST', `${s.sala}/respostas`, s.turma[n], { rodada: v.rodada.numero, resposta: 'nunca' });
+  v = await api('POST', `${s.sala}/proxima`, s.turma.Advair, { rodada: v.rodada.numero });
+}
+await api('POST', `${s.sala}/encerrar`, s.turma.Advair);
+await api('POST', `${s.sala}/mico`, s.turma.Advair, { opcao: 0 });
+p = await abrir(s, 'Bruna');
+await rolar(p, 2100);
+await foto(p, 'mico');
+await p.close();
+
 // Fim da noite: prêmios.
 s = await novaSala();
 v = await comecar(s, { nivel: 'Resenha', modos: ['BebaSe'] });
