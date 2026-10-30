@@ -13,7 +13,7 @@ Toda funcionalidade nova que a turma vê entra no guia, na medida da importânci
 
 | Importância | O que fazer no guia |
 |---|---|
-| Jogo novo, mecânica nova (ex.: cartas na manga, mímica) | Seção ou cartão próprio, com captura da tela |
+| Jogo novo, mecânica nova (ex.: cartas na manga, mímica) | Seção ou cartão próprio, com captura da tela; jogo novo também ganha a carta na galeria "As cartas" (`carta-<Modo>.jpg`, gerada pelo `capturar.mjs`; o teste `OGuiaMostraACartaDeCadaJogo` cobra) |
 | Mudança de regra que muda como se joga (ex.: cofrinho, dose) | Atualizar o texto da seção e a captura, se mudou a tela |
 | Opção nova de configuração (ex.: noites prontas) | Uma linha em "Configurar a noite" |
 | Ajuste visual ou de texto pequeno | Só refazer a captura afetada, se ficou diferente |

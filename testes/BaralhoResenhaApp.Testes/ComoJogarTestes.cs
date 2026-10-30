@@ -1,4 +1,6 @@
 using System.Net;
+using System.Text.RegularExpressions;
+using BaralhoResenhaApp.Api.Dominio;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace BaralhoResenhaApp.Testes;
@@ -44,5 +46,25 @@ public sealed class ComoJogarTestes(WebApplicationFactory<Program> fabrica)
         var resposta = await _cliente.GetAsync(rota);
 
         Assert.Equal(HttpStatusCode.NotFound, resposta.StatusCode);
+    }
+
+    [Fact]
+    public async Task TodaImagemQueOGuiaMostraExiste()
+    {
+        var html = await _cliente.GetStringAsync("/como-jogar");
+        var imagens = Regex.Matches(html, @"/como-jogar/([\w-]+\.jpg)").Select(m => m.Groups[1].Value).Distinct().ToList();
+
+        Assert.NotEmpty(imagens);
+        foreach (var imagem in imagens)
+            Assert.True((await _cliente.GetAsync($"/como-jogar/{imagem}")).IsSuccessStatusCode, $"{imagem} não existe");
+    }
+
+    [Fact]
+    public async Task OGuiaMostraACartaDeCadaJogo()
+    {
+        var html = await _cliente.GetStringAsync("/como-jogar");
+
+        foreach (var modo in Enum.GetValues<ModoDeJogo>())
+            Assert.Contains($"/como-jogar/carta-{modo}.jpg", html);
     }
 }

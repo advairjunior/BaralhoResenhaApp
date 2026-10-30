@@ -61,6 +61,12 @@
     border-radius: 22px; border: 1px solid var(--linha); background: var(--superficie); }
   .tela figcaption { font-size: 14px; color: var(--apagado); line-height: 1.4; }
   .tela figcaption b { color: var(--texto); font-weight: 600; display: block; }
+  .baralho-de-cartas { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+  .baralho-de-cartas figure { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; text-align: center; min-width: 0; }
+  .baralho-de-cartas button { all: unset; cursor: zoom-in; display: block; border-radius: 16px; min-width: 0; }
+  .baralho-de-cartas button:focus-visible { outline: 2px solid var(--ambar); outline-offset: 3px; }
+  .baralho-de-cartas img { width: 100%; max-width: 100%; height: auto; aspect-ratio: 340 / 475; object-fit: cover; display: block; border-radius: 16px; }
+  .baralho-de-cartas figcaption { font-size: 13px; color: var(--apagado); }
 
   .passos { display: grid; gap: 12px; counter-reset: passo; padding: 0; margin: 0; list-style: none; max-width: 62ch; }
   .passos li { display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: start; counter-increment: passo; }
@@ -130,7 +136,7 @@
       <a class="botao leve" href="#rodada">Ver uma rodada</a>
     </div>
     <nav class="indice" aria-label="Partes do guia">
-      <a href="#comeca">Como começa</a><a href="#rodada">Uma rodada</a><a href="#jogos">Os jogos</a>
+      <a href="#comeca">Como começa</a><a href="#rodada">Uma rodada</a><a href="#jogos">Os jogos</a><a href="#cartas">As cartas</a>
       <a href="#pontos">Pontos e goles</a><a href="#sem-alcool">Sem álcool</a><a href="#manga">Cartas na manga</a><a href="#noite">Configurar a noite</a><a href="#fim">Fim da noite</a>
     </nav>
   </header>
@@ -276,6 +282,32 @@
         <h3>💛 Rodada de Elogios</h3>
         <ul><li>Dinâmicas de elogio para alguém da mesa.</li><li>Ninguém bebe: todo mundo sai se achando.</li></ul>
       </article>
+    </div>
+  </section>
+
+  <section id="cartas">
+    <h2>As <span>cartas</span></h2>
+    <p class="apagado texto">Cada jogo tem a sua carta: a cor, a estampa do papel e o desenho no medalhão. Dá para reconhecer o jogo do outro lado da mesa. No celular, a carta acompanha o aparelho inclinado; ao chegar, ela balança e reflete a luz.</p>
+    <div class="baralho-de-cartas">
+      <figure><button type="button" data-ampliar="/como-jogar/carta-EuNunca.jpg"><img src="/como-jogar/carta-EuNunca.jpg" alt="Carta de Eu Nunca" loading="lazy" width="340" height="475"></button><figcaption>🙊 Eu Nunca</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-MaisProvavel.jpg"><img src="/como-jogar/carta-MaisProvavel.jpg" alt="Carta de Quem é mais provável" loading="lazy" width="340" height="475"></button><figcaption>👉 Quem é mais provável</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-BebaSe.jpg"><img src="/como-jogar/carta-BebaSe.jpg" alt="Carta de Beba se" loading="lazy" width="340" height="475"></button><figcaption>🍺 Beba se</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-RegraRelampago.jpg"><img src="/como-jogar/carta-RegraRelampago.jpg" alt="Carta de Regra-relâmpago" loading="lazy" width="340" height="475"></button><figcaption>⚡ Regra-relâmpago</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-Tribunal.jpg"><img src="/como-jogar/carta-Tribunal.jpg" alt="Carta de Tribunal da Turma" loading="lazy" width="340" height="475"></button><figcaption>⚖️ Tribunal da Turma</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-Elogios.jpg"><img src="/como-jogar/carta-Elogios.jpg" alt="Carta de Rodada de Elogios" loading="lazy" width="340" height="475"></button><figcaption>💛 Rodada de Elogios</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-Correio.jpg"><img src="/como-jogar/carta-Correio.jpg" alt="Carta de Correio da Resenha" loading="lazy" width="340" height="475"></button><figcaption>📮 Correio da Resenha</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-ImagemEAcao.jpg"><img src="/como-jogar/carta-ImagemEAcao.jpg" alt="Carta de Imagem e Ação" loading="lazy" width="340" height="475"></button><figcaption>🎭 Imagem e Ação</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-Jurados.jpg"><img src="/como-jogar/carta-Jurados.jpg" alt="Carta de Jurados" loading="lazy" width="340" height="475"></button><figcaption>⭐ Jurados</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-Musica.jpg"><img src="/como-jogar/carta-Musica.jpg" alt="Carta de Roda de Música" loading="lazy" width="340" height="475"></button><figcaption>🎵 Roda de Música</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-Impostor.jpg"><img src="/como-jogar/carta-Impostor.jpg" alt="Carta de Impostor" loading="lazy" width="340" height="475"></button><figcaption>🕵️ Impostor</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-TermineAFrase.jpg"><img src="/como-jogar/carta-TermineAFrase.jpg" alt="Carta de Termine a frase" loading="lazy" width="340" height="475"></button><figcaption>✍️ Termine a frase</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-DuasVerdades.jpg"><img src="/como-jogar/carta-DuasVerdades.jpg" alt="Carta de Duas verdades e uma mentira" loading="lazy" width="340" height="475"></button><figcaption>🤥 Duas verdades e uma mentira</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-ChutaAi.jpg"><img src="/como-jogar/carta-ChutaAi.jpg" alt="Carta de Chuta aí" loading="lazy" width="340" height="475"></button><figcaption>🎯 Chuta aí</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-BatataQuente.jpg"><img src="/como-jogar/carta-BatataQuente.jpg" alt="Carta de Batata quente" loading="lazy" width="340" height="475"></button><figcaption>🥔 Batata quente</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-IssoOuAquilo.jpg"><img src="/como-jogar/carta-IssoOuAquilo.jpg" alt="Carta de Isso ou aquilo" loading="lazy" width="340" height="475"></button><figcaption>🤷 Isso ou aquilo</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-QuemSouEu.jpg"><img src="/como-jogar/carta-QuemSouEu.jpg" alt="Carta de Quem sou eu?" loading="lazy" width="340" height="475"></button><figcaption>🙈 Quem sou eu?</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-PalavraProibida.jpg"><img src="/como-jogar/carta-PalavraProibida.jpg" alt="Carta de Palavra proibida" loading="lazy" width="340" height="475"></button><figcaption>🚫 Palavra proibida</figcaption></figure>
+      <figure><button type="button" data-ampliar="/como-jogar/carta-QuemEscreveu.jpg"><img src="/como-jogar/carta-QuemEscreveu.jpg" alt="Carta de Quem escreveu?" loading="lazy" width="340" height="475"></button><figcaption>🖊️ Quem escreveu?</figcaption></figure>
     </div>
   </section>
 

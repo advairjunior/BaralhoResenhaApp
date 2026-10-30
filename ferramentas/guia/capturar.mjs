@@ -77,6 +77,8 @@ const abrir = async (s, nome, ajuste) => {
 const rolar = async (p, px) => {
   await p.mouse.move(195, 500);
   for (let feito = 0; feito < px; feito += 300) { await p.mouse.wheel({ deltaY: Math.min(300, px - feito) }); await espera(120); }
+  // O mouse sai de cima da carta: senão ela fica inclinada na foto.
+  await p.mouse.move(2, 2);
   await espera(900);
 };
 const foto = (p, nome) => p.screenshot({ path: `${pasta}/${nome}.jpg`, type: 'jpeg', quality: 78 });
@@ -96,7 +98,8 @@ await p.close();
 // Eu Nunca: responder e "conta essa história".
 let v = await comecar(s, { nivel: 'Resenha', modos: ['EuNunca'] });
 p = await abrir(s, 'Júlia');
-await rolar(p, 450);
+// A carta inteira, com os botões embaixo: é o primeiro passo da rodada no guia.
+await rolar(p, 0);
 await foto(p, 'eununca');
 await api('POST', `${s.sala}/respostas`, s.turma.Caio, { rodada: v.rodada.numero, resposta: 'ja' });
 for (const n of ['Advair', 'Júlia', 'Bruna']) await api('POST', `${s.sala}/respostas`, s.turma[n], { rodada: v.rodada.numero, resposta: 'nunca' });
@@ -130,7 +133,7 @@ s = await novaSala();
 v = await comecar(s, { nivel: 'Resenha', modos: ['Tribunal'] }, (r) => !r.elogio);
 const jurado = Object.keys(s.turma).find((n) => s.ids[n] !== v.rodada.alvo);
 p = await abrir(s, jurado);
-await rolar(p, 450);
+await rolar(p, 0);
 await foto(p, 'tribunal');
 await p.close();
 
@@ -330,6 +333,29 @@ await api('POST', `${s.sala}/mico`, s.turma.Advair, { opcao: 0 });
 p = await abrir(s, 'Bruna');
 await rolar(p, 2100);
 await foto(p, 'mico');
+await p.close();
+
+// As cartas: a carta de cada jogo, recortada, para a galeria do guia. Cada uma é
+// fotografada por quem enxerga o segredo (a palavra da mímica, o famoso do Quem sou eu…).
+s = await novaSala();
+v = await comecar(s, { nivel: 'Resenha', modos: ['EuNunca'], passarSozinho: false });
+p = await abrir(s, 'Advair');
+const MODOS = ['EuNunca', 'MaisProvavel', 'BebaSe', 'Tribunal', 'Elogios', 'Correio', 'ImagemEAcao', 'Jurados', 'Musica',
+  'Impostor', 'TermineAFrase', 'DuasVerdades', 'ChutaAi', 'BatataQuente', 'IssoOuAquilo', 'QuemSouEu', 'PalavraProibida',
+  'QuemEscreveu', 'RegraRelampago'];
+const enxerga = (r, eu) => (!['Correio', 'QuemSouEu'].includes(r.modo) || r.alvo !== eu) &&
+  (r.times.length === 0 || r.times.some((t) => t.mimico === eu)) && !r.souImpostor && r.duelistas.length === 0 && !r.goles;
+for (const modo of MODOS) {
+  await api('PUT', `${s.sala}/configuracao`, s.turma.Advair, { nivel: 'Resenha', modos: [modo], zonaSegura: true, passarSozinho: false });
+  for (let tentativa = 0; tentativa < 12; tentativa++) {
+    v = await api('GET', s.sala, s.turma.Advair);
+    v = await api('POST', `${s.sala}/proxima`, s.turma.Advair, { rodada: v.rodada.numero });
+    if (enxerga(v.rodada, v.euId)) break;
+  }
+  await p.mouse.move(2, 2);
+  await espera(3200);
+  await p.screenshot({ path: `${pasta}/carta-${modo}.jpg`, type: 'jpeg', quality: 76, clip: { x: 25, y: 64, width: 340, height: 475 } });
+}
 await p.close();
 
 // Fim da noite: prêmios.
