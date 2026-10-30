@@ -31,6 +31,7 @@ abstract interface class AcoesDaSala {
   Future<void> marcarApontado(String jogadorId);
   Future<void> escolherFavorito(int indice);
   Future<void> escreverDuasVerdades(List<String> frases, int mentira);
+  Future<void> passarABatata();
   Future<void> marcarVacilo(String jogadorId);
   Future<void> resultadoDaMimica(int? vencedor);
   Future<void> iniciarCronometro();
@@ -199,7 +200,9 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   /// A mesa toda ouve junto: a revelação e o vacilo chegam pelo tempo real.
   void _tocarOQueMudou(Rodada? antes, Rodada? agora) {
     if (antes == null || agora == null || antes.numero != agora.numero) return;
-    if (antes.revelacao == null && agora.revelacao != null) som.tocar(som.Som.revelacao);
+    if (antes.revelacao == null && agora.revelacao != null) {
+      som.tocar(agora.modo == ModoDeJogo.batataQuente ? som.Som.estouro : som.Som.revelacao);
+    }
     if (agora.vacilaram.any((id) => !antes.vacilaram.contains(id))) som.tocar(som.Som.vacilo);
   }
 
@@ -261,6 +264,9 @@ class _TelaDaSalaState extends State<TelaDaSala> implements AcoesDaSala {
   @override
   Future<void> escreverDuasVerdades(List<String> frases, int mentira) =>
       _agir((token) => widget.api.escreverDuasVerdades(_codigo, token, _rodada, frases, mentira));
+
+  @override
+  Future<void> passarABatata() => _agir((token) => widget.api.passarABatata(_codigo, token, _rodada));
 
   @override
   Future<void> marcarVacilo(String jogadorId) =>

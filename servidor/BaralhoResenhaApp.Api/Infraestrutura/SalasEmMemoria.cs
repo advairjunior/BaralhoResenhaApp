@@ -45,6 +45,10 @@ public sealed class SalasEmMemoria(Baralho baralho, TimeProvider? relogio = null
         return _salas.Values.Any(sala => sala.UltimaAtividade >= limite);
     }
 
+    /// <summary>Batata quente: as salas em que a batata acabou de estourar.</summary>
+    public IReadOnlyList<string> ConferirBatatas() =>
+        _salas.Values.Where(sala => sala.ConferirBatata()).Select(sala => sala.Codigo).ToList();
+
     internal void LimparParadas()
     {
         var limite = _relogio.GetUtcNow() - TempoParada;

@@ -10,6 +10,9 @@ enum Som {
 
   /// O cronômetro da carta chegou a zero.
   tempo,
+
+  /// Batata quente: estourou na mão de alguém.
+  estouro,
 }
 
 /// Som e vibração deste celular; quem não quer barulho desliga pelo menu.

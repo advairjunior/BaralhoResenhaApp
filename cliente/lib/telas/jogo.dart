@@ -17,6 +17,7 @@ import 'correio.dart';
 import 'termine_a_frase.dart';
 import 'duas_verdades.dart';
 import 'chuta_ai.dart';
+import 'batata_quente.dart';
 import 'configuracao_do_jogo.dart';
 import 'momentos.dart';
 import 'passar_sozinho.dart';
@@ -394,6 +395,7 @@ class _AreaDeAcao extends StatelessWidget {
             ModoDeJogo.termineAFrase => RevelacaoDasFrases(visao: visao, revelacao: revelacao),
             ModoDeJogo.duasVerdades => RevelacaoDaMentira(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.chutaAi => RevelacaoDosChutes(visao: visao, rodada: rodada, revelacao: revelacao),
+            ModoDeJogo.batataQuente => RevelacaoDaBatata(visao: visao, revelacao: revelacao),
             _ => _RevelacaoMaisProvavel(visao: visao, revelacao: revelacao),
           },
           MomentosDaRodada(visao: visao, rodada: rodada, acoes: acoes),
@@ -512,6 +514,7 @@ class _AreaDeAcao extends StatelessWidget {
               ? MinhasAfirmacoes(rodada: rodada)
               : VotarNaMentira(rodada: rodada, acoes: acoes),
         ),
+      ModoDeJogo.batataQuente => PainelDaBatata(visao: visao, rodada: rodada, acoes: acoes),
       ModoDeJogo.chutaAi => _Respondendo(
           visao: visao,
           rodada: rodada,

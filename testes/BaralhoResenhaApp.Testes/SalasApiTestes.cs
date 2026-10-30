@@ -82,6 +82,31 @@ public sealed class SalasApiTestes(WebApplicationFactory<Program> fabrica)
     }
 
     [Fact]
+    public async Task SoQuemEstaComABatataPassaEOPavioNaoVaiParaOCelular()
+    {
+        var ana = await CriarSala("Ana");
+        var turma = new[] { ana, await Entrar(ana.Codigo, "Bia"), await Entrar(ana.Codigo, "Caio") };
+        var sala = $"/api/salas/{ana.Codigo}";
+        await Enviar(HttpMethod.Put, $"{sala}/configuracao", ana.Token,
+            new { nivel = "Leve", modos = new[] { "BatataQuente" }, zonaSegura = true });
+        await Enviar(HttpMethod.Post, $"{sala}/comecar", ana.Token);
+        var rodada = (await Visao(ana.Codigo, ana.Token)).GetProperty("rodada");
+        var comABatata = rodada.GetProperty("comABatata").GetString();
+        var daVez = turma.Single(j => Visao(ana.Codigo, j.Token).Result.GetProperty("euId").GetString() == comABatata);
+        var outro = turma.First(j => j != daVez);
+        var corpo = new { rodada = rodada.GetProperty("numero").GetInt32() };
+
+        Assert.Equal(HttpStatusCode.Conflict, (await Enviar(HttpMethod.Post, $"{sala}/batata", outro.Token, corpo)).StatusCode);
+        var resposta = await Enviar(HttpMethod.Post, $"{sala}/batata", daVez.Token, corpo);
+
+        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
+        var depois = await resposta.Content.ReadAsStringAsync();
+        Assert.DoesNotContain("estoura", depois, StringComparison.OrdinalIgnoreCase);
+        Assert.NotEqual(comABatata,
+            (await Visao(ana.Codigo, ana.Token)).GetProperty("rodada").GetProperty("comABatata").GetString());
+    }
+
+    [Fact]
     public async Task CriarEntrarEJogarUmaRodadaDeEuNunca()
     {
         var ana = await CriarSala("Ana");

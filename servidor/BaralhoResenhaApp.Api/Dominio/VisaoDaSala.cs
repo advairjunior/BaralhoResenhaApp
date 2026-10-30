@@ -54,7 +54,8 @@ public sealed record RodadaVisivel(
     IReadOnlyList<string> Frases,
     int? MinhaFrase,
     IReadOnlyList<string> Afirmacoes,
-    int? MinhaMentira);
+    int? MinhaMentira,
+    Guid? ComABatata);
 
 /// <summary>Esquenta sozinho: em que nível a noite está e quando sobe.</summary>
 /// <param name="SobeEm">Cartas até subir; nulo quando já chegou ao limite.</param>
@@ -154,7 +155,8 @@ public sealed record VisaoDaSala(
                     rodada.OrdemDasFrases?.IndexOf(eu.Id) is >= 0 and var minha ? minha : null,
                     rodada.Afirmacoes,
                     // Qual é a mentira só quem escreveu sabe; a turma descobre na revelação.
-                    rodada.Alvo == eu.Id ? rodada.Mentira : null),
+                    rodada.Alvo == eu.Id ? rodada.Mentira : null,
+                    rodada.ComABatata),
             sala.Regra is { } regra ? regra with { PodemVacilar = sala.QuemPodeVacilar(regra) } : null,
             sala.Momentos.Select(m => new MomentoVisivel(
                 m.Id, m.JogadorId, m.NomeDoJogador, m.Rodada, m.Texto, Endereco(m.Foto))).ToList(),

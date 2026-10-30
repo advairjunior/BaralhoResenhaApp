@@ -20,6 +20,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.termineAFrase => 'Termine a frase',
         ModoDeJogo.duasVerdades => 'Duas verdades e uma mentira',
         ModoDeJogo.chutaAi => 'Chuta aí',
+        ModoDeJogo.batataQuente => 'Batata quente',
       };
 
   String get emoji => switch (this) {
@@ -38,6 +39,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.termineAFrase => '✍️',
         ModoDeJogo.duasVerdades => '🤥',
         ModoDeJogo.chutaAi => '🎯',
+        ModoDeJogo.batataQuente => '🥔',
       };
 
   String get explicacao => switch (this) {
@@ -67,6 +69,8 @@ extension VisualDoModo on ModoDeJogo {
             'em segredo: quem errar leva ponto; se ninguém acertar, ela distribui goles. Precisa de 3 pessoas.',
         ModoDeJogo.chutaAi => 'Uma pergunta com resposta em número ("quantos degraus tem o Cristo?") e cada um '
             'chuta em segredo. Mais longe leva ponto; mais perto distribui goles.',
+        ModoDeJogo.batataQuente => 'A carta dá a categoria ("marcas de cerveja") e a batata passa de celular em '
+            'celular: fala uma e toca em "Falei!". Ninguém sabe quando estoura; quem estiver com ela leva ponto.',
       };
 
   Color get cor => switch (this) {
@@ -85,6 +89,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.termineAFrase => CoresBaralho.frase,
         ModoDeJogo.duasVerdades => CoresBaralho.mentira,
         ModoDeJogo.chutaAi => CoresBaralho.chute,
+        ModoDeJogo.batataQuente => CoresBaralho.batata,
       };
 }
 

@@ -48,6 +48,8 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
         [ModoDeJogo.DuasVerdades] = 1,
         // Um chute e a revelação: rápido, mas é tempero, como os outros jogos novos.
         [ModoDeJogo.ChutaAi] = 1,
+        // Rápida e barulhenta, mas cada uma toma meio minuto da mesa inteira.
+        [ModoDeJogo.BatataQuente] = 1,
     };
 
     /// <summary>

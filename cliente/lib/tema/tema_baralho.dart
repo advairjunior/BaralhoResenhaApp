@@ -31,6 +31,7 @@ abstract final class CoresBaralho {
   static const frase = Color(0xFF84CC16);
   static const mentira = Color(0xFFF97316);
   static const chute = Color(0xFF6366F1);
+  static const batata = Color(0xFFDC2626);
 }
 
 abstract final class EspacoBaralho {

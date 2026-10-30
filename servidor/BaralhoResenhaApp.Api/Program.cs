@@ -16,6 +16,11 @@ builder.Services.AddHostedService(servicos => new MantemAcordado(
     builder.Configuration["RENDER_EXTERNAL_URL"],
     TimeProvider.System,
     servicos.GetRequiredService<ILogger<MantemAcordado>>()));
+// Batata quente: o pavio é do servidor, que confere a cada segundo e avisa quando estoura.
+builder.Services.AddHostedService(servicos => new PavioDaBatata(
+    servicos.GetRequiredService<SalasEmMemoria>(),
+    servicos.GetRequiredService<NotificadorTempoReal>(),
+    TimeProvider.System));
 builder.Services.ConfigureHttpJsonOptions(opcoes =>
     opcoes.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddCors(opcoes => opcoes.AddDefaultPolicy(politica => politica
@@ -82,7 +87,7 @@ app.MapGet("/api/salas/{codigo}", (
     var sala = salas.Obter(codigo);
     var token = Token(http);
     var comandoMudou = sala.MarcarPresenca(token);
-    var mesaMudou = sala.ConferirQuemCaiu();
+    var mesaMudou = sala.ConferirQuemCaiu() | sala.ConferirBatata();
     if (comandoMudou || mesaMudou) notificador.Publicar(sala.Codigo);
     return Results.Ok(sala.Visao(token));
 });
@@ -161,6 +166,12 @@ app.MapPost("/api/salas/{codigo}/duas-verdades", (
     SalasEmMemoria salas, NotificadorTempoReal notificador) =>
     Agir(codigo, http, salas, notificador,
         (sala, token) => sala.EscreverDuasVerdades(token, requisicao.Rodada, requisicao.Frases, requisicao.Mentira)));
+
+// Batata quente: quem está com a batata falou e passa para o próximo.
+app.MapPost("/api/salas/{codigo}/batata", (
+    string codigo, AcaoNaRodada requisicao, HttpRequest http,
+    SalasEmMemoria salas, NotificadorTempoReal notificador) =>
+    Agir(codigo, http, salas, notificador, (sala, token) => sala.PassarABatata(token, requisicao.Rodada)));
 
 app.MapPost("/api/salas/{codigo}/vacilo", (
     string codigo, MarcarApontado requisicao, HttpRequest http,

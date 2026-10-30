@@ -50,6 +50,12 @@ void tocarSom(Som som) {
         for (var vez = 0; vez < 2; vez++) {
           _nota(audio, 440, inicio: vez * 0.3, duracao: 0.25, forma: 'square', volume: 0.12);
         }
+      case Som.estouro:
+        // Bum: um grave rasgado que cai, com um estalo agudo por cima.
+        for (final (indice, frequencia) in [140.0, 90.0, 55.0].indexed) {
+          _nota(audio, frequencia, inicio: indice * 0.06, duracao: 0.5, forma: 'sawtooth', volume: 0.3);
+        }
+        _nota(audio, 1200, inicio: 0, duracao: 0.08, forma: 'square', volume: 0.15);
     }
   } catch (_) {
     // Sem Web Audio: fica só a vibração.
@@ -58,6 +64,7 @@ void tocarSom(Som som) {
     Som.revelacao => [60],
     Som.vacilo => [200, 80, 200],
     Som.tempo => [400],
+    Som.estouro => [600],
   });
 }
 

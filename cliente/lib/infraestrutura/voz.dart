@@ -43,6 +43,7 @@ String falaDaCarta(VisaoDaSala visao) {
       '${rodada.times.map((time) => nome(time.mimico)).join(' e ')} faz${rodada.times.length > 1 ? 'em' : ''} a mímica.',
     ModoDeJogo.impostor => '${rodada.dica ?? ''}. Cada um olha o seu celular.',
     ModoDeJogo.correio => 'A pergunta está no celular da turma.',
+    ModoDeJogo.batataQuente => '${rodada.texto}. Começa com ${nome(rodada.comABatata)}!',
     _ => rodada.texto,
   };
   final titulo = switch (rodada) {

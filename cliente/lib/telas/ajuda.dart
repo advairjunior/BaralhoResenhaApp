@@ -127,6 +127,13 @@ ComoJoga comoJoga(Rodada rodada) {
         'Quem chutou mais longe leva 1 ponto. Quem chegou mais perto distribui goles. '
             'Acertou na mosca? Ganha uma carta na manga.',
       ]),
+    Rodada(modo: ModoDeJogo.batataQuente) => ('batataQuente', ModoDeJogo.batataQuente.titulo, [
+        'A carta dá a categoria ("marcas de cerveja"). A batata começa com quem a carta chamou.',
+        'Com a batata, fale uma coisa da categoria em voz alta e toque em "Falei!": ela passa para o próximo.',
+        'Repetiu ou travou? A turma não deixa passar: só toca em "Falei!" quem falou uma que vale.',
+        'Ninguém sabe quando estoura, nem quem criou a sala. Estourou na sua mão? Leva 1 ponto.',
+        'Ninguém joga o celular: a batata é só na tela.',
+      ]),
     Rodada(modo: ModoDeJogo.imagemEAcao) => ('mimica', ModoDeJogo.imagemEAcao.titulo, [
         'Só quem faz a mímica vê a palavra. Dá para dizer a dica: a categoria e o número de palavras.',
         'Não vale falar, soletrar nem apontar para objetos.',

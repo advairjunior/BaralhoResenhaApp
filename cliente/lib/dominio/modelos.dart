@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades, chutaAi }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades, chutaAi, batataQuente }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 
@@ -464,6 +464,7 @@ class Rodada {
     this.minhaFrase,
     this.afirmacoes = const [],
     this.minhaMentira,
+    this.comABatata,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -523,6 +524,7 @@ class Rodada {
         minhaFrase: json['minhaFrase'] as int?,
         afirmacoes: List<String>.from((json['afirmacoes'] as List?) ?? const []),
         minhaMentira: json['minhaMentira'] as int?,
+        comABatata: json['comABatata'] as String?,
       );
 
   final int numero;
@@ -634,6 +636,9 @@ class Rodada {
   /// e, só no celular dela, qual é a mentira.
   final List<String> afirmacoes;
   final int? minhaMentira;
+
+  /// Batata quente: quem está com a batata agora. Quando estoura é segredo do servidor.
+  final String? comABatata;
 }
 
 class Momento {

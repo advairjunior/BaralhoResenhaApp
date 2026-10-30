@@ -51,7 +51,14 @@ public enum ModoDeJogo
     /// Chuta aí: pergunta com resposta em número; cada um chuta em segredo. Quem
     /// chutou mais longe leva ponto e quem chegou mais perto distribui goles.
     /// </summary>
-    ChutaAi
+    ChutaAi,
+
+    /// <summary>
+    /// Batata quente: a carta dá a categoria e a batata passa de celular em celular:
+    /// cada um fala uma coisa e toca em "Falei!". O pavio é segredo; quando estoura,
+    /// quem está com a batata leva ponto.
+    /// </summary>
+    BatataQuente
 }
 
 /// <summary>
@@ -184,6 +191,6 @@ public sealed record ConfiguracaoDoJogo(
         [ModoDeJogo.EuNunca, ModoDeJogo.MaisProvavel, ModoDeJogo.BebaSe, ModoDeJogo.RegraRelampago,
             ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados,
             ModoDeJogo.Musica, ModoDeJogo.Impostor, ModoDeJogo.TermineAFrase, ModoDeJogo.DuasVerdades,
-            ModoDeJogo.ChutaAi],
+            ModoDeJogo.ChutaAi, ModoDeJogo.BatataQuente],
         ZonaSegura: true);
 }

@@ -98,6 +98,12 @@ void main() {
       expect(fala, contains('Pedra, papel e tesoura!'));
     });
 
+    test('na Batata quente fala a categoria e com quem a batata começa', () {
+      final fala = falaDaCarta(_visao(_carta(modo: 'BatataQuente', texto: 'Marcas de cerveja', extras: {'comABatata': 'bia'})));
+
+      expect(fala, endsWith('Batata quente! Marcas de cerveja. Começa com Bia!'));
+    });
+
     test('o "(a)" do masculino e feminino não é lido', () {
       final fala = falaDaCarta(_visao(_carta(texto: 'Eu nunca fui expulso(a) de lugar nenhum com os(as) amigos(as).')));
 

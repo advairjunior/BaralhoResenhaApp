@@ -224,6 +224,12 @@ public sealed class Rodada
     /// <summary>Duas verdades e uma mentira: qual das três é a mentira. Segredo até a revelação.</summary>
     public int? Mentira { get; set; }
 
+    /// <summary>Batata quente: quem está com a batata agora.</summary>
+    public Guid? ComABatata { get; set; }
+
+    /// <summary>Batata quente: quando o pavio acaba. Segredo do servidor: nenhum celular recebe.</summary>
+    public DateTimeOffset? EstouraEm { get; init; }
+
     public bool PedeResposta =>
         Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio
             or ModoDeJogo.Jurados or ModoDeJogo.Impostor or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades
@@ -785,7 +791,7 @@ public sealed partial class Sala
             .OrderBy(j => j.Chamadas).ThenBy(_ => _sorteio.Next()).Take(2).ToList();
         if (carta.Texto.Contains("{jogador}") ||
             carta.Modo is ModoDeJogo.Tribunal or ModoDeJogo.Correio or ModoDeJogo.Jurados or ModoDeJogo.Musica
-                or ModoDeJogo.DuasVerdades)
+                or ModoDeJogo.DuasVerdades or ModoDeJogo.BatataQuente)
             sorteados[0].Chamadas++;
         if (carta.Texto.Contains("{jogador2}") && sorteados.Count == 2) sorteados[1].Chamadas++;
         var texto = carta.Texto
@@ -811,12 +817,15 @@ public sealed partial class Sala
             Times = carta.Modo == ModoDeJogo.ImagemEAcao ? MontarTimes() : [],
             Fila = carta.Modo switch
             {
-                ModoDeJogo.Musica =>
+                // Batata quente: a mesma roda, começando por quem a carta chamou.
+                ModoDeJogo.Musica or ModoDeJogo.BatataQuente =>
                     [sorteados[0].Id, .. _jogadores.Where(j => j.Id != sorteados[0].Id).OrderBy(_ => _sorteio.Next()).Select(j => j.Id)],
                 ModoDeJogo.Impostor => FilaDasPistas(impostor!),
                 _ => []
             },
-            Impostor = impostor?.Id
+            Impostor = impostor?.Id,
+            ComABatata = carta.Modo == ModoDeJogo.BatataQuente ? sorteados[0].Id : null,
+            EstouraEm = carta.Modo == ModoDeJogo.BatataQuente ? AcenderOPavio() : null
         };
         PresenteDaRodada();
         if (carta.Modo == ModoDeJogo.RegraRelampago)
@@ -893,6 +902,12 @@ public sealed partial class Sala
         else if (rodada.Carta.Modo == ModoDeJogo.ChutaAi)
         {
             revelacao = RevelarChutes(rodada, respostas);
+        }
+        else if (rodada.Carta.Modo == ModoDeJogo.BatataQuente)
+        {
+            // Estourou: quem estava com a batata leva (se ainda está na sala).
+            revelacao = new Revelacao([], [], [],
+                _jogadores.Where(j => j.Id == rodada.ComABatata).Select(j => j.Id).ToList(), null);
         }
         else if (rodada.Carta.Modo == ModoDeJogo.Tribunal)
         {
