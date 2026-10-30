@@ -10,8 +10,8 @@ import 'visual.dart';
 /// Cor de cada time, na ordem em que o servidor manda.
 const coresDosTimes = ['🔴', '🔵', '🟢'];
 
-/// Imagem e Ação antes do resultado: a palavra (só para quem faz a mímica),
-/// os times, o cronômetro e, para quem criou a sala, quem acertou.
+/// Imagem e Ação (e Palavra proibida) antes do resultado: a palavra (só para quem
+/// faz a mímica ou explica), os times, o cronômetro e, para quem criou a sala, quem acertou.
 class PainelDaMimica extends StatelessWidget {
   const PainelDaMimica({super.key, required this.visao, required this.rodada, required this.acoes});
 
@@ -23,27 +23,51 @@ class PainelDaMimica extends StatelessWidget {
   Widget build(BuildContext context) {
     final souMimico = rodada.times.any((t) => t.mimico == visao.euId);
     final umaPessoaSo = rodada.times.length == 1;
+    final palavra = rodada.modo == ModoDeJogo.palavraProibida;
+    final quem = umaPessoaSo ? visao.jogador(rodada.times.single.mimico)?.nome ?? 'Alguém' : '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (souMimico) ...[
-          const Text('🤫 Só você e os outros mímicos veem a palavra',
-              textAlign: TextAlign.center, style: TextStyle(color: CoresBaralho.textoSecundario)),
+          Text(palavra ? '🤫 Só quem explica vê a palavra' : '🤫 Só você e os outros mímicos veem a palavra',
+              textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoSecundario)),
+          if (palavra) ...[
+            const SizedBox(height: EspacoBaralho.pequeno),
+            const Text('🚫 Não pode dizer:',
+                textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: EspacoBaralho.mini),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: EspacoBaralho.pequeno,
+              runSpacing: EspacoBaralho.pequeno,
+              children: [
+                for (final proibida in rodada.proibidas)
+                  Chip(
+                    label: Text(proibida, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    side: const BorderSide(color: CoresBaralho.coral),
+                  ),
+              ],
+            ),
+          ],
           if (rodada.dica case final dica?)
             Text('Pode dizer: $dica',
                 textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-          const Text('Não vale falar a palavra, soletrar nem apontar para objetos.',
-              textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: CoresBaralho.textoApagado)),
+          Text(
+              palavra
+                  ? 'Não vale dizer a palavra, as proibidas, pedaços delas nem fazer mímica.'
+                  : 'Não vale falar a palavra, soletrar nem apontar para objetos.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: CoresBaralho.textoApagado)),
           const SizedBox(height: EspacoBaralho.base),
         ],
         if (umaPessoaSo)
           Text(
-            '🎭 ${visao.jogador(rodada.times.single.mimico)?.nome ?? 'Alguém'} faz a mímica para todo mundo',
+            palavra ? '🗣️ $quem explica para todo mundo' : '🎭 $quem faz a mímica para todo mundo',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           )
         else
-          for (final (indice, time) in rodada.times.indexed) _Time(visao: visao, time: time, indice: indice),
+          for (final (indice, time) in rodada.times.indexed) _Time(visao: visao, time: time, indice: indice, palavra: palavra),
         const SizedBox(height: EspacoBaralho.base),
         Cronometro(key: ValueKey('mimica-${rodada.numero}'), visao: visao, rodada: rodada, aoIniciar: acoes.iniciarCronometro),
         if (visao.souAnfitriao) ...[
@@ -75,11 +99,14 @@ class PainelDaMimica extends StatelessWidget {
 String _de(VisaoDaSala visao, TimeDaMimica time) => ' ${visao.jogador(time.mimico)?.nome ?? 'mímico'}';
 
 class _Time extends StatelessWidget {
-  const _Time({required this.visao, required this.time, required this.indice});
+  const _Time({required this.visao, required this.time, required this.indice, required this.palavra});
 
   final VisaoDaSala visao;
   final TimeDaMimica time;
   final int indice;
+
+  /// Palavra proibida: quem está no lugar do mímico explica.
+  final bool palavra;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +121,7 @@ class _Time extends StatelessWidget {
         border: Border.all(color: meu ? CoresBaralho.ambar : CoresBaralho.borda),
       ),
       child: Column(children: [
-        Text('${coresDosTimes[indice]} ${meu ? 'Seu time' : 'Time'} · $mimico faz a mímica',
+        Text('${coresDosTimes[indice]} ${meu ? 'Seu time' : 'Time'} · $mimico ${palavra ? 'explica' : 'faz a mímica'}',
             style: const TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: EspacoBaralho.pequeno),
         Wrap(
@@ -111,7 +138,7 @@ class _Time extends StatelessWidget {
                     tamanho: 40,
                     destaque: jogador.id == time.mimico ? CoresBaralho.mimica : null,
                   ),
-                  Text(jogador.id == time.mimico ? '🎭 ${jogador.nome}' : jogador.nome,
+                  Text(jogador.id == time.mimico ? '${palavra ? '🗣️' : '🎭'} ${jogador.nome}' : jogador.nome,
                       maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11)),
                 ]),
               ),
@@ -144,6 +171,9 @@ class RevelacaoDaMimica extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text('Era: ${rodada.texto}', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
+        if (rodada.proibidas.isNotEmpty)
+          Text('Proibidas: ${rodada.proibidas.join(' · ')}',
+              textAlign: TextAlign.center, style: const TextStyle(color: CoresBaralho.textoSecundario)),
         const SizedBox(height: EspacoBaralho.pequeno),
         Text(titulo, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: EspacoBaralho.base),

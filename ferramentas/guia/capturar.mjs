@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi', 'batataQuente', 'issoOuAquilo', 'quemSouEu'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi', 'batataQuente', 'issoOuAquilo', 'quemSouEu', 'palavraProibida'];
 
 const pagina = async () => {
   const p = await b.newPage();
@@ -215,6 +215,14 @@ await p.close();
 p = await abrir(s, s.nomes[v.rodada.alvo]);
 await rolar(p, 650);
 await foto(p, 'quem-sou-eu-vez');
+await p.close();
+
+// Palavra proibida: a tela de quem explica, com as proibidas.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['PalavraProibida'] }, (r) => r.cartaId === 'pp-001');
+p = await abrir(s, s.nomes[v.rodada.times[0].mimico]);
+await rolar(p, 650);
+await foto(p, 'palavra-proibida');
 await p.close();
 
 // Jurados: a média das estrelas, sem dizer quem deu qual nota.

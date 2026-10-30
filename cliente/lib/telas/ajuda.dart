@@ -143,6 +143,15 @@ ComoJoga comoJoga(Rodada rodada) {
         'Quem criou a sala dá o "Valendo!": são 90 segundos.',
         'Acertou? Ganha uma carta na manga. O tempo acabou? Leva 1 ponto.',
       ]),
+    Rodada(modo: ModoDeJogo.palavraProibida) => ('palavraProibida', ModoDeJogo.palavraProibida.titulo, [
+        'Só quem explica vê a palavra e as quatro palavras proibidas.',
+        'Explique falando, sem dizer a palavra, as proibidas, pedaços delas nem fazer mímica.',
+        if (rodada.times.length > 1)
+          'Os times jogam ao mesmo tempo, com a mesma palavra: ganha quem acertar primeiro. O time que perder leva 1 ponto.'
+        else
+          'A turma toda tenta adivinhar. Ninguém acertou no tempo? Quem explicou leva 1 ponto.',
+        'Quem criou a sala dá o "Valendo!" no cronômetro de 60 segundos e marca quem acertou.',
+      ]),
     Rodada(modo: ModoDeJogo.imagemEAcao) => ('mimica', ModoDeJogo.imagemEAcao.titulo, [
         'Só quem faz a mímica vê a palavra. Dá para dizer a dica: a categoria e o número de palavras.',
         'Não vale falar, soletrar nem apontar para objetos.',

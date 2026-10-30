@@ -68,6 +68,8 @@ public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = 
         [ModoDeJogo.IssoOuAquilo] = 2,
         // Um minuto e meio de perguntas com a mesa inteira olhando: dos mais pedidos.
         [ModoDeJogo.QuemSouEu] = 2,
+        // A mímica falada: rende como a mímica, mas é mais rápida de entender.
+        [ModoDeJogo.PalavraProibida] = 2,
     };
 
     /// <summary>
@@ -95,7 +97,7 @@ public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = 
         var modos = configuracao.Modos
             .Distinct()
             // Votação e tribunal precisam de gente para votar.
-            .Where(modo => modo is not (ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.ImagemEAcao
+            .Where(modo => modo is not (ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.ImagemEAcao or ModoDeJogo.PalavraProibida
                     or ModoDeJogo.Jurados or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades
                     or ModoDeJogo.IssoOuAquilo) ||
                 quantidadeDeJogadores >= 3)

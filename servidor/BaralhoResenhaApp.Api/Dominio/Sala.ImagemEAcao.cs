@@ -4,7 +4,8 @@ namespace BaralhoResenhaApp.Api.Dominio;
 public sealed record TimeDaMimica(Guid Mimico, IReadOnlyList<Guid> Jogadores);
 
 /// <summary>
-/// Imagem e Ação. Só quem faz a mímica vê a palavra; a turma vê a dica.
+/// Imagem e Ação (e a Palavra proibida, que usa os mesmos times). Só quem faz a
+/// mímica vê a palavra; a turma vê a dica.
 /// Até 5 pessoas, uma faz para todos; de 6 a 8, dois times; 9 ou mais,
 /// três. Nos times, todos os mímicos fazem a mesma palavra ao mesmo tempo
 /// e ganha quem acertar primeiro.
@@ -25,8 +26,8 @@ public sealed partial class Sala
             ExigirAnfitriao(token, "Quem marca o resultado é quem criou a sala.");
             if (!RodadaEmAndamento(numeroDaRodada) || Fase != FaseDaSala.Carta) return;
             var rodada = Rodada!;
-            if (rodada.Carta.Modo != ModoDeJogo.ImagemEAcao)
-                throw new AcaoNaoPermitidaException("Só vale no Imagem e Ação.");
+            if (rodada.Carta.Modo is not (ModoDeJogo.ImagemEAcao or ModoDeJogo.PalavraProibida))
+                throw new AcaoNaoPermitidaException("Só vale no Imagem e Ação e na Palavra proibida.");
             if (timeVencedor is { } indice && (indice < 0 || indice >= rodada.Times.Count))
                 throw new AcaoNaoPermitidaException("Esse time não existe.");
 
@@ -40,7 +41,8 @@ public sealed partial class Sala
                 { } ganhou => rodada.Times.Where((_, i) => i != ganhou).SelectMany(t => t.Jogadores)
             };
             var vencedores = timeVencedor is { } v ? rodada.Times[v].Jogadores : [];
-            if (timeVencedor is { } acertou &&
+            // Palavra proibida não conta para o prêmio de artista da mímica.
+            if (timeVencedor is { } acertou && rodada.Carta.Modo == ModoDeJogo.ImagemEAcao &&
                 _jogadores.FirstOrDefault(j => j.Id == rodada.Times[acertou].Mimico) is { } artista)
                 artista.Estatisticas.MimicasAcertadas++;
 

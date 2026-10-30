@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades, chutaAi, batataQuente, issoOuAquilo, quemSouEu }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades, chutaAi, batataQuente, issoOuAquilo, quemSouEu, palavraProibida }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 
@@ -466,6 +466,7 @@ class Rodada {
     this.prendas = const {},
     this.prendaParaDar,
     this.opcoes = const [],
+    this.proibidas = const [],
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -530,6 +531,7 @@ class Rodada {
         },
         prendaParaDar: json['prendaParaDar'] as String?,
         opcoes: List<String>.from((json['opcoes'] as List?) ?? const []),
+        proibidas: List<String>.from((json['proibidas'] as List?) ?? const []),
       );
 
   final int numero;
@@ -649,6 +651,9 @@ class Rodada {
 
   /// Isso ou aquilo: as duas opções, na ordem dos botões.
   final List<String> opcoes;
+
+  /// Palavra proibida: o que quem explica não pode dizer (vazio para quem adivinha).
+  final List<String> proibidas;
 }
 
 class Momento {

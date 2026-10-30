@@ -45,7 +45,9 @@ Chuta aí (pergunta com resposta em número; mais longe leva, mais perto distrib
 Batata quente (categoria; cada um fala e toca em "Falei!"; o pavio escondido é do servidor e estoura sozinho) ·
 Isso ou aquilo (duas opções, voto secreto; a minoria leva; empate ou unanimidade, ninguém; 3+ pessoas) ·
 Quem sou eu? (todo mundo vê o segredo, menos a pessoa da vez, que só sabe a categoria; pergunta sim ou não
-em 90 s; acertou, carta na manga; o tempo acabou, ponto; quem criou a sala marca).
+em 90 s; acertou, carta na manga; o tempo acabou, ponto; quem criou a sala marca) ·
+Palavra proibida (a mímica falada: quem explica vê a palavra e 4 proibidas; mesmos times, 60 s e
+resultado da mímica, mas não conta para o prêmio de artista da mímica; 3+ pessoas).
 
 ## Regras de produto já decididas
 

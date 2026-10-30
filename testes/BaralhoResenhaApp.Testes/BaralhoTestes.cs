@@ -210,12 +210,13 @@ public sealed class BaralhoTestes
         var deVoto = Parte(c => c.Modo is ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.Jurados
             or ModoDeJogo.Impostor or ModoDeJogo.IssoOuAquilo);
         var desafios = Parte(c => c.Duelo);
-        var mimica = Parte(c => c.Modo == ModoDeJogo.ImagemEAcao);
+        // Adivinhar em time: a mímica e a palavra proibida, que usa os mesmos times.
+        var mimica = Parte(c => c.Modo is ModoDeJogo.ImagemEAcao or ModoDeJogo.PalavraProibida);
         Assert.True(deVoto >= 0.35, $"votação, tribunal, jurados, impostor e isso ou aquilo: {deVoto:P0}");
         // Esperado: uns 6,5% (Quem é mais provável pesa 5 de 31, e 40% dele é duelo); cada jogo novo dilui um pouco.
         Assert.True(desafios >= 0.05, $"duelos: {desafios:P0}");
         // Uma em cada 8 cartas (12,5%), com folga para cada jogo novo que entra na mistura.
-        Assert.True(mimica >= 0.11, $"imagem e ação: {mimica:P0}");
+        Assert.True(mimica >= 0.11, $"imagem e ação e palavra proibida: {mimica:P0}");
     }
 
     [Fact]

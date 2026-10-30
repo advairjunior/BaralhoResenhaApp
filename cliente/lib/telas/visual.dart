@@ -22,6 +22,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.batataQuente => 'Batata quente',
         ModoDeJogo.issoOuAquilo => 'Isso ou aquilo',
         ModoDeJogo.quemSouEu => 'Quem sou eu?',
+        ModoDeJogo.palavraProibida => 'Palavra proibida',
       };
 
   String get emoji => switch (this) {
@@ -42,6 +43,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.batataQuente => '🥔',
         ModoDeJogo.issoOuAquilo => '🤷',
         ModoDeJogo.quemSouEu => '🙈',
+        ModoDeJogo.palavraProibida => '🚫',
       };
 
   String get explicacao => switch (this) {
@@ -75,6 +77,8 @@ extension VisualDoModo on ModoDeJogo {
             'na minoria leva ponto. Precisa de 3 pessoas.',
         ModoDeJogo.quemSouEu => 'Todo mundo vê quem a pessoa da vez é (um objeto, um bicho, um famoso, '
             'qualquer coisa), menos ela. Pergunta sim ou não até acertar: acertou, carta na manga; o tempo acabou, ponto.',
+        ModoDeJogo.palavraProibida => 'A mímica falada: quem explica vê a palavra e quatro proibidas, e o time '
+            'adivinha em 60 segundos. Os times são os da mímica. Precisa de 3 pessoas.',
       };
 
   Color get cor => switch (this) {
@@ -95,6 +99,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.batataQuente => CoresBaralho.batata,
         ModoDeJogo.issoOuAquilo => CoresBaralho.issoOuAquilo,
         ModoDeJogo.quemSouEu => CoresBaralho.quemSouEu,
+        ModoDeJogo.palavraProibida => CoresBaralho.palavraProibida,
       };
 }
 

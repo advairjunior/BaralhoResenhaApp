@@ -128,6 +128,7 @@ class Jogo extends StatelessWidget {
                     rodada.revelacao == null &&
                     rodada.modo != ModoDeJogo.imagemEAcao &&
                     rodada.modo != ModoDeJogo.quemSouEu &&
+                    rodada.modo != ModoDeJogo.palavraProibida &&
                     !(rodada.modo == ModoDeJogo.maisProvavel && !rodada.votacao))
                   Cronometro(
                     key: ValueKey('cronometro-${rodada.numero}'),
@@ -391,7 +392,8 @@ class _AreaDeAcao extends StatelessWidget {
               RevelacaoDoJokenpo(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.maisProvavel when rodada.duelo =>
               _RevelacaoDoDuelo(visao: visao, rodada: rodada, revelacao: revelacao),
-            ModoDeJogo.imagemEAcao => RevelacaoDaMimica(visao: visao, rodada: rodada, revelacao: revelacao),
+            ModoDeJogo.imagemEAcao || ModoDeJogo.palavraProibida =>
+              RevelacaoDaMimica(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.correio => RevelacaoDoCorreio(visao: visao, rodada: rodada, revelacao: revelacao, acoes: acoes),
             ModoDeJogo.termineAFrase => RevelacaoDasFrases(visao: visao, revelacao: revelacao),
             ModoDeJogo.duasVerdades => RevelacaoDaMentira(visao: visao, rodada: rodada, revelacao: revelacao),
@@ -539,7 +541,7 @@ class _AreaDeAcao extends StatelessWidget {
               ? EscreverFrase(key: ValueKey('escrever-frase-${rodada.numero}'), rodada: rodada, acoes: acoes)
               : VotarNaFrase(rodada: rodada, acoes: acoes),
         ),
-      ModoDeJogo.imagemEAcao => PainelDaMimica(visao: visao, rodada: rodada, acoes: acoes),
+      ModoDeJogo.imagemEAcao || ModoDeJogo.palavraProibida => PainelDaMimica(visao: visao, rodada: rodada, acoes: acoes),
       ModoDeJogo.impostor => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           _PistasDoImpostor(visao: visao, rodada: rodada),
           const SizedBox(height: EspacoBaralho.grande),

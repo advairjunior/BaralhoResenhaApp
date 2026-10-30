@@ -69,7 +69,13 @@ public enum ModoDeJogo
     /// Quem sou eu?: a carta é um segredo (objeto, bicho, famoso, personagem…) que todo
     /// mundo vê, menos a pessoa da vez, que pergunta "sim ou não" até acertar.
     /// </summary>
-    QuemSouEu
+    QuemSouEu,
+
+    /// <summary>
+    /// Palavra proibida: como a mímica, só que falando. Quem explica vê a palavra e as
+    /// proibidas; os times seguem o Imagem e Ação.
+    /// </summary>
+    PalavraProibida
 }
 
 /// <summary>
@@ -119,6 +125,7 @@ public enum NivelDaCarta
 /// <param name="Conta">Eu Nunca "conta essa": na revelação, cada um que já fez conta a sua, um de cada vez.</param>
 /// <param name="Resposta">Chuta aí: o número certo, que só aparece na revelação.</param>
 /// <param name="Opcoes">Isso ou aquilo: as duas opções, curtas, na ordem dos botões.</param>
+/// <param name="Proibidas">Palavra proibida: o que quem explica não pode dizer.</param>
 /// <param name="Sensivel">
 /// Assunto que pode virar DR de verdade entre casais (ex, ciúme, traição).
 /// Fica fora do baralho quando a Zona Segura está ligada.
@@ -139,7 +146,8 @@ public sealed record Carta(
     int? Goles = null,
     bool Conta = false,
     decimal? Resposta = null,
-    IReadOnlyList<string>? Opcoes = null);
+    IReadOnlyList<string>? Opcoes = null,
+    IReadOnlyList<string>? Proibidas = null);
 
 /// <summary>De onde saem as iscas das regras-relâmpago.</summary>
 /// <param name="Perguntas">Perguntas abertas, para a pessoa ter que falar bastante.</param>
@@ -228,6 +236,6 @@ public sealed record ConfiguracaoDoJogo(
             ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados,
             ModoDeJogo.Musica, ModoDeJogo.Impostor, ModoDeJogo.TermineAFrase, ModoDeJogo.DuasVerdades,
             ModoDeJogo.ChutaAi, ModoDeJogo.BatataQuente, ModoDeJogo.IssoOuAquilo,
-            ModoDeJogo.QuemSouEu],
+            ModoDeJogo.QuemSouEu, ModoDeJogo.PalavraProibida],
         ZonaSegura: true);
 }

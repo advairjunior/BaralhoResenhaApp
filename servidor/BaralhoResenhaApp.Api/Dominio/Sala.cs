@@ -106,7 +106,7 @@ public sealed class Rodada
     /// <summary>Mímica tem 60 s; outras cartas, o tempo que o texto pede ("em 5 segundos").</summary>
     public int? SegundosDoCronometro => Carta.Modo switch
     {
-        ModoDeJogo.ImagemEAcao => 60,
+        ModoDeJogo.ImagemEAcao or ModoDeJogo.PalavraProibida => 60,
         // Perguntas de sim ou não até acertar: um minuto e meio.
         ModoDeJogo.QuemSouEu => 90,
         // Aponta no 3: a contagem é uma só, em todos os celulares.
@@ -186,10 +186,13 @@ public sealed class Rodada
     {
         if (Impostor == jogadorId && !revelada) return "🕵️ Você é o impostor!";
         if (Carta.Modo == ModoDeJogo.QuemSouEu && Alvo == jogadorId && !revelada) return "🙈 Quem é você?";
-        return Times.Count == 0 || revelada || Times.Any(t => t.Mimico == jogadorId)
-            ? Texto
-            : "🎭 Adivinhe a mímica!";
+        if (Times.Count == 0 || revelada || Times.Any(t => t.Mimico == jogadorId)) return Texto;
+        return Carta.Modo == ModoDeJogo.PalavraProibida ? "🚫 Adivinhe a palavra!" : "🎭 Adivinhe a mímica!";
     }
+
+    /// <summary>Palavra proibida: só quem explica (e todo mundo, depois do resultado) vê as proibidas.</summary>
+    public IReadOnlyList<string> ProibidasPara(Guid jogadorId, bool revelada) =>
+        revelada || Times.Any(t => t.Mimico == jogadorId) ? Carta.Proibidas ?? [] : [];
 
     /// <summary>Duelo: os dois da carta. Eles se apresentam e a turma vota.</summary>
     public IReadOnlyList<Guid> Duelistas { get; init; } = [];
@@ -809,7 +812,7 @@ public sealed partial class Sala
             Votacao = carta.Modo == ModoDeJogo.MaisProvavel &&
                 (carta.Elogio || carta.Duelo || _sorteio.NextDouble() < ChanceDeVotacao),
             Duelistas = carta.Duelo && sorteados.Count == 2 ? [sorteados[0].Id, sorteados[1].Id] : [],
-            Times = carta.Modo == ModoDeJogo.ImagemEAcao ? MontarTimes() : [],
+            Times = carta.Modo is ModoDeJogo.ImagemEAcao or ModoDeJogo.PalavraProibida ? MontarTimes() : [],
             Fila = carta.Modo switch
             {
                 // Batata quente: a mesma roda, começando por quem a carta chamou.
