@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi'];
 
 const pagina = async () => {
   const p = await b.newPage();
@@ -173,6 +173,16 @@ await api('POST', `${s.sala}/duas-verdades`, s.turma[daVez], {
 p = await abrir(s, Object.keys(s.turma).find((n) => n !== daVez));
 await rolar(p, 450);
 await foto(p, 'mentira');
+await p.close();
+
+// Chuta aí: a resposta certa e os chutes, do mais perto ao mais longe.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['ChutaAi'] }, (r) => r.cartaId === 'ch-001');
+for (const [n, chute] of [['Advair', '180'], ['Júlia', '250'], ['Caio', '500'], ['Bruna', '215']])
+  await api('POST', `${s.sala}/respostas`, s.turma[n], { rodada: v.rodada.numero, resposta: chute });
+p = await abrir(s, 'Júlia');
+await rolar(p, 750);
+await foto(p, 'chute');
 await p.close();
 
 // Jurados: a média das estrelas, sem dizer quem deu qual nota.
