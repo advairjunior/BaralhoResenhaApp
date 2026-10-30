@@ -30,6 +30,7 @@ abstract final class CoresBaralho {
   static const impostor = Color(0xFF64748B);
   static const frase = Color(0xFF84CC16);
   static const mentira = Color(0xFFF97316);
+  static const chute = Color(0xFF6366F1);
 }
 
 abstract final class EspacoBaralho {

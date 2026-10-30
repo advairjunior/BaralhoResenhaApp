@@ -46,6 +46,8 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
         [ModoDeJogo.TermineAFrase] = 1,
         // A pessoa da vez escreve três frases antes de a turma votar: demora, como o Correio.
         [ModoDeJogo.DuasVerdades] = 1,
+        // Um chute e a revelação: rápido, mas é tempero, como os outros jogos novos.
+        [ModoDeJogo.ChutaAi] = 1,
     };
 
     /// <summary>

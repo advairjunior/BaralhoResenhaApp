@@ -153,8 +153,8 @@ public sealed class BaralhoTestes
         Assert.InRange(Parte(ModoDeJogo.RegraRelampago), 0.04, 0.20);
         Assert.True(Parte(ModoDeJogo.EuNunca) > Parte(ModoDeJogo.CasaisEmJogo) * 2);
         Assert.True(Parte(ModoDeJogo.MaisProvavel) > 0.12);
-        // Beba se cedeu espaço para votação, desafios e mímica, mas segue na mesa.
-        Assert.True(Parte(ModoDeJogo.BebaSe) > 0.06);
+        // Beba se cedeu espaço para votação, desafios, mímica e os jogos novos, mas segue na mesa.
+        Assert.True(Parte(ModoDeJogo.BebaSe) > 0.05);
     }
 
     [Fact]

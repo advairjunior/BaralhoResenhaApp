@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, casaisEmJogo, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades, chutaAi }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 
@@ -298,6 +298,8 @@ class Revelacao {
     this.mentira,
     this.votosNasAfirmacoes = const [],
     this.acertaram = const [],
+    this.respostaCerta,
+    this.chutes = const [],
   });
 
   factory Revelacao.deJson(Map<String, dynamic> json) => Revelacao(
@@ -329,6 +331,11 @@ class Revelacao {
         mentira: json['mentira'] as int?,
         votosNasAfirmacoes: List<int>.from((json['votosNasAfirmacoes'] as List?) ?? const []),
         acertaram: List<String>.from((json['acertaram'] as List?) ?? const []),
+        respostaCerta: json['respostaCerta'] as num?,
+        chutes: [
+          for (final chute in (json['chutes'] as List?) ?? const [])
+            ChuteRevelado(chute['jogadorId'] as String, chute['valor'] as num),
+        ],
       );
 
   /// Termine a frase: da mais votada para a menos; autor só nas vencedoras.
@@ -338,6 +345,10 @@ class Revelacao {
   final int? mentira;
   final List<int> votosNasAfirmacoes;
   final List<String> acertaram;
+
+  /// Chuta aí: o número certo e os chutes, do mais perto para o mais longe.
+  final num? respostaCerta;
+  final List<ChuteRevelado> chutes;
 
   /// Jurados: a média das estrelas e as notas, sem dizer quem deu qual.
   final double? media;
@@ -377,6 +388,13 @@ class Revelacao {
 
   /// Eu Nunca: a maioria já fez, então leva quem nunca fez.
   final bool minoriaLeva;
+}
+
+class ChuteRevelado {
+  const ChuteRevelado(this.jogadorId, this.valor);
+
+  final String jogadorId;
+  final num valor;
 }
 
 class FraseRevelada {

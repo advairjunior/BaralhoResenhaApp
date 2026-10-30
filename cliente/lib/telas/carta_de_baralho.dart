@@ -53,6 +53,8 @@ _TemaDaCarta _temaDo(ModoDeJogo modo) => switch (modo) {
         const _TemaDaCarta(moldura: Color(0xFF4D7C0F), papel: Color(0xFFF7FDEB), titulo: Color(0xFF3F6212)),
       ModoDeJogo.duasVerdades =>
         const _TemaDaCarta(moldura: Color(0xFFC2410C), papel: Color(0xFFFFF5ED), titulo: Color(0xFF9A3412)),
+      ModoDeJogo.chutaAi =>
+        const _TemaDaCarta(moldura: Color(0xFF4F46E5), papel: Color(0xFFF0F1FF), titulo: Color(0xFF3730A3)),
     };
 
 /// O que vai em cima do título: o jeito de jogar esta carta.

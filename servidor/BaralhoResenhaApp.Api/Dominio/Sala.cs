@@ -226,7 +226,8 @@ public sealed class Rodada
 
     public bool PedeResposta =>
         Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio
-            or ModoDeJogo.Jurados or ModoDeJogo.Impostor or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades ||
+            or ModoDeJogo.Jurados or ModoDeJogo.Impostor or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades
+            or ModoDeJogo.ChutaAi ||
         (Carta.Modo == ModoDeJogo.MaisProvavel && Votacao);
 }
 
@@ -279,9 +280,15 @@ public sealed record Revelacao(
     public int? Mentira { get; init; }
     public IReadOnlyList<int> VotosNasAfirmacoes { get; init; } = [];
     public IReadOnlyList<Guid> Acertaram { get; init; } = [];
+
+    /// <summary>Chuta aí: o número certo e os chutes, do mais perto para o mais longe.</summary>
+    public decimal? RespostaCerta { get; init; }
+    public IReadOnlyList<ChuteRevelado> Chutes { get; init; } = [];
 }
 
 public sealed record FraseRevelada(string Texto, int Votos, Guid? Autor);
+
+public sealed record ChuteRevelado(Guid JogadorId, decimal Valor);
 
 /// <param name="Quem">Quem faz: entrevista, missão, pergunta ou piada.</param>
 /// <param name="Para">Para quem: quem responde ou tem que segurar a risada.</param>
@@ -566,6 +573,7 @@ public sealed partial class Sala
             if (rodada.Carta.Modo == ModoDeJogo.TermineAFrase) ValidarVotoNaFrase(rodada, jogador, resposta);
             if (rodada.Carta.Modo == ModoDeJogo.DuasVerdades) ValidarVotoNaMentira(rodada, jogador, resposta);
             if (rodada.Carta.Modo == ModoDeJogo.Impostor) ValidarVotoNoImpostor(jogador, resposta);
+            if (rodada.Carta.Modo == ModoDeJogo.ChutaAi) resposta = ValidarChute(resposta);
 
             if (rodada.Carta.Modo == ModoDeJogo.EuNunca && resposta is not (RespostaJa or RespostaNunca))
                 throw new AcaoNaoPermitidaException("Responda se já fez ou se nunca fez.");
@@ -881,6 +889,10 @@ public sealed partial class Sala
         else if (rodada.Carta.Modo == ModoDeJogo.DuasVerdades)
         {
             revelacao = RevelarMentira(rodada, respostas);
+        }
+        else if (rodada.Carta.Modo == ModoDeJogo.ChutaAi)
+        {
+            revelacao = RevelarChutes(rodada, respostas);
         }
         else if (rodada.Carta.Modo == ModoDeJogo.Tribunal)
         {

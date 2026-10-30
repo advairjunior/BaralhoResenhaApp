@@ -16,6 +16,7 @@ import 'jokenpo.dart';
 import 'correio.dart';
 import 'termine_a_frase.dart';
 import 'duas_verdades.dart';
+import 'chuta_ai.dart';
 import 'configuracao_do_jogo.dart';
 import 'momentos.dart';
 import 'passar_sozinho.dart';
@@ -392,6 +393,7 @@ class _AreaDeAcao extends StatelessWidget {
             ModoDeJogo.correio => RevelacaoDoCorreio(visao: visao, rodada: rodada, revelacao: revelacao, acoes: acoes),
             ModoDeJogo.termineAFrase => RevelacaoDasFrases(visao: visao, revelacao: revelacao),
             ModoDeJogo.duasVerdades => RevelacaoDaMentira(visao: visao, rodada: rodada, revelacao: revelacao),
+            ModoDeJogo.chutaAi => RevelacaoDosChutes(visao: visao, rodada: rodada, revelacao: revelacao),
             _ => _RevelacaoMaisProvavel(visao: visao, revelacao: revelacao),
           },
           MomentosDaRodada(visao: visao, rodada: rodada, acoes: acoes),
@@ -509,6 +511,12 @@ class _AreaDeAcao extends StatelessWidget {
           opcoes: visao.euId == rodada.alvo
               ? MinhasAfirmacoes(rodada: rodada)
               : VotarNaMentira(rodada: rodada, acoes: acoes),
+        ),
+      ModoDeJogo.chutaAi => _Respondendo(
+          visao: visao,
+          rodada: rodada,
+          acoes: acoes,
+          opcoes: ChutarNumero(key: ValueKey('chute-${rodada.numero}'), rodada: rodada, acoes: acoes),
         ),
       ModoDeJogo.termineAFrase => _Respondendo(
           visao: visao,
@@ -628,6 +636,7 @@ class _Respondendo extends StatelessWidget {
                       ModoDeJogo.jurados => 'Dê sua nota em segredo:',
                       ModoDeJogo.impostor => 'Depois das pistas, vote em segredo em quem é o impostor:',
                       ModoDeJogo.duasVerdades => 'Qual é a mentira? Vote em segredo:',
+                      ModoDeJogo.chutaAi => 'Chute em segredo:',
                       _ => 'Vote em segredo:',
                     }
                   : 'Resposta guardada. Dá para trocar até revelar.',
@@ -640,7 +649,9 @@ class _Respondendo extends StatelessWidget {
         Text(
           escrevendo
               ? '${rodada.respostas} de ${votantes.length} já escreveram'
-              : rodada.duelo || frase || rodada.modo == ModoDeJogo.duasVerdades
+              : rodada.modo == ModoDeJogo.chutaAi
+                  ? '${rodada.respostas} de ${votantes.length} chutaram'
+                  : rodada.duelo || frase || rodada.modo == ModoDeJogo.duasVerdades
                   ? '${rodada.respostas} de ${votantes.length} votaram'
                   : '${rodada.respostas} de ${votantes.length} responderam',
           textAlign: TextAlign.center,

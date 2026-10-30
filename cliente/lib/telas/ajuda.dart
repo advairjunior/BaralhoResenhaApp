@@ -120,6 +120,13 @@ ComoJoga comoJoga(Rodada rodada) {
         'Quem errou leva 1 ponto. Se ninguém acertou, a pessoa da vez distribui goles.',
         'Depois, a pessoa da vez conta a história das verdades (e de onde tirou a mentira) e toca em "🎤 Contei".',
       ]),
+    Rodada(modo: ModoDeJogo.chutaAi) => ('chutaAi', ModoDeJogo.chutaAi.titulo, [
+        'A carta faz uma pergunta com resposta em número. Cada um chuta no celular, em segredo.',
+        'Vale vírgula: 42,5. Dá para trocar o chute até todo mundo chutar.',
+        'Na revelação aparecem a resposta certa e todos os chutes, do mais perto ao mais longe.',
+        'Quem chutou mais longe leva 1 ponto. Quem chegou mais perto distribui goles. '
+            'Acertou na mosca? Ganha uma carta na manga.',
+      ]),
     Rodada(modo: ModoDeJogo.imagemEAcao) => ('mimica', ModoDeJogo.imagemEAcao.titulo, [
         'Só quem faz a mímica vê a palavra. Dá para dizer a dica: a categoria e o número de palavras.',
         'Não vale falar, soletrar nem apontar para objetos.',

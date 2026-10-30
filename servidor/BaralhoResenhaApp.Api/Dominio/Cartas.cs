@@ -45,7 +45,13 @@ public enum ModoDeJogo
     /// Duas verdades e uma mentira: a pessoa da vez escreve três frases sobre si
     /// e a turma vota em segredo em qual é a mentira.
     /// </summary>
-    DuasVerdades
+    DuasVerdades,
+
+    /// <summary>
+    /// Chuta aí: pergunta com resposta em número; cada um chuta em segredo. Quem
+    /// chutou mais longe leva ponto e quem chegou mais perto distribui goles.
+    /// </summary>
+    ChutaAi
 }
 
 /// <summary>
@@ -92,6 +98,7 @@ public enum NivelDaCarta
 /// <param name="Isca">Regra-relâmpago: o que o jogo gera a cada carta para a regra acontecer.</param>
 /// <param name="Iscas">Perguntas feitas para esta regra (ex.: sobre trabalho, na regra que proíbe falar de trabalho).</param>
 /// <param name="Conta">Eu Nunca "conta essa": na revelação, cada um que já fez conta a sua, um de cada vez.</param>
+/// <param name="Resposta">Chuta aí: o número certo, que só aparece na revelação.</param>
 /// <param name="Sensivel">
 /// Assunto que pode virar DR de verdade entre casais (ex, ciúme, traição).
 /// Fica fora do baralho quando a Zona Segura está ligada.
@@ -110,7 +117,8 @@ public sealed record Carta(
     bool Destaque = false,
     bool Jokenpo = false,
     int? Goles = null,
-    bool Conta = false);
+    bool Conta = false,
+    decimal? Resposta = null);
 
 /// <summary>De onde saem as iscas das regras-relâmpago.</summary>
 /// <param name="Perguntas">Perguntas abertas, para a pessoa ter que falar bastante.</param>
@@ -175,6 +183,7 @@ public sealed record ConfiguracaoDoJogo(
         // Casais em Jogo começa desligado: quem quiser, liga.
         [ModoDeJogo.EuNunca, ModoDeJogo.MaisProvavel, ModoDeJogo.BebaSe, ModoDeJogo.RegraRelampago,
             ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados,
-            ModoDeJogo.Musica, ModoDeJogo.Impostor, ModoDeJogo.TermineAFrase, ModoDeJogo.DuasVerdades],
+            ModoDeJogo.Musica, ModoDeJogo.Impostor, ModoDeJogo.TermineAFrase, ModoDeJogo.DuasVerdades,
+            ModoDeJogo.ChutaAi],
         ZonaSegura: true);
 }
