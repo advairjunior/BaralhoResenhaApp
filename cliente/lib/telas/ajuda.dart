@@ -130,6 +130,12 @@ ComoJoga comoJoga(Rodada rodada) {
         'Ninguém sabe quando estoura, nem quem criou a sala. Estourou na sua mão? Leva 1 ponto.',
         'Ninguém joga o celular: a batata é só na tela.',
       ]),
+    Rodada(modo: ModoDeJogo.issoOuAquilo) => ('issoOuAquilo', ModoDeJogo.issoOuAquilo.titulo, [
+        'A carta dá duas opções. Cada um escolhe a sua no celular, em segredo.',
+        'Dá para trocar até todo mundo escolher.',
+        'Na revelação aparece quem escolheu cada lado. Quem ficou na minoria leva 1 ponto.',
+        'Empate ou todo mundo do mesmo lado: ninguém leva.',
+      ]),
     Rodada(modo: ModoDeJogo.imagemEAcao) => ('mimica', ModoDeJogo.imagemEAcao.titulo, [
         'Só quem faz a mímica vê a palavra. Dá para dizer a dica: a categoria e o número de palavras.',
         'Não vale falar, soletrar nem apontar para objetos.',

@@ -209,8 +209,8 @@ public sealed class BaralhoTestes
         var desafios = Parte(c => c.Duelo);
         var mimica = Parte(c => c.Modo == ModoDeJogo.ImagemEAcao);
         Assert.True(deVoto >= 0.35, $"votação, tribunal, jurados e impostor: {deVoto:P0}");
-        // Esperado: uns 6,9% (Quem é mais provável pesa 5 de 29, e 40% dele é duelo).
-        Assert.True(desafios >= 0.06, $"duelos: {desafios:P0}");
+        // Esperado: uns 6,5% (Quem é mais provável pesa 5 de 31, e 40% dele é duelo); cada jogo novo dilui um pouco.
+        Assert.True(desafios >= 0.05, $"duelos: {desafios:P0}");
         // Uma em cada 8 cartas (12,5%), com folga para cada jogo novo que entra na mistura.
         Assert.True(mimica >= 0.11, $"imagem e ação: {mimica:P0}");
     }

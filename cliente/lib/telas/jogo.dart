@@ -11,6 +11,7 @@ import 'cartas_na_manga.dart';
 import 'controles_do_anfitriao.dart';
 import 'cronometro.dart';
 import 'imagem_e_acao.dart';
+import 'isso_ou_aquilo.dart';
 import 'jokenpo.dart';
 import 'correio.dart';
 import 'termine_a_frase.dart';
@@ -394,6 +395,7 @@ class _AreaDeAcao extends StatelessWidget {
             ModoDeJogo.duasVerdades => RevelacaoDaMentira(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.chutaAi => RevelacaoDosChutes(visao: visao, rodada: rodada, revelacao: revelacao),
             ModoDeJogo.batataQuente => RevelacaoDaBatata(visao: visao, revelacao: revelacao),
+            ModoDeJogo.issoOuAquilo => RevelacaoDasEscolhas(visao: visao, rodada: rodada, revelacao: revelacao),
             _ => _RevelacaoMaisProvavel(visao: visao, revelacao: revelacao),
           },
           MomentosDaRodada(visao: visao, rodada: rodada, acoes: acoes),
@@ -513,6 +515,12 @@ class _AreaDeAcao extends StatelessWidget {
               : VotarNaMentira(rodada: rodada, acoes: acoes),
         ),
       ModoDeJogo.batataQuente => PainelDaBatata(visao: visao, rodada: rodada, acoes: acoes),
+      ModoDeJogo.issoOuAquilo => _Respondendo(
+          visao: visao,
+          rodada: rodada,
+          acoes: acoes,
+          opcoes: EscolherUmaDasDuas(rodada: rodada, acoes: acoes),
+        ),
       ModoDeJogo.chutaAi => _Respondendo(
           visao: visao,
           rodada: rodada,
@@ -637,6 +645,7 @@ class _Respondendo extends StatelessWidget {
                       ModoDeJogo.impostor => 'Depois das pistas, vote em segredo em quem é o impostor:',
                       ModoDeJogo.duasVerdades => 'Qual é a mentira? Vote em segredo:',
                       ModoDeJogo.chutaAi => 'Chute em segredo:',
+                      ModoDeJogo.issoOuAquilo => 'Escolha em segredo:',
                       _ => 'Vote em segredo:',
                     }
                   : 'Resposta guardada. Dá para trocar até revelar.',
@@ -651,6 +660,8 @@ class _Respondendo extends StatelessWidget {
               ? '${rodada.respostas} de ${votantes.length} já escreveram'
               : rodada.modo == ModoDeJogo.chutaAi
                   ? '${rodada.respostas} de ${votantes.length} chutaram'
+                  : rodada.modo == ModoDeJogo.issoOuAquilo
+                  ? '${rodada.respostas} de ${votantes.length} escolheram'
                   : rodada.duelo || frase || rodada.modo == ModoDeJogo.duasVerdades
                   ? '${rodada.respostas} de ${votantes.length} votaram'
                   : '${rodada.respostas} de ${votantes.length} responderam',

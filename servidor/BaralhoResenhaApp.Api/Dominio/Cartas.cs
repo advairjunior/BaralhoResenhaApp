@@ -57,7 +57,13 @@ public enum ModoDeJogo
     /// cada um fala uma coisa e toca em "Falei!". O pavio é segredo; quando estoura,
     /// quem está com a batata leva ponto.
     /// </summary>
-    BatataQuente
+    BatataQuente,
+
+    /// <summary>
+    /// Isso ou aquilo: a carta dá duas opções e cada um escolhe em segredo. Quem
+    /// ficou na minoria leva ponto; empate ou todo mundo igual, ninguém leva.
+    /// </summary>
+    IssoOuAquilo
 }
 
 /// <summary>
@@ -105,6 +111,7 @@ public enum NivelDaCarta
 /// <param name="Iscas">Perguntas feitas para esta regra (ex.: sobre trabalho, na regra que proíbe falar de trabalho).</param>
 /// <param name="Conta">Eu Nunca "conta essa": na revelação, cada um que já fez conta a sua, um de cada vez.</param>
 /// <param name="Resposta">Chuta aí: o número certo, que só aparece na revelação.</param>
+/// <param name="Opcoes">Isso ou aquilo: as duas opções, curtas, na ordem dos botões.</param>
 /// <param name="Sensivel">
 /// Assunto que pode virar DR de verdade entre casais (ex, ciúme, traição).
 /// Fica fora do baralho quando a Zona Segura está ligada.
@@ -124,7 +131,8 @@ public sealed record Carta(
     bool Jokenpo = false,
     int? Goles = null,
     bool Conta = false,
-    decimal? Resposta = null);
+    decimal? Resposta = null,
+    IReadOnlyList<string>? Opcoes = null);
 
 /// <summary>De onde saem as iscas das regras-relâmpago.</summary>
 /// <param name="Perguntas">Perguntas abertas, para a pessoa ter que falar bastante.</param>
@@ -212,6 +220,6 @@ public sealed record ConfiguracaoDoJogo(
         [ModoDeJogo.EuNunca, ModoDeJogo.MaisProvavel, ModoDeJogo.BebaSe, ModoDeJogo.RegraRelampago,
             ModoDeJogo.Tribunal, ModoDeJogo.Elogios, ModoDeJogo.ImagemEAcao, ModoDeJogo.Jurados,
             ModoDeJogo.Musica, ModoDeJogo.Impostor, ModoDeJogo.TermineAFrase, ModoDeJogo.DuasVerdades,
-            ModoDeJogo.ChutaAi, ModoDeJogo.BatataQuente],
+            ModoDeJogo.ChutaAi, ModoDeJogo.BatataQuente, ModoDeJogo.IssoOuAquilo],
         ZonaSegura: true);
 }

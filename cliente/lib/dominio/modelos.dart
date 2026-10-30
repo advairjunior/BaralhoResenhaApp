@@ -1,4 +1,4 @@
-enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades, chutaAi, batataQuente }
+enum ModoDeJogo { euNunca, maisProvavel, bebaSe, regraRelampago, tribunal, elogios, correio, imagemEAcao, jurados, musica, impostor, termineAFrase, duasVerdades, chutaAi, batataQuente, issoOuAquilo }
 
 enum NivelDaCarta { leve, resenha, picante, original }
 
@@ -301,6 +301,7 @@ class Revelacao {
     this.acertaram = const [],
     this.respostaCerta,
     this.chutes = const [],
+    this.lados = const [],
   });
 
   factory Revelacao.deJson(Map<String, dynamic> json) => Revelacao(
@@ -335,6 +336,7 @@ class Revelacao {
           for (final chute in (json['chutes'] as List?) ?? const [])
             ChuteRevelado(chute['jogadorId'] as String, chute['valor'] as num),
         ],
+        lados: [for (final lado in (json['lados'] as List?) ?? const []) List<String>.from(lado as List)],
       );
 
   /// Termine a frase: da mais votada para a menos; autor só nas vencedoras.
@@ -348,6 +350,9 @@ class Revelacao {
   /// Chuta aí: o número certo e os chutes, do mais perto para o mais longe.
   final num? respostaCerta;
   final List<ChuteRevelado> chutes;
+
+  /// Isso ou aquilo: quem escolheu cada opção, na ordem das opções.
+  final List<List<String>> lados;
 
   /// Jurados: a média das estrelas e as notas, sem dizer quem deu qual.
   final double? media;
@@ -460,6 +465,7 @@ class Rodada {
     this.comABatata,
     this.prendas = const {},
     this.prendaParaDar,
+    this.opcoes = const [],
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -523,6 +529,7 @@ class Rodada {
             key as String: List<String>.from(value as List),
         },
         prendaParaDar: json['prendaParaDar'] as String?,
+        opcoes: List<String>.from((json['opcoes'] as List?) ?? const []),
       );
 
   final int numero;
@@ -639,6 +646,9 @@ class Rodada {
 
   /// Sala sem álcool: no elogio, a prenda que quem a turma escolheu passa para alguém.
   final String? prendaParaDar;
+
+  /// Isso ou aquilo: as duas opções, na ordem dos botões.
+  final List<String> opcoes;
 }
 
 class Momento {

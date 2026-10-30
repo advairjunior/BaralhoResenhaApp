@@ -64,6 +64,8 @@ public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = 
         [ModoDeJogo.ChutaAi] = 1,
         // Rápida e barulhenta, mas cada uma toma meio minuto da mesa inteira.
         [ModoDeJogo.BatataQuente] = 1,
+        // Um toque e a revelação: rápido como o Eu Nunca, mas com menos cartas.
+        [ModoDeJogo.IssoOuAquilo] = 2,
     };
 
     /// <summary>
@@ -92,7 +94,8 @@ public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = 
             .Distinct()
             // Votação e tribunal precisam de gente para votar.
             .Where(modo => modo is not (ModoDeJogo.MaisProvavel or ModoDeJogo.Tribunal or ModoDeJogo.ImagemEAcao
-                    or ModoDeJogo.Jurados or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades) ||
+                    or ModoDeJogo.Jurados or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades
+                    or ModoDeJogo.IssoOuAquilo) ||
                 quantidadeDeJogadores >= 3)
             // Com menos de três escrevendo, todo mundo adivinha quem escreveu.
             .Where(modo => modo != ModoDeJogo.Correio || quantidadeDeJogadores >= 4)

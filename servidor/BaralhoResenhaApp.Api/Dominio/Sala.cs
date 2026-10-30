@@ -228,7 +228,7 @@ public sealed class Rodada
     public bool PedeResposta =>
         Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.Tribunal or ModoDeJogo.Correio
             or ModoDeJogo.Jurados or ModoDeJogo.Impostor or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades
-            or ModoDeJogo.ChutaAi ||
+            or ModoDeJogo.ChutaAi or ModoDeJogo.IssoOuAquilo ||
         (Carta.Modo == ModoDeJogo.MaisProvavel && Votacao);
 }
 
@@ -283,6 +283,9 @@ public sealed record Revelacao(
     /// <summary>Chuta aí: o número certo e os chutes, do mais perto para o mais longe.</summary>
     public decimal? RespostaCerta { get; init; }
     public IReadOnlyList<ChuteRevelado> Chutes { get; init; } = [];
+
+    /// <summary>Isso ou aquilo: quem escolheu cada opção, na ordem das opções.</summary>
+    public IReadOnlyList<IReadOnlyList<Guid>> Lados { get; init; } = [];
 }
 
 public sealed record FraseRevelada(string Texto, int Votos, Guid? Autor);
@@ -570,6 +573,7 @@ public sealed partial class Sala
             if (rodada.Carta.Modo == ModoDeJogo.DuasVerdades) ValidarVotoNaMentira(rodada, jogador, resposta);
             if (rodada.Carta.Modo == ModoDeJogo.Impostor) ValidarVotoNoImpostor(jogador, resposta);
             if (rodada.Carta.Modo == ModoDeJogo.ChutaAi) resposta = ValidarChute(resposta);
+            if (rodada.Carta.Modo == ModoDeJogo.IssoOuAquilo) ValidarEscolha(resposta);
 
             if (rodada.Carta.Modo == ModoDeJogo.EuNunca && resposta is not (RespostaJa or RespostaNunca))
                 throw new AcaoNaoPermitidaException("Responda se já fez ou se nunca fez.");
@@ -881,6 +885,10 @@ public sealed partial class Sala
         else if (rodada.Carta.Modo == ModoDeJogo.ChutaAi)
         {
             revelacao = RevelarChutes(rodada, respostas);
+        }
+        else if (rodada.Carta.Modo == ModoDeJogo.IssoOuAquilo)
+        {
+            revelacao = RevelarEscolhas(respostas);
         }
         else if (rodada.Carta.Modo == ModoDeJogo.BatataQuente)
         {

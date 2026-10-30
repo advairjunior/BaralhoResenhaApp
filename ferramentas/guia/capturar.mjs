@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi', 'batataQuente'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi', 'batataQuente', 'issoOuAquilo'];
 
 const pagina = async () => {
   const p = await b.newPage();
@@ -192,6 +192,17 @@ v = await api('POST', `${s.sala}/batata`, s.turma[s.nomes[v.rodada.comABatata]],
 p = await abrir(s, s.nomes[v.rodada.comABatata]);
 await rolar(p, 650);
 await foto(p, 'batata');
+await p.close();
+
+// Isso ou aquilo: quem escolheu cada lado e quem ficou na minoria.
+s = await novaSala();
+// Sem pendência a carta passaria sozinha antes da foto.
+v = await comecar(s, { nivel: 'Leve', modos: ['IssoOuAquilo'], passarSozinho: false });
+for (const [n, lado] of [['Advair', '0'], ['Júlia', '0'], ['Caio', '1'], ['Bruna', '0']])
+  await api('POST', `${s.sala}/respostas`, s.turma[n], { rodada: v.rodada.numero, resposta: lado });
+p = await abrir(s, 'Júlia');
+await rolar(p, 1050);
+await foto(p, 'isso-ou-aquilo');
 await p.close();
 
 // Jurados: a média das estrelas, sem dizer quem deu qual nota.

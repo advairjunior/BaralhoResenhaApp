@@ -20,6 +20,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.duasVerdades => 'Duas verdades e uma mentira',
         ModoDeJogo.chutaAi => 'Chuta aí',
         ModoDeJogo.batataQuente => 'Batata quente',
+        ModoDeJogo.issoOuAquilo => 'Isso ou aquilo',
       };
 
   String get emoji => switch (this) {
@@ -38,6 +39,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.duasVerdades => '🤥',
         ModoDeJogo.chutaAi => '🎯',
         ModoDeJogo.batataQuente => '🥔',
+        ModoDeJogo.issoOuAquilo => '🤷',
       };
 
   String get explicacao => switch (this) {
@@ -67,6 +69,8 @@ extension VisualDoModo on ModoDeJogo {
             'chuta em segredo. Mais longe leva ponto; mais perto distribui goles.',
         ModoDeJogo.batataQuente => 'A carta dá a categoria ("marcas de cerveja") e a batata passa de celular em '
             'celular: fala uma e toca em "Falei!". Ninguém sabe quando estoura; quem estiver com ela leva ponto.',
+        ModoDeJogo.issoOuAquilo => 'Duas opções ("praia ou montanha?") e cada um escolhe em segredo. Quem ficar '
+            'na minoria leva ponto. Precisa de 3 pessoas.',
       };
 
   Color get cor => switch (this) {
@@ -85,6 +89,7 @@ extension VisualDoModo on ModoDeJogo {
         ModoDeJogo.duasVerdades => CoresBaralho.mentira,
         ModoDeJogo.chutaAi => CoresBaralho.chute,
         ModoDeJogo.batataQuente => CoresBaralho.batata,
+        ModoDeJogo.issoOuAquilo => CoresBaralho.issoOuAquilo,
       };
 }
 

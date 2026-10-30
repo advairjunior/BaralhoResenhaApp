@@ -42,7 +42,8 @@ um, que só sabe o tema; pistas em voz alta na ordem do app; voto secreto; 4+ pe
 Termine a frase (cada um completa o começo da carta em segredo, a turma vota sem saber de quem é; 3+ pessoas) ·
 Duas verdades e uma mentira (a pessoa da vez escreve três frases sobre si e a turma vota na mentira; 3+ pessoas) ·
 Chuta aí (pergunta com resposta em número; mais longe leva, mais perto distribui) ·
-Batata quente (categoria; cada um fala e toca em "Falei!"; o pavio escondido é do servidor e estoura sozinho).
+Batata quente (categoria; cada um fala e toca em "Falei!"; o pavio escondido é do servidor e estoura sozinho) ·
+Isso ou aquilo (duas opções, voto secreto; a minoria leva; empate ou unanimidade, ninguém; 3+ pessoas).
 
 ## Regras de produto já decididas
 
