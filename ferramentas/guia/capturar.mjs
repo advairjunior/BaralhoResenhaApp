@@ -16,7 +16,7 @@ async function api(metodo, rota, token, corpo, bytes) {
 }
 await espera(2500);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi'];
+const DICAS = ['euNunca', 'jokenpo', 'duelo', 'elogio', 'votacao', 'apontar', 'bebaSe', 'regra', 'casais', 'tribunal', 'elogios', 'correio', 'mimica', 'jurados', 'musica', 'impostor', 'termineAFrase', 'duasVerdades', 'chutaAi', 'batataQuente'];
 
 const pagina = async () => {
   const p = await b.newPage();
@@ -183,6 +183,15 @@ for (const [n, chute] of [['Advair', '180'], ['Júlia', '250'], ['Caio', '500'],
 p = await abrir(s, 'Júlia');
 await rolar(p, 750);
 await foto(p, 'chute');
+await p.close();
+
+// Batata quente: o botão "Falei!" no celular de quem está com a batata.
+s = await novaSala();
+v = await comecar(s, { nivel: 'Leve', modos: ['BatataQuente'] }, (r) => r.cartaId === 'bq-001');
+v = await api('POST', `${s.sala}/batata`, s.turma[s.nomes[v.rodada.comABatata]], { rodada: v.rodada.numero });
+p = await abrir(s, s.nomes[v.rodada.comABatata]);
+await rolar(p, 650);
+await foto(p, 'batata');
 await p.close();
 
 // Jurados: a média das estrelas, sem dizer quem deu qual nota.
