@@ -81,7 +81,11 @@ class SuspenseDaVotacao extends StatefulWidget {
               [final id] => visao.jogador(id) == null
                   ? null
                   : destinoDoPego(visao, visao.jogador(id)!).replaceFirst('bebe 🍺', 'bebe! 🍺'),
-              _ => visao.configuracao.pontosPorGole == 1 ? 'todos bebem! 🍺' : '+1 ponto para todos!',
+              _ => switch ((visao.configuracao.pontosPorGole, visao.configuracao.semAlcool)) {
+                  (1, true) => 'todos pagam prenda! 🎟️',
+                  (1, false) => 'todos bebem! 🍺',
+                  _ => '+1 ponto para todos!',
+                },
             },
     );
   }

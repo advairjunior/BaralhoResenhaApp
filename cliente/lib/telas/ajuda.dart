@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
+import 'bebida.dart';
 import 'visual.dart';
 
 /// O jogo se explica sozinho: ninguém precisa ensinar ninguém na mesa.
@@ -147,22 +148,33 @@ ComoJoga comoJoga(Rodada rodada) {
   return ComoJoga(chave: chave, titulo: titulo, passos: [...passos, ?dose]);
 }
 
-/// Pontos e goles, do jeito que a noite está configurada.
-String explicacaoDosPontos(ConfiguracaoDoJogo configuracao) => switch (configuracao.pontosPorGole) {
-      1 => 'Ritmo Raiz: cada ponto no cofrinho é 1 gole. Quem joga sem álcool só soma pontos.',
-      final pontos => 'Cada vez que a carta te pega, você ganha 1 ponto no cofrinho. '
-          'A cada $pontos pontos, o cofrinho enche e você bebe 1 gole. '
+/// Pontos e goles (ou prendas), do jeito que a noite está configurada.
+String explicacaoDosPontos(ConfiguracaoDoJogo configuracao) => switch (configuracao) {
+      ConfiguracaoDoJogo(semAlcool: true, pontosPorGole: 1) =>
+        '🧃 Sala sem álcool: ninguém bebe. Cada vez que a carta te pega, você paga uma prenda, '
+            'que aparece na tela. Pagou? Toque em "Paguei".',
+      ConfiguracaoDoJogo(semAlcool: true, :final pontosPorGole) =>
+        '🧃 Sala sem álcool: ninguém bebe. Cada vez que a carta te pega, você ganha 1 ponto no cofrinho. '
+            'A cada $pontosPorGole pontos, o cofrinho enche e você paga uma prenda, que aparece na tela. '
+            'Pagou? Toque em "Paguei".',
+      ConfiguracaoDoJogo(pontosPorGole: 1) =>
+        'Ritmo Raiz: cada ponto no cofrinho é 1 gole. Quem joga sem álcool só soma pontos.',
+      ConfiguracaoDoJogo(:final pontosPorGole) => 'Cada vez que a carta te pega, você ganha 1 ponto no cofrinho. '
+          'A cada $pontosPorGole pontos, o cofrinho enche e você bebe 1 gole. '
           'Quem joga sem álcool só soma pontos.',
     };
+
+String _tituloDosPontos(VisaoDaSala visao) =>
+    visao.configuracao.semAlcool ? '🎟️ Pontos e prendas' : '🍺 Pontos e goles';
 
 Future<void> abrirComoJoga(BuildContext context, VisaoDaSala visao, Rodada rodada) {
   final ajuda = comoJoga(rodada);
   return _folha(context, [
     Text('Como joga: ${ajuda.titulo}', style: Theme.of(context).textTheme.titleLarge),
     const SizedBox(height: EspacoBaralho.medio),
-    for (final (indice, passo) in ajuda.passos.indexed) _Passo(numero: indice + 1, texto: passo),
+    for (final (indice, passo) in ajuda.passos.indexed) _Passo(numero: indice + 1, texto: paraASala(visao, passo)),
     const SizedBox(height: EspacoBaralho.base),
-    _Secao(titulo: '🍺 Pontos e goles', texto: explicacaoDosPontos(visao.configuracao)),
+    _Secao(titulo: _tituloDosPontos(visao), texto: explicacaoDosPontos(visao.configuracao)),
     if (visao.configuracao.cartasNaManga)
       const _Secao(
         titulo: '🃏 Cartas na manga',
@@ -173,9 +185,10 @@ Future<void> abrirComoJoga(BuildContext context, VisaoDaSala visao, Rodada rodad
       texto: 'Só ${visao.anfitriao?.nome ?? 'quem criou a sala'} puxa a próxima carta, pula e revela antes da hora.',
     ),
     if (visao.configuracao.passarSozinho)
-      const _Secao(
+      _Secao(
         titulo: '⏩ A carta passa sozinha',
-        texto: 'Quando todo mundo responde e quem tem que beber (ou contar a história) confirma, '
+        texto: 'Quando todo mundo responde e quem tem que '
+            '${visao.configuracao.semAlcool ? 'pagar a prenda' : 'beber'} (ou contar a história) confirma, '
             'a próxima carta vem em 3 segundos. Precisa de mais tempo? Toque em "⏸️ Segura aí".',
       ),
   ]);
@@ -200,11 +213,12 @@ Future<void> abrirComoFunciona(BuildContext context, VisaoDaSala visao) {
     const _Passo(numero: 3, texto: 'Embaixo de toda carta tem "ⓘ Como joga" explicando aquele jogo.'),
     const _Passo(numero: 4, texto: 'No fim da noite saem os prêmios e o mural com as fotos de reação.'),
     const SizedBox(height: EspacoBaralho.base),
-    _Secao(titulo: '🍺 Pontos e goles', texto: explicacaoDosPontos(visao.configuracao)),
-    const _Secao(
-      titulo: '🍺 Dose de verdade',
-      texto: 'Carta com o selo "DOSE DE VERDADE" manda beber de verdade, fora do cofrinho.',
-    ),
+    _Secao(titulo: _tituloDosPontos(visao), texto: explicacaoDosPontos(visao.configuracao)),
+    if (!visao.configuracao.semAlcool)
+      const _Secao(
+        titulo: '🍺 Dose de verdade',
+        texto: 'Carta com o selo "DOSE DE VERDADE" manda beber de verdade, fora do cofrinho.',
+      ),
     if (visao.configuracao.cartasNaManga)
       const _Secao(
         titulo: '🃏 Cartas na manga',

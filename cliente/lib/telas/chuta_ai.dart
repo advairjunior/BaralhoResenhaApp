@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
+import 'bebida.dart';
 import 'sala.dart';
 import 'visual.dart';
 
@@ -83,7 +84,9 @@ class RevelacaoDosChutes extends StatelessWidget {
 
   String _nomes(Iterable<String> ids) => ids.map((id) => visao.jogador(id)?.nome ?? '?').join(', ');
 
-  String get _resumo {
+  String get _resumo => paraASala(visao, _resumoComBebida);
+
+  String get _resumoComBebida {
     final perto = revelacao.escolhidos;
     final longe = revelacao.perderam;
     if (perto.isEmpty && longe.isEmpty) return 'Todo mundo chutou igual: ninguém bebe.';

@@ -33,6 +33,19 @@ const _esperandoPor = {
   MotivoPendente.cantar: 'cantar 🎤',
 };
 
+/// Na sala sem álcool, quem "bebe" paga a prenda e o elogio passa uma prenda.
+String _botao(VisaoDaSala visao, MotivoPendente motivo) => switch (motivo) {
+      MotivoPendente.beber when visao.configuracao.semAlcool => '🎟️ Paguei ✓',
+      MotivoPendente.elogio when visao.configuracao.semAlcool => '💛 Passei ✓',
+      _ => _botaoDoMotivo[motivo]!,
+    };
+
+String _esperando(VisaoDaSala visao, MotivoPendente motivo) => switch (motivo) {
+      MotivoPendente.beber when visao.configuracao.semAlcool => 'pagar a prenda 🎟️',
+      MotivoPendente.elogio when visao.configuracao.semAlcool => 'passar a prenda 💛',
+      _ => _esperandoPor[motivo]!,
+    };
+
 /// Passar a carta sozinho: "Pronto ✓", quem falta, a contagem de 3 segundos e
 /// o "Segura aí". Quem criou a sala segue podendo passar na mão.
 class PassarSozinho extends StatefulWidget {
@@ -124,7 +137,7 @@ class _PassarSozinhoState extends State<PassarSozinho> {
     final esperando = [
       for (final pendente in rodada.pendentes)
         if (pendente.jogadorId != visao.euId)
-          '${visao.jogador(pendente.jogadorId)?.nome ?? 'alguém'} ${_esperandoPor[pendente.motivo]}',
+          '${visao.jogador(pendente.jogadorId)?.nome ?? 'alguém'} ${_esperando(visao, pendente.motivo)}',
     ];
 
     final Widget conteudo;
@@ -152,7 +165,7 @@ class _PassarSozinhoState extends State<PassarSozinho> {
       // Beba se e revelação: só quem tem pendência confirma.
       conteudo = Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         if (minha != null)
-          FilledButton(onPressed: widget.acoes.marcarPronto, child: Text(_botaoDoMotivo[minha.motivo]!)),
+          FilledButton(onPressed: widget.acoes.marcarPronto, child: Text(_botao(visao, minha.motivo))),
         if (bebaSe && faltam.isNotEmpty)
           Text('Responderam: ${rodada.prontos.length} de ${naMesa.length}$faltando',
               textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: CoresBaralho.textoApagado)),

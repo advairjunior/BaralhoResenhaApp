@@ -1,8 +1,23 @@
+using System.Text.RegularExpressions;
+
 namespace BaralhoResenhaApp.Api.Dominio;
 
-public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
+public sealed partial class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null, Prendas? prendas = null)
 {
     public Iscas Iscas { get; } = iscas ?? Iscas.Vazias;
+    public Prendas Prendas { get; } = prendas ?? Prendas.Vazias;
+
+    /// <summary>Na regra-relâmpago sem álcool, quem vacila leva ponto: "Escorregou, bebeu." vira "leva ponto".</summary>
+    [GeneratedRegex(@"\bbebeu\b|\bbebe\b(?=[.,;!])")]
+    private static partial Regex Bebeu();
+
+    /// <summary>O que sobrar falando de bebida não sai na sala sem álcool.</summary>
+    [GeneratedRegex(@"beb|cerveja|cachaça|\bdoses?\b|drink|bêbad|garrafa|brinde", RegexOptions.IgnoreCase)]
+    private static partial Regex FalaDeBebida();
+
+    public static string SemBebida(string texto) => Bebeu().Replace(texto, "leva ponto");
+
+    private static bool ServeSemAlcool(Carta carta) => !FalaDeBebida().IsMatch(SemBebida(carta.Texto));
 
     /// <summary>Uma em cada tantas cartas vira regra-relâmpago.</summary>
     internal const int ChanceDeRelampago = 7;
@@ -148,6 +163,7 @@ public sealed class Baralho(IReadOnlyList<Carta> cartas, Iscas? iscas = null)
             .Where(carta => !tiradas.Contains(carta.Id))
             .Where(carta => carta.Nivel <= configuracao.Nivel)
             .Where(carta => !(configuracao.ZonaSegura && carta.Sensivel))
+            .Where(carta => !configuracao.SemAlcool || ServeSemAlcool(carta))
             .ToList();
         if (permitidas.Count == 0) return null;
 

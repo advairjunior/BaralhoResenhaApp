@@ -111,10 +111,23 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
             style: const TextStyle(color: CoresBaralho.textoApagado),
           ),
         ),
+        SwitchListTile(
+          key: const Key('sala-sem-alcool'),
+          contentPadding: EdgeInsets.zero,
+          value: configuracao.semAlcool,
+          onChanged: podeEditar ? (ligado) => aoMudar(configuracao.copiar(semAlcool: ligado)) : null,
+          title: const Text('🧃  Sala sem álcool'),
+          subtitle: const Text(
+            'Ninguém bebe: quando o cofrinho enche, sai uma prenda. Carta que fala de bebida fica de fora.',
+            style: TextStyle(color: CoresBaralho.textoApagado),
+          ),
+        ),
         const SizedBox(height: EspacoBaralho.base),
-        Text('Ritmo da bebida', style: texto.titleMedium),
+        Text(configuracao.semAlcool ? 'Ritmo das prendas' : 'Ritmo da bebida', style: texto.titleMedium),
         Text(
-          'Cada vez que a carta pega alguém vale 1 ponto. O gole só sai quando o cofrinho enche.',
+          configuracao.semAlcool
+              ? 'Cada vez que a carta pega alguém vale 1 ponto. A prenda só sai quando o cofrinho enche.'
+              : 'Cada vez que a carta pega alguém vale 1 ponto. O gole só sai quando o cofrinho enche.',
           style: texto.bodyMedium?.copyWith(color: CoresBaralho.textoApagado),
         ),
         const SizedBox(height: EspacoBaralho.pequeno),
@@ -126,6 +139,7 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
               Expanded(
                 child: _CartaoDeRitmo(
                   ritmo: ritmo,
+                  configuracao: configuracao,
                   escolhido: configuracao.cofrinho == null && configuracao.ritmo == ritmo,
                   aoTocar: podeEditar ? () => aoMudar(configuracao.copiar(ritmo: ritmo)) : null,
                 ),
@@ -135,6 +149,7 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
         ),
         _TamanhoDoCofrinho(
           pontos: configuracao.pontosPorGole,
+          semAlcool: configuracao.semAlcool,
           aoMudar: podeEditar ? (pontos) => aoMudar(configuracao.copiar(cofrinho: pontos)) : null,
         ),
         SwitchListTile(
@@ -187,7 +202,7 @@ class ConfiguracaoDoJogoEditor extends StatelessWidget {
             value: configuracao.modos.contains(modo),
             onChanged: podeEditar ? (ligado) => _alternarModo(context, modo, ligado) : null,
             title: Text('${modo.emoji}  ${modo.titulo}'),
-            subtitle: Text(modo.explicacao, style: const TextStyle(color: CoresBaralho.textoApagado)),
+            subtitle: Text(configuracao.semAlcool ? semAlcoolNoTexto(modo.explicacao) : modo.explicacao, style: const TextStyle(color: CoresBaralho.textoApagado)),
           ),
           // Com um jogo só, não tem com quem dividir a mistura.
           if (configuracao.modos.contains(modo) && configuracao.modos.length > 1)
@@ -290,9 +305,10 @@ class _PesoNaMistura extends StatelessWidget {
 
 /// Ajuste fino do cofrinho: 1 gole a cada quantos pontos. Vale também no meio do jogo.
 class _TamanhoDoCofrinho extends StatelessWidget {
-  const _TamanhoDoCofrinho({required this.pontos, required this.aoMudar});
+  const _TamanhoDoCofrinho({required this.pontos, required this.semAlcool, required this.aoMudar});
 
   final int pontos;
+  final bool semAlcool;
   final ValueChanged<int>? aoMudar;
 
   @override
@@ -309,7 +325,12 @@ class _TamanhoDoCofrinho extends StatelessWidget {
                 Text('🐷 Cofrinho de $pontos ${pontos == 1 ? 'ponto' : 'pontos'}',
                     style: const TextStyle(fontWeight: FontWeight.w600)),
                 Text(
-                  pontos == 1 ? 'Todo ponto é gole.' : 'Encheu, bebe 1 gole.',
+                  switch ((pontos, semAlcool)) {
+                    (1, false) => 'Todo ponto é gole.',
+                    (_, false) => 'Encheu, bebe 1 gole.',
+                    (1, true) => 'Todo ponto é prenda.',
+                    (_, true) => 'Encheu, paga 1 prenda.',
+                  },
                   style: const TextStyle(fontSize: 12, color: CoresBaralho.textoApagado),
                 ),
               ],
@@ -333,9 +354,10 @@ class _TamanhoDoCofrinho extends StatelessWidget {
 }
 
 class _CartaoDeRitmo extends StatelessWidget {
-  const _CartaoDeRitmo({required this.ritmo, required this.escolhido, required this.aoTocar});
+  const _CartaoDeRitmo({required this.ritmo, required this.configuracao, required this.escolhido, required this.aoTocar});
 
   final RitmoDaBebida ritmo;
+  final ConfiguracaoDoJogo configuracao;
   final bool escolhido;
   final VoidCallback? aoTocar;
 
@@ -358,7 +380,7 @@ class _CartaoDeRitmo extends StatelessWidget {
               Text(ritmo.titulo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
               const SizedBox(height: EspacoBaralho.mini),
               Text(
-                ritmo.explicacao,
+                ritmo.explicacaoNa(configuracao),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 12, height: 1.3, color: CoresBaralho.textoSecundario),
               ),

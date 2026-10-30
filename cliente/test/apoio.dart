@@ -88,6 +88,7 @@ Map<String, dynamic> visaoJson({
   // Os testes mais antigos são do tempo em que todo ponto era gole.
   String ritmo = 'Raiz',
   int? cofrinho,
+  bool semAlcool = false,
 }) =>
     {
       'codigo': 'ABCD',
@@ -100,6 +101,7 @@ Map<String, dynamic> visaoJson({
         'zonaSegura': true,
         'ritmo': ritmo,
         'cofrinho': cofrinho,
+        'semAlcool': semAlcool,
       },
       'jogadores': jogadores ??
           [jogadorJson('ana', 'Ana', anfitriao: true), jogadorJson('bia', 'Bia', semAlcool: true)],

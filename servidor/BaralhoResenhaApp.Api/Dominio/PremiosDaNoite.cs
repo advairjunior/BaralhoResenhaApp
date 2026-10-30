@@ -14,7 +14,9 @@ public static class PremiosDaNoite
 {
     private const int MaximoDeGanhadores = 3;
 
-    public static IReadOnlyList<Premio> Calcular(IReadOnlyList<Jogador> jogadores, IReadOnlyList<(Jogador Um, Jogador Outro)> casais)
+    /// <param name="salaSemAlcool">Na sala sem álcool, o cofrinho cheio virou prenda, não gole.</param>
+    public static IReadOnlyList<Premio> Calcular(
+        IReadOnlyList<Jogador> jogadores, IReadOnlyList<(Jogador Um, Jogador Outro)> casais, bool salaSemAlcool = false)
     {
         var premios = new List<Premio>();
 
@@ -39,10 +41,12 @@ public static class PremiosDaNoite
             premios.Add(new Premio(emoji, titulo, descricao(maximo), [ganhadores[0].Um.Id, ganhadores[0].Outro.Id]));
         }
 
-        Individual("🍺", "Rei(nha) da noite", j => j.Pontos,
-            (n, j) => j.SemAlcool || j.Goles == 0
-                ? Plural(n, "ponto", "pontos")
-                : $"{Plural(n, "ponto", "pontos")} · {Plural(j.Goles, "gole", "goles")}");
+        Individual(salaSemAlcool ? "🎟️" : "🍺", "Rei(nha) da noite", j => j.Pontos,
+            (n, j) => salaSemAlcool
+                ? $"{Plural(n, "ponto", "pontos")} · {Plural(j.Goles, "prenda", "prendas")}"
+                : j.SemAlcool || j.Goles == 0
+                    ? Plural(n, "ponto", "pontos")
+                    : $"{Plural(n, "ponto", "pontos")} · {Plural(j.Goles, "gole", "goles")}");
         Individual("👉", "Alvo preferido da turma", j => j.Estatisticas.VotosRecebidos,
             (n, _) => $"{Plural(n, "voto", "votos")} da turma nas votações");
         Individual("💛", "Xodó da turma", j => j.Estatisticas.Elogios,
@@ -84,8 +88,8 @@ public static class PremiosDaNoite
         return new ResumoDaNoite(
             sala.Rodada?.Numero ?? 0,
             Math.Max(minutos, 0),
-            jogadores.Where(j => !j.SemAlcool).Sum(j => j.Goles),
-            jogadores.Where(j => j.SemAlcool).Sum(j => j.Pontos),
+            jogadores.Where(j => !sala.SoPontos(j)).Sum(j => j.Goles),
+            jogadores.Where(sala.SoPontos).Sum(j => j.Pontos),
             sala.EscolherCartaDaNoite());
     }
 

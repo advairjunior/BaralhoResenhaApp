@@ -18,7 +18,10 @@ public static class CatalogoDeCartas
             ?? throw new InvalidOperationException("O baralho cartas.json não foi incluído na compilação.");
         using var iscas = typeof(CatalogoDeCartas).Assembly.GetManifestResourceStream("iscas.json")
             ?? throw new InvalidOperationException("As iscas iscas.json não foram incluídas na compilação.");
-        return new Baralho(Ler(arquivo), JsonSerializer.Deserialize<Iscas>(iscas, Opcoes));
+        using var prendas = typeof(CatalogoDeCartas).Assembly.GetManifestResourceStream("prendas.json")
+            ?? throw new InvalidOperationException("As prendas prendas.json não foram incluídas na compilação.");
+        return new Baralho(Ler(arquivo), JsonSerializer.Deserialize<Iscas>(iscas, Opcoes),
+            JsonSerializer.Deserialize<Prendas>(prendas, Opcoes));
     }
 
     internal static IReadOnlyList<Carta> Ler(Stream arquivo)

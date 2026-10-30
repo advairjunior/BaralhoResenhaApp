@@ -816,6 +816,9 @@ String _comDestino(Rodada rodada, VisaoDaSala visao, Jogador jogador) {
 
 /// "Me pegou! 🍺"; na dose, quanto bebe de verdade.
 String _mePegou(VisaoDaSala visao, Rodada rodada) {
+  if (visao.configuracao.semAlcool) {
+    return rodada.goles == null ? 'Me pegou! 🎟️' : 'Me pegou! Paga ${rodada.goles} prendas 🎟️';
+  }
   final unidade = visao.eu.semAlcool ? '⭐' : '🍺';
   return switch (rodada.goles) {
     final goles? => visao.eu.semAlcool ? 'Me pegou! +$goles $unidade' : 'Me pegou! Bebe $goles $unidade',
@@ -881,7 +884,7 @@ class _RevelacaoMaisProvavel extends StatelessWidget {
         Text(
           maisVotados.length == 1
               ? 'A turma escolheu:'
-              : (revelacao.elogio ? 'Empate! Todos levam:' : 'Empate! Todos bebem:'),
+              : (revelacao.elogio ? 'Empate! Todos levam:' : paraASala(visao, 'Empate! Todos bebem:')),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleMedium,
         ),
@@ -1504,7 +1507,7 @@ Future<void> abrirPlacar(BuildContext context, VisaoDaSala visao, AcoesDaSala ac
                   ],
                 ],
               ),
-              trailing: Text(jogador.placar,
+              trailing: Text(placarDe(visao, jogador),
                   style: Theme.of(context).textTheme.titleMedium),
             ),
         ],

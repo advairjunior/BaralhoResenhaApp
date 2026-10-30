@@ -230,6 +230,12 @@ public sealed class Rodada
     /// <summary>Batata quente: quando o pavio acaba. Segredo do servidor: nenhum celular recebe.</summary>
     public DateTimeOffset? EstouraEm { get; init; }
 
+    /// <summary>Sala sem álcool: a prenda de cada um que encheu o cofrinho (ou levou dose).</summary>
+    public Dictionary<Guid, List<string>> Prendas { get; } = [];
+
+    /// <summary>Sala sem álcool: a prenda que quem a turma elogiou passa para alguém.</summary>
+    public string? PrendaDoElogio { get; set; }
+
     public bool PedeResposta =>
         Carta.Modo is ModoDeJogo.EuNunca or ModoDeJogo.CasaisEmJogo or ModoDeJogo.Tribunal or ModoDeJogo.Correio
             or ModoDeJogo.Jurados or ModoDeJogo.Impostor or ModoDeJogo.TermineAFrase or ModoDeJogo.DuasVerdades
@@ -797,6 +803,7 @@ public sealed partial class Sala
         var texto = carta.Texto
             .Replace("{jogador2}", sorteados[^1].Nome)
             .Replace("{jogador}", sorteados[0].Nome);
+        if (Configuracao.SemAlcool) texto = Baralho.SemBebida(texto);
         var (palpiteiro, alvo) = carta.Modo == ModoDeJogo.CasaisEmJogo ? EscolherCasal() : (null, null);
         var impostor = carta.Modo == ModoDeJogo.Impostor ? _jogadores[_sorteio.Next(_jogadores.Count)] : null;
         if (alvo is not null) texto = texto.Replace("{par}", alvo.Nome);

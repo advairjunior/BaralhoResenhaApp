@@ -82,6 +82,26 @@ public sealed class SalasApiTestes(WebApplicationFactory<Program> fabrica)
     }
 
     [Fact]
+    public async Task ASalaSemAlcoolChegaNoCelularComAsPrendas()
+    {
+        var ana = await CriarSala("Ana");
+        await Entrar(ana.Codigo, "Bia");
+        var sala = $"/api/salas/{ana.Codigo}";
+        await Enviar(HttpMethod.Put, $"{sala}/configuracao", ana.Token,
+            new { nivel = "Leve", modos = new[] { "BebaSe" }, zonaSegura = true, ritmo = "Raiz", semAlcool = true });
+        await Enviar(HttpMethod.Post, $"{sala}/comecar", ana.Token);
+        var numero = (await Visao(ana.Codigo, ana.Token)).GetProperty("rodada").GetProperty("numero").GetInt32();
+
+        await Enviar(HttpMethod.Post, $"{sala}/bebi", ana.Token, new { rodada = numero });
+
+        var visao = await Visao(ana.Codigo, ana.Token);
+        Assert.True(visao.GetProperty("configuracao").GetProperty("semAlcool").GetBoolean());
+        var euId = visao.GetProperty("euId").GetString()!;
+        var prendas = visao.GetProperty("rodada").GetProperty("prendas").GetProperty(euId);
+        Assert.Equal(1, prendas.GetArrayLength());
+    }
+
+    [Fact]
     public async Task SoQuemEstaComABatataPassaEOPavioNaoVaiParaOCelular()
     {
         var ana = await CriarSala("Ana");

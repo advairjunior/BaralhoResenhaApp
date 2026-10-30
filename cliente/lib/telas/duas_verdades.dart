@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
+import 'bebida.dart';
 import 'sala.dart';
 import 'visual.dart';
 
@@ -219,7 +220,8 @@ class RevelacaoDaMentira extends StatelessWidget {
         const SizedBox(height: EspacoBaralho.base),
         Text(
           revelacao.elogio
-              ? '🎭 Ninguém acertou! ${daVez?.nome ?? 'A pessoa da vez'} enganou a turma inteira e distribui goles.'
+              ? paraASala(visao,
+                  '🎭 Ninguém acertou! ${daVez?.nome ?? 'A pessoa da vez'} enganou a turma inteira e distribui goles.')
               : [
                   if (acertaram.isNotEmpty) '${acertaram.length == 1 ? 'Acertou' : 'Acertaram'}: ${_nomes(acertaram)}',
                   if (erraram.isNotEmpty)

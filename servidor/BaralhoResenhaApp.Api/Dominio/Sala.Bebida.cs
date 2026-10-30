@@ -25,7 +25,7 @@ public sealed partial class Sala
     {
         var contas = Rodada!.Contas;
         if (!contas.TryGetValue(jogador.Id, out var conta))
-            contas[jogador.Id] = conta = new ContaDaCarta { SemAlcool = jogador.SemAlcool };
+            contas[jogador.Id] = conta = new ContaDaCarta { SemAlcool = SoPontos(jogador) };
         return conta;
     }
 
@@ -34,7 +34,7 @@ public sealed partial class Sala
         jogador.Pontos++;
         Conta(jogador).Pontos++;
         // Quem joga sem álcool só junta pontos.
-        if (jogador.SemAlcool) return;
+        if (SoPontos(jogador)) return;
         jogador.Cofrinho++;
         if (jogador.Cofrinho < Configuracao.PontosPorGole) return;
         jogador.Cofrinho = 0;
@@ -50,7 +50,7 @@ public sealed partial class Sala
         if (conta.Pontos == 0) return;
         conta.Pontos--;
         jogador.Pontos = Math.Max(0, jogador.Pontos - 1);
-        if (jogador.SemAlcool) return;
+        if (SoPontos(jogador)) return;
         if (Rodada!.EncheuCofrinho.Remove(jogador.Id))
         {
             jogador.Goles--;
@@ -67,7 +67,7 @@ public sealed partial class Sala
     {
         Conta(jogador).Goles += goles;
         jogador.Pontos += goles;
-        if (!jogador.SemAlcool) jogador.Goles += goles;
+        if (!SoPontos(jogador)) jogador.Goles += goles;
     }
 
     private void TirarDose(Jogador jogador, int goles)
@@ -77,7 +77,7 @@ public sealed partial class Sala
         if (goles <= 0) return;
         conta.Goles -= goles;
         jogador.Pontos = Math.Max(0, jogador.Pontos - goles);
-        if (!jogador.SemAlcool) jogador.Goles -= goles;
+        if (!SoPontos(jogador)) jogador.Goles -= goles;
     }
 
     /// <summary>

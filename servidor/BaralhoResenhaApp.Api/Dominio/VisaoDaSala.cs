@@ -55,7 +55,9 @@ public sealed record RodadaVisivel(
     int? MinhaFrase,
     IReadOnlyList<string> Afirmacoes,
     int? MinhaMentira,
-    Guid? ComABatata);
+    Guid? ComABatata,
+    IReadOnlyDictionary<Guid, IReadOnlyList<string>> Prendas,
+    string? PrendaParaDar);
 
 /// <summary>Esquenta sozinho: em que nível a noite está e quando sobe.</summary>
 /// <param name="SobeEm">Cartas até subir; nulo quando já chegou ao limite.</param>
@@ -97,7 +99,7 @@ public sealed record VisaoDaSala(
             eu.Anfitriao,
             sala.Configuracao,
             jogadores.Select(j => new JogadorVisivel(
-                j.Id, j.Nome, j.Anfitriao, j.SemAlcool, j.Pontos, j.Cofrinho, j.Goles,
+                j.Id, j.Nome, j.Anfitriao, sala.SoPontos(j), j.Pontos, j.Cofrinho, j.Goles,
                 rodada is not null && (rodada.Escrevendo ? rodada.Frases : rodada.Respostas).ContainsKey(j.Id),
                 j.Foto is null ? null : Endereco(j.Foto),
                 j.ParId,
@@ -156,11 +158,13 @@ public sealed record VisaoDaSala(
                     rodada.Afirmacoes,
                     // Qual é a mentira só quem escreveu sabe; a turma descobre na revelação.
                     rodada.Alvo == eu.Id ? rodada.Mentira : null,
-                    rodada.ComABatata),
+                    rodada.ComABatata,
+                    sala.PrendasDaCarta(rodada),
+                    sala.PrendaParaDar(rodada)),
             sala.Regra is { } regra ? regra with { PodemVacilar = sala.QuemPodeVacilar(regra) } : null,
             sala.Momentos.Select(m => new MomentoVisivel(
                 m.Id, m.JogadorId, m.NomeDoJogador, m.Rodada, m.Texto, Endereco(m.Foto))).ToList(),
-            fim ? PremiosDaNoite.Calcular(jogadores, sala.Casais()) : null,
+            fim ? PremiosDaNoite.Calcular(jogadores, sala.Casais(), sala.Configuracao.SemAlcool) : null,
             fim ? PremiosDaNoite.Resumir(sala, jogadores) : null,
             Esquentando(sala),
             sala.CartaTiradaPor,

@@ -78,6 +78,7 @@ class ConfiguracaoDoJogo {
     this.cofrinho,
     this.muito = const {},
     this.pouco = const {},
+    this.semAlcool = false,
   });
 
   /// Maior cofrinho que dá para escolher (igual ao servidor).
@@ -94,6 +95,7 @@ class ConfiguracaoDoJogo {
         cofrinho: json['cofrinho'] as int?,
         muito: _modos(json['muito']),
         pouco: _modos(json['pouco']),
+        semAlcool: json['semAlcool'] as bool? ?? false,
       );
 
   static Set<ModoDeJogo> _modos(Object? lista) =>
@@ -122,6 +124,9 @@ class ConfiguracaoDoJogo {
   /// Jogos que saem o dobro ("mais Tribunal") e a metade ("menos Beba se").
   final Set<ModoDeJogo> muito;
   final Set<ModoDeJogo> pouco;
+
+  /// A sala toda sem álcool: o cofrinho cheio vira prenda e carta de bebida não sai.
+  final bool semAlcool;
 
   PesoDoJogo pesoDo(ModoDeJogo modo) => muito.contains(modo)
       ? PesoDoJogo.muito
@@ -153,6 +158,7 @@ class ConfiguracaoDoJogo {
     int? cofrinho,
     Set<ModoDeJogo>? muito,
     Set<ModoDeJogo>? pouco,
+    bool? semAlcool,
   }) =>
       ConfiguracaoDoJogo(
         nivel: nivel ?? this.nivel,
@@ -166,6 +172,7 @@ class ConfiguracaoDoJogo {
         cofrinho: cofrinho ?? (ritmo != null ? null : this.cofrinho),
         muito: muito ?? this.muito,
         pouco: pouco ?? this.pouco,
+        semAlcool: semAlcool ?? this.semAlcool,
       );
 
   Map<String, dynamic> paraJson() => {
@@ -179,6 +186,7 @@ class ConfiguracaoDoJogo {
         if (cofrinho != null) 'cofrinho': cofrinho,
         if (muito.isNotEmpty) 'muito': [for (final modo in ModoDeJogo.values) if (muito.contains(modo)) paraServidor(modo)],
         if (pouco.isNotEmpty) 'pouco': [for (final modo in ModoDeJogo.values) if (pouco.contains(modo)) paraServidor(modo)],
+        if (semAlcool) 'semAlcool': true,
       };
 }
 
@@ -465,6 +473,8 @@ class Rodada {
     this.afirmacoes = const [],
     this.minhaMentira,
     this.comABatata,
+    this.prendas = const {},
+    this.prendaParaDar,
   });
 
   factory Rodada.deJson(Map<String, dynamic> json) => Rodada(
@@ -525,6 +535,11 @@ class Rodada {
         afirmacoes: List<String>.from((json['afirmacoes'] as List?) ?? const []),
         minhaMentira: json['minhaMentira'] as int?,
         comABatata: json['comABatata'] as String?,
+        prendas: {
+          for (final MapEntry(:key, :value) in ((json['prendas'] as Map?) ?? const {}).entries)
+            key as String: List<String>.from(value as List),
+        },
+        prendaParaDar: json['prendaParaDar'] as String?,
       );
 
   final int numero;
@@ -639,6 +654,12 @@ class Rodada {
 
   /// Batata quente: quem está com a batata agora. Quando estoura é segredo do servidor.
   final String? comABatata;
+
+  /// Sala sem álcool: a prenda de cada um que encheu o cofrinho (ou levou dose).
+  final Map<String, List<String>> prendas;
+
+  /// Sala sem álcool: no elogio, a prenda que quem a turma escolheu passa para alguém.
+  final String? prendaParaDar;
 }
 
 class Momento {

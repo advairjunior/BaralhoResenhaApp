@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
+import 'bebida.dart';
 import 'sala.dart';
 import 'visual.dart';
 
@@ -204,7 +205,7 @@ class _Vencedora extends StatelessWidget {
         Text(_votos(frase.votos), style: const TextStyle(color: CoresBaralho.textoSecundario)),
         const SizedBox(height: EspacoBaralho.medio),
         Text(
-          '✍️ ${autor?.nome ?? 'Quem escreveu'} escreveu a melhor e distribui goles!',
+          paraASala(visao, '✍️ ${autor?.nome ?? 'Quem escreveu'} escreveu a melhor e distribui goles!'),
           textAlign: TextAlign.center,
           style: const TextStyle(color: CoresBaralho.frase, fontWeight: FontWeight.w600),
         ),

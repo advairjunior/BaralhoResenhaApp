@@ -10,6 +10,8 @@
     <EmbeddedResource Include="Dados\cartas.json" LogicalName="cartas.json" />
     <Content Remove="Dados\iscas.json" />
     <EmbeddedResource Include="Dados\iscas.json" LogicalName="iscas.json" />
+    <Content Remove="Dados\prendas.json" />
+    <EmbeddedResource Include="Dados\prendas.json" LogicalName="prendas.json" />
     <!-- Guia /como-jogar: a página e as imagens também viajam na DLL. -->
     <Content Remove="Paginas\**" />
     <EmbeddedResource Include="Paginas\como-jogar\*" LogicalName="como-jogar/%(Filename)%(Extension)" />

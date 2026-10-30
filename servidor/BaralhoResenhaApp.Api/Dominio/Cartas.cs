@@ -137,6 +137,27 @@ public sealed record Iscas(IReadOnlyList<string> Perguntas, IReadOnlyList<string
         ["Conte a pior piada que você sabe."], ["Qual é o doce preferido do pedreiro? Pé de moleque."]);
 }
 
+/// <summary>
+/// Sala sem álcool: no lugar do gole, uma prenda (desafio rápido), separada por nível
+/// como as cartas. Os micos são para o fim da noite, mais caprichados.
+/// </summary>
+public sealed record Prendas(
+    IReadOnlyList<string> Leve, IReadOnlyList<string> Resenha, IReadOnlyList<string> Picante, IReadOnlyList<string> Micos)
+{
+    public static Prendas Vazias { get; } = new(["Imite alguém da mesa até a turma adivinhar quem é."],
+        ["Mostre a última foto da sua galeria."], ["Conte o seu crush mais vergonhoso."],
+        ["Cante o refrão de uma música escolhida pela turma.", "Dance sem música por 20 segundos.",
+            "Faça um discurso de agradecimento de Oscar para a turma."]);
+
+    /// <summary>As prendas que valem até <paramref name="nivel"/>: o Leve nunca vê as de cima.</summary>
+    public IReadOnlyList<string> Ate(NivelDaCarta nivel) => nivel switch
+    {
+        NivelDaCarta.Leve => Leve,
+        NivelDaCarta.Resenha => [.. Leve, .. Resenha],
+        _ => [.. Leve, .. Resenha, .. Picante]
+    };
+}
+
 /// <summary>Quantos pontos (vezes que a carta pegou) valem um gole de verdade.</summary>
 public enum RitmoDaBebida
 {
@@ -152,6 +173,7 @@ public enum RitmoDaBebida
 
 /// <param name="Nivel">Com <paramref name="Esquentar"/>, é até onde a noite pode chegar.</param>
 /// <param name="Esquentar">Começa no Leve e sobe um nível a cada <see cref="CartasPorNivel"/> cartas.</param>
+/// <param name="SemAlcool">A sala toda sem álcool: o cofrinho cheio vira prenda e carta de bebida não sai.</param>
 public sealed record ConfiguracaoDoJogo(
     NivelDaCarta Nivel,
     IReadOnlyList<ModoDeJogo> Modos,
@@ -162,7 +184,8 @@ public sealed record ConfiguracaoDoJogo(
     bool PassarSozinho = true,
     int? Cofrinho = null,
     IReadOnlyList<ModoDeJogo>? Muito = null,
-    IReadOnlyList<ModoDeJogo>? Pouco = null)
+    IReadOnlyList<ModoDeJogo>? Pouco = null,
+    bool SemAlcool = false)
 {
     public const int CartasPorNivel = 8;
 

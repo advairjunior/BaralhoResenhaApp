@@ -147,7 +147,7 @@ class CartaoDosPremios extends StatelessWidget {
               children: [
                 _Numero(valor: '${resumo.cartas}', rotulo: 'cartas'),
                 if (resumo.minutos > 0) _Numero(valor: _duracao(resumo.minutos), rotulo: 'de resenha'),
-                if (resumo.goles > 0) _Numero(valor: '${resumo.goles}', rotulo: 'goles'),
+                if (resumo.goles > 0) _Numero(valor: '${resumo.goles}', rotulo: visao.configuracao.semAlcool ? 'prendas' : 'goles'),
                 if (resumo.pontos > 0) _Numero(valor: '${resumo.pontos}', rotulo: 'pontos 🥤'),
               ],
             ),

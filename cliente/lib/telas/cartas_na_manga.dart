@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../dominio/modelos.dart';
 import '../tema/tema_baralho.dart';
+import 'bebida.dart';
 import 'sala.dart';
 import 'visual.dart';
 
@@ -107,13 +108,16 @@ class MinhaMao extends StatelessWidget {
               Center(child: Cartinha(carta: carta, largura: 132)),
               const SizedBox(height: EspacoBaralho.medio),
               const Text('O que faz', style: TextStyle(fontWeight: FontWeight.w600)),
-              Text(carta.explicacao, style: const TextStyle(height: 1.4)),
+              Text(paraASala(visao, carta.explicacao), style: const TextStyle(height: 1.4)),
               const SizedBox(height: EspacoBaralho.medio),
               const Text('Quando dá para usar', style: TextStyle(fontWeight: FontWeight.w600)),
-              Text(carta.quando, style: const TextStyle(height: 1.4)),
+              Text(paraASala(visao, carta.quando), style: const TextStyle(height: 1.4)),
               const SizedBox(height: EspacoBaralho.medio),
               const Text('Exemplo', style: TextStyle(fontWeight: FontWeight.w600)),
-              Text(carta.exemplo, style: const TextStyle(height: 1.4, color: CoresBaralho.textoSecundario)),
+              Text(
+                paraASala(visao, carta.exemplo),
+                style: const TextStyle(height: 1.4, color: CoresBaralho.textoSecundario),
+              ),
               const SizedBox(height: EspacoBaralho.base),
               if (impedimento != null) ...[
                 Text(
@@ -194,7 +198,7 @@ class MinhaMao extends StatelessWidget {
               ),
               TextButton(
                 key: const Key('guia-das-cartas'),
-                onPressed: () => abrirGuiaDasCartas(context),
+                onPressed: () => abrirGuiaDasCartas(context, semAlcool: visao.configuracao.semAlcool),
                 child: const Text('ⓘ Como funcionam'),
               ),
             ],
@@ -250,7 +254,7 @@ class UsosDasCartas extends StatelessWidget {
       CartaNaManga.escudo => '🛡️ $quem usou Escudo!',
       CartaNaManga.passaABola => '🎯 $quem passou a bola para $alvo!',
       CartaNaManga.devolve => '↩️ $quem devolveu para $alvo!',
-      CartaNaManga.batataQuente => '🥔 $quem jogou a batata quente em $alvo: ${uso.goles} goles!',
+      CartaNaManga.batataQuente => paraASala(visao, '🥔 $quem jogou a batata quente em $alvo: ${uso.goles} goles!'),
       CartaNaManga.dobra => '✖️2 $quem dobrou a conta de $alvo!',
     };
   }
@@ -283,7 +287,7 @@ class UsosDasCartas extends StatelessWidget {
 }
 
 /// Todas as cartas na manga e como ganhar mais.
-Future<void> abrirGuiaDasCartas(BuildContext context) => showModalBottomSheet<void>(
+Future<void> abrirGuiaDasCartas(BuildContext context, {bool semAlcool = false}) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
   builder: (context) => DraggableScrollableSheet(
@@ -317,9 +321,12 @@ Future<void> abrirGuiaDasCartas(BuildContext context) => showModalBottomSheet<vo
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(carta.titulo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                        Text(carta.explicacao, style: const TextStyle(height: 1.4)),
                         Text(
-                          carta.quando,
+                          semAlcool ? semAlcoolNoTexto(carta.explicacao) : carta.explicacao,
+                          style: const TextStyle(height: 1.4),
+                        ),
+                        Text(
+                          semAlcool ? semAlcoolNoTexto(carta.quando) : carta.quando,
                           style: const TextStyle(fontSize: 12, height: 1.4, color: CoresBaralho.textoApagado),
                         ),
                       ],
